@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-fukukomu.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PB Manager">
+<meta name="theme-color" content="#1a1f2e">
+<link rel="manifest" href="#" id="manifest-link">
+<title>Pickleball Manager</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+/* ── Design Tokens ── */
+:root {
+/* Muted dark palette */
+–bg:        #151922;
+–bg-2:      #1c2130;
+–bg-3:      #222840;
+–bg-card:   #1e2438;
+–bg-card2:  #252c42;
+–bg-glass:  rgba(30,36,56,0.85);
+
+/* Accents — muted, sophisticated */
+–teal:      #4ecdc4;
+–teal-dim:  rgba(78,205,196,0.18);
+–teal-line: rgba(78,205,196,0.28);
+–coral:     #e07a5f;
+–coral-dim: rgba(224,122,95,0.18);
+–gold:      #c9a84c;
+–gold-dim:  rgba(201,168,76,0.18);
+–sage:      #81b29a;
+–sage-dim:  rgba(129,178,154,0.18);
+–lavender:  #8b8fc8;
+–lav-dim:   rgba(139,143,200,0.18);
+
+/* Gradients */
+–grad-teal:   linear-gradient(135deg, #4ecdc4, #2a9d8f);
+–grad-coral:  linear-gradient(135deg, #e07a5f, #c1440e);
+–grad-warm:   linear-gradient(135deg, #c9a84c, #e07a5f);
+–grad-cool:   linear-gradient(135deg, #4ecdc4, #8b8fc8);
+–grad-sage:   linear-gradient(135deg, #81b29a, #4ecdc4);
+
+/* Text */
+–t-hi:    #dde4f0;
+–t-mid:   #8a93aa;
+–t-lo:    #404a62;
+–t-faint: #2c3448;
+
+/* Borders */
+–b1: rgba(255,255,255,0.07);
+–b2: rgba(255,255,255,0.04);
+
+/* Shadows */
+–sh-card: 0 4px 24px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.04);
+–sh-up:   0 8px 32px rgba(0,0,0,0.5),  0 1px 0 rgba(255,255,255,0.06);
+–sh-glow-teal: 0 0 20px rgba(78,205,196,0.2);
+
+–r:  14px;
+–r2:  9px;
+–r3:  6px;
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+height: 100%;
+font-family: ‘DM Sans’, sans-serif;
+background: var(–bg);
+color: var(–t-hi);
+overflow: hidden;
+font-size: 14px;
+}
+
+body::before {
+content: ‘’;
+position: fixed; inset: 0;
+background:
+radial-gradient(ellipse 70% 50% at 15% 0%,   rgba(78,205,196,0.07) 0%, transparent 60%),
+radial-gradient(ellipse 50% 40% at 85% 100%,  rgba(139,143,200,0.06) 0%, transparent 60%);
+pointer-events: none; z-index: 0;
+}
+
+#app { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100vh; }
+
+/* ════════════════════════════════════
+TOP BAR
+════════════════════════════════════ */
+#topbar {
+display: flex; align-items: center; gap: 12px;
+padding: 8px 16px;
+background: rgba(21,25,34,0.96);
+border-bottom: 1px solid var(–b1);
+backdrop-filter: blur(16px);
+flex-shrink: 0; z-index: 100;
+}
+
+.logo {
+font-family: ‘DM Mono’, monospace;
+font-weight: 500; font-size: 16px; letter-spacing: 2px;
+background: var(–grad-cool);
+-webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+white-space: nowrap;
+}
+
+/* TIMER */
+.timer-center { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+#timer-disp {
+font-family: ‘DM Mono’, monospace;
+font-weight: 500; font-size: 32px; letter-spacing: 6px;
+color: var(–teal);
+cursor: pointer; user-select: none;
+transition: color 0.3s;
+text-shadow: 0 0 20px rgba(78,205,196,0.35);
+}
+#timer-disp.warn   { color: var(–coral); text-shadow: 0 0 20px rgba(224,122,95,0.45); animation: blink .6s infinite; }
+#timer-disp.done   { color: #e05c8a;     text-shadow: 0 0 24px rgba(224,92,138,0.55); animation: blink .3s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+.tctrl { display: flex; align-items: center; gap: 5px; }
+
+.tbtn {
+width: 28px; height: 28px; border-radius: var(–r3);
+background: var(–bg-3); border: 1px solid var(–b1);
+color: var(–t-mid); font-size: 13px; cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+transition: all .2s;
+}
+.tbtn:hover { border-color: var(–teal-line); color: var(–teal); }
+.tbtn.on    { background: var(–teal-dim); border-color: var(–teal-line); color: var(–teal); }
+
+#tmin-inp {
+width: 38px; background: var(–bg-3); border: 1px solid var(–b1);
+color: var(–t-hi); font-family: ‘DM Mono’, monospace; font-size: 14px;
+text-align: center; border-radius: var(–r3); padding: 3px; outline: none;
+}
+
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+.chip {
+font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+background: var(–bg-card); border: 1px solid var(–b1); color: var(–t-mid);
+white-space: nowrap;
+}
+.chip b { color: var(–teal); }
+.chip.lav b { color: var(–lavender); }
+
+/* ════════════════════════════════════
+TABS
+════════════════════════════════════ */
+#tabs {
+display: flex; background: rgba(21,25,34,0.9);
+border-bottom: 1px solid var(–b1); flex-shrink: 0; padding: 0 14px;
+}
+.tab-btn {
+padding: 7px 16px; font-size: 12px; font-weight: 600; letter-spacing: .5px;
+color: var(–t-lo); background: transparent; border: none;
+border-bottom: 2px solid transparent; cursor: pointer; transition: all .2s;
+}
+.tab-btn:hover { color: var(–t-mid); }
+.tab-btn.active { color: var(–teal); border-bottom-color: var(–teal); }
+
+/* ════════════════════════════════════
+LAYOUT
+════════════════════════════════════ */
+#main { display: flex; flex: 1; overflow: hidden; }
+.tab-panel { display: none; }
+.tab-panel.active { display: flex; flex: 1; overflow: hidden; }
+
+/* ════════════════════════════════════
+SCHEDULE PANEL (LEFT)
+════════════════════════════════════ */
+#sched-panel {
+width: 210px; min-width: 180px; flex-shrink: 0;
+background: rgba(21,25,34,0.95);
+border-right: 1px solid var(–b1);
+display: flex; flex-direction: column; overflow: hidden;
+}
+
+.sp-hdr {
+padding: 10px 12px;
+font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+color: var(–t-lo); border-bottom: 1px solid var(–b2);
+background: linear-gradient(90deg, rgba(78,205,196,0.05), transparent);
+flex-shrink: 0;
+}
+
+#sched-list { flex: 1; overflow-y: auto; padding: 8px 7px; display: flex; flex-direction: column; gap: 5px; }
+
+/* Schedule cards */
+.sc { border-radius: var(–r2); overflow: hidden; flex-shrink: 0; transition: all .25s; }
+
+.sc.past   { opacity: .45; border: 1px solid var(–b2); }
+.sc.cur    { border: 1px solid var(–teal-line); box-shadow: var(–sh-glow-teal); }
+.sc.future { border: 1px solid rgba(139,143,200,0.2); }
+
+.sc-head {
+display: flex; align-items: center; justify-content: space-between;
+font-size: 11px; font-weight: 700;
+}
+.past .sc-head  { padding: 5px 9px; background: var(–bg-card); }
+.cur  .sc-head  { padding: 7px 11px; background: linear-gradient(90deg, rgba(78,205,196,0.12), rgba(139,143,200,0.06)); }
+.future .sc-head{ padding: 5px 9px; background: var(–bg-card); }
+
+.sc-rn { letter-spacing: .5px; }
+.past   .sc-rn { color: var(–t-lo); }
+.cur    .sc-rn { color: var(–teal); font-size: 12px; }
+.future .sc-rn { color: var(–lavender); }
+
+.sc-badge {
+font-size: 9px; padding: 1px 7px; border-radius: 20px; font-weight: 700;
+}
+.past .sc-badge   { background: var(–bg-3); color: var(–t-lo); }
+.cur  .sc-badge   { background: var(–teal-dim); color: var(–teal); border: 1px solid var(–teal-line); animation: fadepulse 2s infinite; }
+.future .sc-badge { background: var(–lav-dim); color: var(–lavender); border: 1px solid rgba(139,143,200,0.25); }
+@keyframes fadepulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+.sc-body { padding: 5px 9px 7px; background: var(–bg-2); }
+.cur .sc-body { padding: 7px 11px 9px; }
+
+.sc-row {
+display: flex; align-items: flex-start; gap: 4px;
+padding: 2px 0; border-bottom: 1px solid var(–b2); font-size: 10px;
+}
+.sc-row:last-child { border-bottom: none; }
+.cur .sc-row { font-size: 11px; padding: 3px 0; }
+
+.sc-ct { font-weight: 700; font-size: 9px; color: var(–t-lo); width: 18px; flex-shrink: 0; padding-top: 1px; }
+.cur .sc-ct { font-size: 10px; }
+.sc-pl { flex: 1; color: var(–t-mid); line-height: 1.4; }
+.sc-vs { color: var(–coral); font-weight: 700; font-size: 8px; margin: 0 2px; }
+.sc-sc { font-family: ‘DM Mono’, monospace; font-size: 10px; color: var(–gold); flex-shrink: 0; }
+
+/* ════════════════════════════════════
+GAME CENTER (RIGHT SIDE)
+════════════════════════════════════ */
+#game-right { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+#game-center { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 11px; }
+
+/* ── Court Card ── */
+.court-card {
+background: var(–bg-card);
+border-radius: var(–r);
+border: 1px solid var(–b1);
+box-shadow: var(–sh-card);
+overflow: hidden; flex-shrink: 0;
+transition: box-shadow .3s, border-color .3s;
+}
+.court-card:hover {
+border-color: var(–teal-line);
+box-shadow: var(–sh-up), var(–sh-glow-teal);
+}
+
+.court-hdr {
+display: flex; align-items: center; justify-content: space-between;
+padding: 8px 14px;
+background: linear-gradient(90deg, rgba(78,205,196,0.07), rgba(139,143,200,0.04));
+border-bottom: 1px solid var(–b1);
+}
+
+.court-nm {
+font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+background: var(–grad-cool);
+-webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.mode-sel { display: flex; gap: 3px; }
+.mbtn {
+padding: 2px 8px; font-size: 10px; font-weight: 600;
+border-radius: var(–r3); border: 1px solid var(–b1);
+background: transparent; color: var(–t-lo); cursor: pointer; transition: all .2s;
+}
+.mbtn:hover { color: var(–t-mid); border-color: var(–b1); background: var(–bg-3); }
+.mbtn.on { background: var(–teal-dim); border-color: var(–teal-line); color: var(–teal); }
+
+/* Court body */
+.court-body { padding: 10px 14px; }
+
+.match-grid { display: grid; grid-template-columns: 1fr 42px 1fr; gap: 8px; align-items: center; }
+
+.team-blk {
+background: var(–bg-2);
+border: 1px solid var(–b1);
+border-radius: var(–r2);
+padding: 8px 11px; min-height: 58px;
+}
+
+.team-lbl {
+font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+margin-bottom: 5px;
+}
+.team-lbl.a { color: var(–teal); }
+.team-lbl.b { color: var(–coral); }
+
+.pchip { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+.pnum {
+font-family: ‘DM Mono’, monospace; font-size: 10px; font-weight: 500;
+width: 22px; height: 22px; border-radius: 50%;
+display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+background: var(–teal-dim); border: 1px solid var(–teal-line); color: var(–teal);
+}
+.pchip-name { font-size: 13px; font-weight: 600; color: var(–t-hi); }
+.pchip-nick { font-size: 11px; color: var(–t-mid); margin-left: 2px; }
+.wbadge {
+font-size: 9px; background: var(–gold-dim); color: var(–gold);
+padding: 1px 5px; border-radius: 4px; font-weight: 700; border: 1px solid rgba(201,168,76,0.25);
+}
+.pchip.emp .pchip-name { color: var(–t-lo); font-style: italic; font-size: 12px; }
+
+.vs-col { display: flex; align-items: center; justify-content: center; }
+.vs-txt {
+font-family: ‘DM Mono’, monospace; font-weight: 500; font-size: 14px; letter-spacing: 2px;
+background: var(–grad-coral);
+-webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.unused-ph {
+display: flex; align-items: center; justify-content: center;
+padding: 20px; color: var(–t-lo); font-size: 12px; font-style: italic; gap: 6px;
+}
+
+/* Score row */
+.score-row {
+display: flex; align-items: center; gap: 10px;
+margin-top: 8px; padding-top: 8px; border-top: 1px solid var(–b2);
+}
+.score-lbl { font-size: 11px; font-weight: 600; color: var(–t-lo); flex-shrink: 0; }
+.score-inps { display: flex; align-items: center; gap: 5px; }
+.sinp {
+width: 42px; background: var(–bg-2); border: 1px solid var(–b1); color: var(–t-hi);
+font-family: ‘DM Mono’, monospace; font-size: 18px; font-weight: 500;
+text-align: center; border-radius: var(–r3); padding: 3px; outline: none;
+transition: border-color .2s;
+}
+.sinp:focus { border-color: var(–teal-line); }
+.ssep { color: var(–t-lo); font-weight: 600; }
+.btn-rec {
+margin-left: auto; padding: 4px 12px;
+background: var(–sage-dim); border: 1px solid rgba(129,178,154,0.3);
+border-radius: var(–r3); color: var(–sage);
+font-size: 11px; font-weight: 700; cursor: pointer; transition: all .2s;
+}
+.btn-rec:hover { background: rgba(129,178,154,0.28); }
+.btn-overwrite {
+background: var(–lav-dim); border-color: rgba(139,143,200,0.3); color: var(–lavender);
+}
+.btn-overwrite:hover { background: rgba(139,143,200,0.28); }
+.score-recorded {
+font-size: 11px; font-weight: 700; color: var(–sage);
+display: flex; align-items: center; gap: 3px; white-space: nowrap;
+}
+/* Nick popover */
+.nick-popover {
+position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
+background: var(–bg-card2); border: 1px solid var(–teal-line);
+border-radius: var(–r2); padding: 10px 12px;
+box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+margin-top: 4px;
+}
+
+/* ════════════════════════════════════
+WAIT BAR
+════════════════════════════════════ */
+#wait-bar {
+padding: 6px 14px; min-height: 34px;
+background: linear-gradient(90deg, rgba(224,122,95,0.06), rgba(201,168,76,0.04));
+border-top: 1px solid rgba(224,122,95,0.12);
+display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex-shrink: 0;
+}
+.wlbl { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(–t-lo); text-transform: uppercase; flex-shrink: 0; }
+.wchips { display: flex; flex-wrap: wrap; gap: 4px; }
+.wchip {
+font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+background: var(–coral-dim); color: var(–coral); border: 1px solid rgba(224,122,95,0.22);
+}
+.wchip.hi {
+background: linear-gradient(135deg, rgba(224,122,95,0.22), rgba(201,168,76,0.16));
+border-color: var(–gold); color: var(–gold);
+}
+
+/* ════════════════════════════════════
+ACTION BAR
+════════════════════════════════════ */
+#action-bar {
+padding: 9px 14px; flex-shrink: 0;
+background: rgba(21,25,34,0.95); border-top: 1px solid var(–b1);
+display: flex; gap: 8px; align-items: center;
+}
+
+.btn-pri {
+padding: 7px 18px;
+background: var(–grad-teal); border: none; border-radius: 9px;
+color: #0e1c1b; font-size: 13px; font-weight: 700; cursor: pointer;
+transition: all .2s; box-shadow: 0 3px 14px rgba(78,205,196,0.28);
+letter-spacing: .3px;
+}
+.btn-pri:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 5px 20px rgba(78,205,196,0.4); }
+
+.btn-sec {
+padding: 7px 14px;
+background: var(–bg-card2); border: 1px solid var(–b1); border-radius: 9px;
+color: var(–t-mid); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s;
+}
+.btn-sec:hover { border-color: var(–teal-line); color: var(–teal); background: var(–teal-dim); }
+
+.bal-wrap { margin-left: auto; display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(–t-mid); }
+
+.sw { position: relative; width: 34px; height: 19px; cursor: pointer; }
+.sw input { opacity: 0; width: 0; height: 0; }
+.sw-tr {
+position: absolute; inset: 0;
+background: var(–bg-3); border: 1px solid var(–b1); border-radius: 20px; transition: .3s;
+}
+.sw-tr::after {
+content: ‘’; position: absolute; left: 2px; top: 50%; transform: translateY(-50%);
+width: 13px; height: 13px; background: var(–t-lo); border-radius: 50%; transition: .3s;
+}
+.sw input:checked + .sw-tr { background: var(–teal-dim); border-color: var(–teal-line); }
+.sw input:checked + .sw-tr::after { transform: translateX(15px) translateY(-50%); background: var(–teal); }
+
+/* ════════════════════════════════════
+PARTICIPANTS TAB
+════════════════════════════════════ */
+#panel-participants { flex: 1; overflow: hidden; flex-direction: column; }
+#panel-participants .inner { flex: 1; overflow-y: auto; padding: 14px; }
+
+.section-hdr {
+font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+color: var(–t-lo); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(–b2);
+}
+
+/* Quick add: just number input */
+.qadd-area {
+background: var(–bg-card); border: 1px solid var(–b1); border-radius: var(–r);
+padding: 12px 14px; margin-bottom: 14px;
+box-shadow: var(–sh-card);
+}
+.qadd-title { font-size: 11px; font-weight: 700; color: var(–t-mid); margin-bottom: 8px; letter-spacing: .5px; }
+.qadd-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.field-group { display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: 10px; font-weight: 600; color: var(–t-lo); letter-spacing: .5px; }
+.inp {
+background: var(–bg-2); border: 1px solid var(–b1); color: var(–t-hi);
+font-family: ‘DM Sans’, sans-serif; font-size: 14px;
+padding: 6px 10px; border-radius: var(–r3); outline: none; transition: border-color .2s;
+}
+.inp:focus { border-color: var(–teal-line); }
+.inp::placeholder { color: var(–t-lo); font-size: 12px; }
+.inp-no { width: 64px; font-family: ‘DM Mono’, monospace; text-align: center; }
+.inp-nick { flex: 1; min-width: 110px; }
+.inp-bulk { width: 100%; font-family: ‘DM Mono’, monospace; font-size: 12px; }
+
+.add-hint { font-size: 10px; color: var(–t-lo); margin-top: 8px; line-height: 1.5; }
+
+/* Player grid */
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+
+.pcard {
+background: var(–bg-card); border: 1px solid var(–b1); border-radius: var(–r2);
+padding: 9px 11px; display: flex; align-items: center; gap: 8px;
+transition: all .22s; box-shadow: var(–sh-card);
+}
+.pcard:hover { border-color: var(–teal-line); }
+.pcard.inactive { opacity: .3; border-style: dashed; }
+
+.pno-tag {
+font-family: ‘DM Mono’, monospace; font-weight: 500; font-size: 13px;
+min-width: 28px; height: 28px; border-radius: 50%;
+display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.pi { flex: 1; min-width: 0; }
+.pn-main { font-weight: 600; font-size: 13px; }
+.pn-nick { font-size: 11px; color: var(–t-mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pstats { font-size: 10px; color: var(–t-lo); margin-top: 2px; }
+.pwl { display: flex; gap: 6px; margin-top: 1px; font-size: 10px; }
+.pw { color: var(–sage); font-weight: 700; }
+.pl { color: var(–coral); font-weight: 700; }
+
+.pa { display: flex; gap: 3px; }
+.bxs {
+height: 24px; padding: 0 8px; border-radius: 5px;
+border: 1px solid var(–b1); background: transparent;
+color: var(–t-lo); font-size: 11px; font-weight: 600; cursor: pointer;
+display: flex; align-items: center; justify-content: center; transition: all .18s;
+white-space: nowrap;
+}
+.bxs.exit   { border-color: rgba(224,122,95,0.3); color: var(–coral); }
+.bxs.exit:hover   { background: var(–coral-dim); border-color: var(–coral); }
+.bxs.rejoin { border-color: rgba(129,178,154,0.3); color: var(–sage); }
+.bxs.rejoin:hover { background: var(–sage-dim); border-color: var(–sage); }
+
+/* ════════════════════════════════════
+HISTORY TAB
+════════════════════════════════════ */
+#panel-history { flex: 1; overflow: hidden; flex-direction: column; }
+#panel-history .inner { flex: 1; overflow-y: auto; padding: 14px; }
+
+.hcard {
+background: var(–bg-card); border: 1px solid var(–b1); border-radius: var(–r2);
+margin-bottom: 9px; overflow: hidden; box-shadow: var(–sh-card);
+}
+.hhead {
+display: flex; align-items: center; justify-content: space-between;
+padding: 8px 13px;
+background: linear-gradient(90deg, rgba(78,205,196,0.06), transparent);
+font-size: 12px; font-weight: 700; color: var(–t-mid); letter-spacing: .5px;
+}
+.hbody { padding: 7px 13px; }
+.hrow {
+display: flex; align-items: center; gap: 8px;
+padding: 5px 0; border-bottom: 1px solid var(–b2); font-size: 12px;
+}
+.hrow:last-child { border-bottom: none; }
+.hct  { color: var(–t-lo); width: 36px; flex-shrink: 0; font-size: 10px; }
+.hpl  { flex: 1; color: var(–t-mid); }
+.hsc  { font-family: ‘DM Mono’, monospace; font-size: 12px; color: var(–gold); }
+
+/* ════════════════════════════════════
+SCROLLBAR
+════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(–b1); border-radius: 2px; }
+
+/* ════════════════════════════════════
+TOAST
+════════════════════════════════════ */
+#toast {
+position: fixed; bottom: 18px; left: 50%;
+transform: translateX(-50%) translateY(70px);
+background: var(–bg-card2); border: 1px solid var(–b1);
+color: var(–t-hi); padding: 9px 20px; border-radius: 30px;
+font-size: 12px; font-weight: 600; z-index: 2000;
+transition: transform .3s; box-shadow: var(–sh-up); white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.ok  { border-color: rgba(129,178,154,.5); color: var(–sage); }
+#toast.err { border-color: rgba(224,122,95,.5);  color: var(–coral); }
+
+@media (max-width: 600px) {
+#sched-panel { width: 155px; min-width: 130px; }
+.logo { font-size: 13px; }
+#timer-disp { font-size: 24px; }
+}
+</style>
+
+</head>
+<body>
+<div id="app">
+
+<!-- ████ TOP BAR ████ -->
+
+<div id="topbar">
+  <div class="logo">PB · MGR</div>
+
+  <div class="timer-center">
+    <div id="timer-disp" onclick="toggleTimer()" title="タップで開始/停止">07:00</div>
+    <div class="tctrl">
+      <button class="tbtn" id="btn-pp" onclick="toggleTimer()">▶</button>
+      <button class="tbtn" onclick="resetTimer()">↺</button>
+      <input type="number" id="tmin-inp" value="7" min="1" max="99" onchange="setTMin(this.value)">
+      <span style="font-size:10px;color:var(--t-lo)">分</span>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="chip">参加 <b id="pax-cnt">0</b>人</div>
+    <div class="chip lav">第<b id="rnd-num">1</b>ゲーム</div>
+  </div>
+</div>
+
+<!-- ████ TABS ████ -->
+
+<div id="tabs">
+  <button class="tab-btn active" onclick="switchTab('game')">🎾 ゲーム</button>
+  <button class="tab-btn" onclick="switchTab('participants')">👥 参加者</button>
+  <button class="tab-btn" onclick="switchTab('history')">📊 履歴</button>
+</div>
+
+<!-- ████ MAIN ████ -->
+
+<div id="main">
+
+  <!-- ══ GAME TAB ══ -->
+
+  <div id="panel-game" class="tab-panel active">
+
+```
+<div id="sched-panel">
+  <div class="sp-hdr">📅 対戦スケジュール</div>
+  <div id="sched-list"></div>
+</div>
+
+<div id="game-right">
+  <div id="game-center"></div>
+
+  <div id="wait-bar">
+    <span class="wlbl">🪑 待機</span>
+    <div class="wchips" id="wait-chips"></div>
+  </div>
+
+  <div id="action-bar">
+    <button class="btn-pri" onclick="autoAssign()">🔀 自動配置</button>
+    <button class="btn-sec" onclick="nextRound()">次のゲーム ▶</button>
+    <div class="bal-wrap">
+      <label class="sw"><input type="checkbox" id="bal-tog"><div class="sw-tr"></div></label>
+      <span>実力均衡モード</span>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- ══ PARTICIPANTS TAB ══ -->
+
+  <div id="panel-participants" class="tab-panel">
+    <div class="inner">
+
+```
+  <!-- Step 1: 参加人数を設定 -->
+  <div class="qadd-area">
+    <div class="qadd-title">① 参加人数を設定</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn-sec" onclick="adjustCount(-1)" style="width:32px;height:32px;padding:0;font-size:18px;line-height:1">−</button>
+        <input class="inp" type="number" id="inp-count" min="0" max="30" value="0"
+          style="width:64px;text-align:center;font-size:20px;font-family:'DM Mono',monospace;font-weight:500"
+          oninput="clampCount(this)">
+        <button class="btn-sec" onclick="adjustCount(1)"  style="width:32px;height:32px;padding:0;font-size:18px;line-height:1">＋</button>
+      </div>
+      <span style="font-size:12px;color:var(--t-lo)">名　（0〜30人）</span>
+      <button class="btn-pri" onclick="applyCount()" style="margin-left:auto">この人数で登録</button>
+    </div>
+    <div class="add-hint" style="margin-top:8px">※ 人数を入力して「登録」すると No.1 から連番で参加者が作成されます。<br>登録後、各 No. 横のニックネーム欄に任意で名前を入力できます。</div>
+  </div>
+
+  <!-- Step 2: ニックネーム入力テーブル -->
+  <div id="nick-table-wrap" style="display:none;margin-bottom:14px">
+    <div class="qadd-area" style="padding:10px 14px">
+      <div class="qadd-title" style="margin-bottom:8px">② ニックネームを入力（任意）</div>
+      <div id="nick-table"></div>
+      <button class="btn-pri" onclick="applyNicks()" style="margin-top:10px;width:100%">ニックネームを確定</button>
+    </div>
+  </div>
+
+  <div class="section-hdr">参加者一覧（<span id="p-count">0</span>名アクティブ）</div>
+  <div class="pgrid" id="pgrid"></div>
+</div>
+```
+
+  </div>
+
+  <!-- ══ HISTORY TAB ══ -->
+
+  <div id="panel-history" class="tab-panel">
+    <div class="inner">
+      <div id="hlist"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+const S = {
+  // players: { id(=no), no, nick, active, waitCount, lastWaited, wins, losses }
+  players: [],
+
+  courts: [
+    { id:0, name:'手前コート', mode:'doubles', teams:[[null,null],[null,null]] },
+    { id:1, name:'中央コート', mode:'doubles', teams:[[null,null],[null,null]] },
+    { id:2, name:'奥コート',   mode:'doubles', teams:[[null,null],[null,null]] },
+  ],
+
+  rounds:       [],   // completed rounds
+  futureRounds: [],   // simulated future rounds
+
+  currentRound: 0,
+
+  // courtHistory[courtIdx] = Set of frozenSet(player nos) that played together on that court
+  // We track "groups that played on same court" to avoid repeating the same group
+  // key: sorted nos joined with '-'
+  courtGroupHist: [],  // per-court: Map<string, count>
+
+  // pairHist[key] = count  (same team pair)
+  pairHist: {},
+  // opponentHist[key] = count  (faced each other)
+  oppHist: {},
+
+  scores: [{},{},{}],
+};
+
+// Initialize courtGroupHist per court
+S.courts.forEach(() => S.courtGroupHist.push({}));
+
+// ══════════════════════════════════════════════════
+//  TIMER
+// ══════════════════════════════════════════════════
+let tSec=7*60, tTotal=7*60, tRun=false, tIv=null;
+
+function setTMin(v){
+  const m=Math.max(1,Math.min(99,parseInt(v)||7));
+  document.getElementById('tmin-inp').value=m;
+  tTotal=m*60; tSec=tTotal; tRun=false; clearInterval(tIv);
+  updTimer();
+}
+function toggleTimer(){
+  tRun ? (clearInterval(tIv), tRun=false) : (tRun=true, tIv=setInterval(tickT,1000));
+  const b=document.getElementById('btn-pp');
+  b.textContent=tRun?'⏸':'▶'; b.classList.toggle('on',tRun);
+}
+function resetTimer(){
+  clearInterval(tIv); tRun=false; tSec=tTotal;
+  const b=document.getElementById('btn-pp'); b.textContent='▶'; b.classList.remove('on');
+  updTimer();
+}
+function tickT(){
+  if(tSec<=0){
+    clearInterval(tIv); tRun=false;
+    const b=document.getElementById('btn-pp'); b.textContent='▶'; b.classList.remove('on');
+    playEnd(); showToast('⏰ タイム！','ok'); return;
+  }
+  tSec--; updTimer();
+}
+function updTimer(){
+  const el=document.getElementById('timer-disp');
+  const m=Math.floor(tSec/60), s=tSec%60;
+  el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className=tSec===0?'done':tSec<=30?'warn':'';
+}
+function playEnd(){
+  try{
+    const c=new(window.AudioContext||window.webkitAudioContext)();
+    [660,880,1100,880,1100,660,880].forEach((f,i)=>{
+      const o=c.createOscillator(),g=c.createGain();
+      o.connect(g);g.connect(c.destination);
+      o.frequency.value=f; o.type='sine';
+      const t=c.currentTime+i*.18;
+      g.gain.setValueAtTime(.4,t); g.gain.exponentialRampToValueAtTime(.001,t+.16);
+      o.start(t); o.stop(t+.16);
+    });
+  }catch(e){}
+}
+
+// ══════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════
+function switchTab(n){
+  const ns=['game','participants','history'];
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',ns[i]===n));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(`panel-${n}`).classList.add('active');
+  if(n==='participants') renderPlayers();
+  if(n==='history')      renderHistory();
+}
+
+// ══════════════════════════════════════════════════
+//  PLAYERS
+// ══════════════════════════════════════════════════
+// ── Count-based registration ──
+function adjustCount(delta){
+  const el=document.getElementById('inp-count');
+  const v=Math.max(0,Math.min(30,(parseInt(el.value)||0)+delta));
+  el.value=v;
+}
+function clampCount(el){
+  const v=parseInt(el.value);
+  if(isNaN(v)||v<0) el.value=0;
+  else if(v>30) el.value=30;
+}
+function applyCount(){
+  const count=Math.max(0,Math.min(30,parseInt(document.getElementById('inp-count').value)||0));
+  if(count===0){ showToast('人数を1以上で入力してください','err'); return; }
+  // Build player list: No.1〜count, preserve existing nick/stats if already registered
+  const newPlayers=[];
+  for(let no=1;no<=count;no++){
+    const existing=S.players.find(p=>p.no===no);
+    if(existing){ newPlayers.push(existing); }
+    else { newPlayers.push({no,nick:'',active:true,waitCount:0,lastWaited:false,wins:0,losses:0}); }
+  }
+  S.players=newPlayers;
+  renderPlayers(); updPax();
+  renderNickTable(count);
+  document.getElementById('nick-table-wrap').style.display='block';
+  showToast(`${count}人を登録しました。ニックネームを入力してください`,'ok');
+}
+function renderNickTable(count){
+  const el=document.getElementById('nick-table');
+  const rows=[];
+  for(let no=1;no<=count;no++){
+    const p=S.players.find(x=>x.no===no);
+    const nick=p?p.nick:'';
+    rows.push(`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--b2)">
+      <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--t-mid);width:42px;flex-shrink:0">No.${no}</span>
+      <input class="inp" type="text" id="nick-${no}" value="${nick}" placeholder="ニックネーム（任意）"
+        style="flex:1;padding:5px 9px;font-size:13px" maxlength="20">
+    </div>`);
+  }
+  el.innerHTML=rows.join('');
+}
+function applyNicks(){
+  const count=S.players.length;
+  S.players.forEach(p=>{
+    const el=document.getElementById(`nick-${p.no}`);
+    if(el) p.nick=el.value.trim();
+  });
+  renderPlayers(); updPax();
+  document.getElementById('nick-table-wrap').style.display='none';
+  showToast('ニックネームを保存しました','ok');
+}
+
+function _addPlayer(no, nick){
+  S.players.push({ no, nick, active:true, waitCount:0, lastWaited:false, wins:0, losses:0 });
+  S.players.sort((a,b)=>a.no-b.no);
+}
+
+function toggleActive(no){
+  const p=S.players.find(x=>x.no===no); if(!p)return;
+  p.active=!p.active;
+  renderPlayers(); updPax();
+  showToast(`No.${p.no}${p.nick?' '+p.nick:''} を${p.active?'参加に戻しました':'退場しました'}`);
+  computeFuture(); renderSched();
+}
+
+function updPax(){
+  const n=S.players.filter(p=>p.active).length;
+  document.getElementById('pax-cnt').textContent=n;
+  document.getElementById('p-count').textContent=n;
+}
+
+function renderPlayers(){
+  const grid = document.getElementById('pgrid');
+  const sorted = [...S.players].sort((a,b) => a.no - b.no);
+  // Build DOM manually to avoid template literal quoting issues
+  grid.innerHTML = '';
+  sorted.forEach(function(p){
+    const hue = (p.no * 47 + 160) % 360;
+    const rgb1 = hslToRgb(hue, 35, 35);
+    const rgb2 = hslToRgb(hue, 45, 45);
+
+    const card = document.createElement('div');
+    card.className = 'pcard' + (p.active ? '' : ' inactive');
+    card.style.cursor = 'pointer';
+    card.title = 'タップでニックネームを編集';
+    card.onclick = function(e){ openNickEdit(p.no, e); };
+
+    // number badge
+    const badge = document.createElement('div');
+    badge.className = 'pno-tag';
+    badge.style.cssText = 'background:rgba(' + rgb1 + ',0.25);border:1px solid rgba(' + rgb2 + ',0.5);color:hsl(' + hue + ',60%,72%)';
+    badge.textContent = p.no;
+    card.appendChild(badge);
+
+    // info block
+    const pi = document.createElement('div');
+    pi.className = 'pi';
+
+    const pmain = document.createElement('div');
+    pmain.className = 'pn-main';
+    pmain.textContent = 'No.' + p.no;
+    pi.appendChild(pmain);
+
+    const pnick = document.createElement('div');
+    pnick.className = 'pn-nick';
+    if(p.nick){
+      pnick.textContent = p.nick;
+    } else {
+      pnick.innerHTML = '<span style="color:var(--t-lo);font-style:italic;font-size:11px">ニックネームなし</span>';
+    }
+    pi.appendChild(pnick);
+
+    const pstats = document.createElement('div');
+    pstats.className = 'pstats';
+    pstats.textContent = '待機' + p.waitCount + '回';
+    pi.appendChild(pstats);
+
+    const pwl = document.createElement('div');
+    pwl.className = 'pwl';
+    pwl.innerHTML = '<span class="pw">W' + p.wins + '</span><span class="pl">L' + p.losses + '</span>';
+    pi.appendChild(pwl);
+
+    card.appendChild(pi);
+
+    // action button
+    const pa = document.createElement('div');
+    pa.className = 'pa';
+    const btn = document.createElement('button');
+    btn.className = 'bxs ' + (p.active ? 'exit' : 'rejoin');
+    btn.textContent = p.active ? '退場' : '参加';
+    btn.onclick = function(e){
+      e.stopPropagation();
+      toggleActive(p.no);
+    };
+    pa.appendChild(btn);
+    card.appendChild(pa);
+
+    grid.appendChild(card);
+  });
+}
+
+// Nick edit popover — built with DOM API, no innerHTML quoting risk
+function openNickEdit(no, evt){
+  evt.stopPropagation();
+  document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); });
+  const p = S.players.find(function(x){ return x.no === no; });
+  if(!p) return;
+
+  const card = evt.currentTarget;
+  card.style.position = 'relative';
+
+  const pop = document.createElement('div');
+  pop.className = 'nick-popover';
+
+  const lbl = document.createElement('div');
+  lbl.style.cssText = 'font-size:11px;font-weight:700;color:var(--t-mid);margin-bottom:6px';
+  lbl.textContent = 'No.' + no + ' のニックネーム';
+  pop.appendChild(lbl);
+
+  const inp = document.createElement('input');
+  inp.className = 'inp';
+  inp.id = 'pop-nick-inp';
+  inp.type = 'text';
+  inp.value = p.nick || '';
+  inp.placeholder = 'ニックネームを入力';
+  inp.maxLength = 20;
+  inp.style.cssText = 'width:100%;padding:6px 9px;font-size:14px';
+  inp.onkeydown = function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); doSaveNick(no, inp.value); }
+    if(e.key === 'Escape'){ closeNickEdit(); }
+  };
+  pop.appendChild(inp);
+
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:6px;margin-top:8px';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'btn-pri';
+  saveBtn.style.cssText = 'flex:1;padding:6px 0;font-size:12px';
+  saveBtn.textContent = '保存';
+  saveBtn.onclick = function(e){ e.stopPropagation(); doSaveNick(no, inp.value); };
+  row.appendChild(saveBtn);
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn-sec';
+  cancelBtn.style.cssText = 'padding:6px 10px;font-size:12px';
+  cancelBtn.textContent = '✕';
+  cancelBtn.onclick = function(e){ e.stopPropagation(); closeNickEdit(); };
+  row.appendChild(cancelBtn);
+
+  pop.appendChild(row);
+  card.appendChild(pop);
+
+  setTimeout(function(){ inp.focus(); }, 30);
+  setTimeout(function(){
+    document.addEventListener('click', outsideNickClose, { once: true });
+  }, 50);
+}
+
+function outsideNickClose(){
+  document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); });
+}
+
+function closeNickEdit(){
+  document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); });
+}
+
+function doSaveNick(no, rawVal){
+  const p = S.players.find(function(x){ return x.no === no; });
+  if(!p) return;
+  const val = rawVal.trim();
+  p.nick = val;
+  closeNickEdit();
+  renderPlayers();
+  showToast(val ? 'No.' + no + ' → ' + val : 'No.' + no + ' ニックネームを削除', 'ok');
+}
+
+// Helper: hsl to RGB string for rgba()
+function hslToRgb(h,s,l){
+  s/=100;l/=100;
+  const k=n=>(n+h/30)%12;
+  const a=s*Math.min(l,1-l);
+  const f=n=>Math.round((l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1))))*255);
+  return `${f(0)},${f(8)},${f(4)}`;
+}
+
+// ══════════════════════════════════════════════════
+//  CORE ASSIGNMENT LOGIC
+//
+//  Priority system (lower score = should play first):
+//  1. lastWaited bonus (top priority)
+//  2. waitCount (how many times waited)
+//  3. random tiebreak
+//
+//  Court group avoidance:
+//  For each possible group of N players on a court,
+//  score the group by how many times they've been on
+//  the SAME COURT together. Minimize this score.
+//
+//  This ensures that even if pairing changes, the
+//  same 4 people won't play on the same court again.
+// ══════════════════════════════════════════════════
+
+function waitPriority(p){
+  // Lower = should play sooner
+  return -(p.waitCount*10 + (p.lastWaited?8:0));
+}
+
+function groupKey(players){
+  return players.filter(Boolean).map(p=>p.no).sort((a,b)=>a-b).join('-');
+}
+
+// Score a candidate group for a court (how much we want to AVOID this group)
+// Returns a lower number = better (less repeated combination)
+function groupAvoidScore(players, courtIdx, pairH, oppH, cgHist){
+  const active = players.filter(Boolean);
+  if(active.length < 2) return 0;
+
+  let score = 0;
+
+  // Main: has this exact group been on this court before?
+  const key = groupKey(active);
+  score += (cgHist[courtIdx][key]||0) * 100;
+
+  // Sub-penalty: have any subpairs been on same court repeatedly?
+  for(let i=0;i<active.length;i++){
+    for(let j=i+1;j<active.length;j++){
+      const k=[active[i].no,active[j].no].sort().join('-');
+      score += (pairH[k]||0) * 3;
+      score += (oppH[k]||0) * 1;
+    }
+  }
+  return score;
+}
+
+// For doubles: given 4 players, find the best pairing (minimize pair history on same team)
+function bestPairing(players, pairH){
+  if(players.length < 4){ while(players.length<4) players.push(null); }
+  const[a,b,c,d]=players;
+  const opts=[[[a,b],[c,d]],[[a,c],[b,d]],[[a,d],[b,c]]];
+  let best=opts[0], bs=Infinity;
+  opts.forEach(opt=>{
+    const s=(pairH[[opt[0][0]?.no,opt[0][1]?.no].sort().join('-')]||0)
+           +(pairH[[opt[1][0]?.no,opt[1][1]?.no].sort().join('-')]||0);
+    if(s<bs){bs=s;best=opt;}
+  });
+  return best;
+}
+
+// Main assignment function
+// Returns { courtAssignments: [ [[p,p],[p,p]], ... ], waiters: [p,...] }
+function doAssign(activePlayers, balanceMode, pairH, oppH, cgHist){
+  const slots = S.courts.map(c => c.mode==='doubles'?4 : c.mode==='singles'?2 : 0);
+  const totalSlots = slots.reduce((a,b)=>a+b, 0);
+
+  // Sort pool by priority
+  let pool = [...activePlayers];
+  if(balanceMode){
+    // Sort by win rate for balance, but still respect wait priority
+    pool.sort((a,b)=>{
+      const wpa = (a.wins+a.losses)>0 ? a.wins/(a.wins+a.losses) : 0.5;
+      const wpb = (b.wins+b.losses)>0 ? b.wins/(b.wins+b.losses) : 0.5;
+      // Those who waited still go first regardless
+      const waitDiff = waitPriority(a)-waitPriority(b);
+      if(Math.abs(waitDiff)>5) return waitDiff;
+      return wpb-wpa; // higher win rate plays first in balance mode
+    });
+  } else {
+    pool.sort((a,b)=>waitPriority(a)-waitPriority(b));
+  }
+
+  // Add small random jitter to break ties and add variety
+  // (only among players with same wait priority)
+  pool = stableShuffleWithPriority(pool);
+
+  const numPlay = Math.min(totalSlots, pool.length);
+  const toPlay  = pool.slice(0, numPlay);
+  const waiters = pool.slice(numPlay);
+
+  // ── Assign players to courts optimally ──
+  // We use a greedy approach: for each court, pick the subset of available
+  // players that minimizes the group-avoidance score.
+  // For large player counts this is efficient enough.
+
+  let remaining = [...toPlay];
+  const courtAssignments = [];
+
+  S.courts.forEach((court, ci)=>{
+    const s = slots[ci];
+    if(s===0){ courtAssignments.push([[],[]]); return; }
+
+    if(remaining.length <= s){
+      // Not enough players to be selective
+      const group = remaining.splice(0,s);
+      if(court.mode==='doubles') courtAssignments.push(bestPairing([...group], pairH));
+      else courtAssignments.push([[group[0]||null],[group[1]||null]]);
+      return;
+    }
+
+    // Choose best s players from remaining for this court
+    // Strategy: among high-priority players, find the group with lowest avoidance score
+    // We always include the highest-priority player(s), then pick best companions
+    const mustInclude = remaining.slice(0, Math.max(1, Math.floor(s/2)));
+    const candidates  = remaining.slice(mustInclude.length);
+
+    // Try to pick s - mustInclude.length from candidates to minimize avoidance
+    const chosen = pickBestCompanions(mustInclude, candidates, s, ci, pairH, oppH, cgHist);
+    const group  = chosen;
+
+    // Remove chosen from remaining
+    group.forEach(p=>{ const idx=remaining.indexOf(p); if(idx!==-1) remaining.splice(idx,1); });
+
+    if(court.mode==='doubles') courtAssignments.push(bestPairing([...group], pairH));
+    else courtAssignments.push([[group[0]||null],[group[1]||null]]);
+  });
+
+  return { courtAssignments, waiters };
+}
+
+// Pick best companions: given mustHave[] and pool[], choose (targetSize - mustHave.length)
+// from pool to form a group with minimal avoidance score
+function pickBestCompanions(mustHave, pool, targetSize, courtIdx, pairH, oppH, cgHist){
+  const need = targetSize - mustHave.length;
+  if(need <= 0) return mustHave.slice(0, targetSize);
+  if(pool.length <= need) return [...mustHave, ...pool];
+
+  // Score all combinations of 'need' from pool
+  // For small need this is fine; for large we limit iterations
+  const combos = getCombinations(pool, need);
+  let best = combos[0], bs = Infinity;
+  combos.forEach(combo=>{
+    const group = [...mustHave, ...combo];
+    const s = groupAvoidScore(group, courtIdx, pairH, oppH, cgHist);
+    if(s < bs){ bs=s; best=combo; }
+  });
+  return [...mustHave, ...best];
+}
+
+// Generate combinations of size k from arr
+function getCombinations(arr, k){
+  if(k===0) return [[]];
+  if(arr.length===0) return [];
+  // Limit to avoid slowdown with large arrays
+  if(arr.length > 12){
+    // Just take first 12 for performance
+    arr = arr.slice(0,12);
+  }
+  const [first, ...rest] = arr;
+  const withFirst = getCombinations(rest, k-1).map(c=>[first,...c]);
+  const withoutFirst = getCombinations(rest, k);
+  return [...withFirst, ...withoutFirst];
+}
+
+// Shuffle while respecting priority groups (same priority = random order)
+function stableShuffleWithPriority(players){
+  // Group by priority bucket
+  const result = [];
+  let i = 0;
+  while(i < players.length){
+    const pri = waitPriority(players[i]);
+    let j = i;
+    while(j < players.length && waitPriority(players[j])===pri) j++;
+    const group = players.slice(i,j);
+    // Shuffle this group
+    for(let k=group.length-1;k>0;k--){
+      const r=Math.floor(Math.random()*(k+1));
+      [group[k],group[r]]=[group[r],group[k]];
+    }
+    result.push(...group);
+    i = j;
+  }
+  return result;
+}
+
+// ── Public autoAssign ──
+function autoAssign(){
+  const active = S.players.filter(p=>p.active);
+  if(active.length<2){ showToast('参加者が足りません（最低2人）','err'); return; }
+  const totalSlots = S.courts.map(c=>c.mode==='doubles'?4:c.mode==='singles'?2:0).reduce((a,b)=>a+b,0);
+  if(totalSlots===0){ showToast('コートを設定してください','err'); return; }
+
+  const bal = document.getElementById('bal-tog').checked;
+  const { courtAssignments, waiters } = doAssign(active, bal, S.pairHist, S.oppHist, S.courtGroupHist);
+
+  // Update wait state
+  S.players.forEach(p=>{ if(p.active) p.lastWaited=false; });
+  waiters.forEach(w=>{ const sp=S.players.find(x=>x.no===w.no); if(sp){sp.waitCount++;sp.lastWaited=true;} });
+
+  // Apply
+  S.courts.forEach((c,ci)=>{ c.teams=courtAssignments[ci]; });
+  S.scores = S.courts.map(()=>({team1:'',team2:''}));
+
+  computeFuture();
+  renderGamePanel();
+  showToast('✅ 自動配置完了','ok');
+}
+
+// ── Compute future rounds (simulate up to 4) ──
+function computeFuture(){
+  S.futureRounds = [];
+  const active = S.players.filter(p=>p.active);
+  const totalSlots = S.courts.map(c=>c.mode==='doubles'?4:c.mode==='singles'?2:0).reduce((a,b)=>a+b,0);
+  if(totalSlots===0||active.length<2) return;
+
+  const bal = document.getElementById('bal-tog').checked;
+  let simPool  = active.map(p=>({...p}));
+  let simPairH = {...S.pairHist};
+  let simOppH  = {...S.oppHist};
+  let simCGH   = S.courtGroupHist.map(h=>({...h}));
+
+  for(let r=0;r<4;r++){
+    const {courtAssignments, waiters} = doAssign(simPool, bal, simPairH, simOppH, simCGH);
+    simPool.forEach(p=>{p.lastWaited=false;});
+    waiters.forEach(w=>{ const sp=simPool.find(x=>x.no===w.no); if(sp){sp.waitCount++;sp.lastWaited=true;} });
+
+    // Update sim histories
+    S.courts.forEach((court,ci)=>{
+      if(court.mode==='unused') return;
+      const[t1,t2]=courtAssignments[ci];
+      const t1p=(t1||[]).filter(Boolean);
+      const t2p=(t2||[]).filter(Boolean);
+      // Court group history
+      const gkey=groupKey([...t1p,...t2p]);
+      simCGH[ci][gkey]=(simCGH[ci][gkey]||0)+1;
+      // Pair history
+      [[...t1p],[...t2p]].forEach(team=>{
+        for(let i=0;i<team.length;i++) for(let j=i+1;j<team.length;j++){
+          const k=[team[i].no,team[j].no].sort().join('-');
+          simPairH[k]=(simPairH[k]||0)+1;
+        }
+      });
+      // Opponent history
+      t1p.forEach(a=>t2p.forEach(b=>{
+        const k=[a.no,b.no].sort().join('-');
+        simOppH[k]=(simOppH[k]||0)+1;
+      }));
+    });
+
+    S.futureRounds.push({
+      round: S.currentRound+1+r+1,
+      courts: S.courts.map((court,ci)=>{
+        const[t1,t2]=courtAssignments[ci];
+        return {
+          name:court.name, mode:court.mode,
+          teams:[(t1||[]).filter(Boolean).map(p=>dispName(p)),(t2||[]).filter(Boolean).map(p=>dispName(p))]
+        };
+      })
+    });
+  }
+}
+
+function dispName(p){
+  if(!p) return '—';
+  const sp=S.players.find(x=>x.no===p.no);
+  if(!sp) return `No.${p.no}`;
+  return sp.nick ? `${sp.no}:${sp.nick}` : `No.${sp.no}`;
+}
+
+// ══════════════════════════════════════════════════
+//  NEXT ROUND
+// ══════════════════════════════════════════════════
+function nextRound(){
+  // Save round
+  S.rounds.push({
+    round: S.currentRound+1,
+    courts: S.courts.map((c,ci)=>({
+      name:c.name, mode:c.mode,
+      teams: c.teams.map(t=>(t||[]).filter(Boolean).map(p=>dispName(p))),
+      score: {...S.scores[ci]}
+    }))
+  });
+
+  // Record histories from current round
+  S.courts.forEach((court,ci)=>{
+    if(court.mode==='unused') return;
+    const[t1,t2]=court.teams;
+    const t1p=(t1||[]).filter(Boolean);
+    const t2p=(t2||[]).filter(Boolean);
+    const all=[...t1p,...t2p];
+
+    // Court group history
+    const gkey=groupKey(all);
+    S.courtGroupHist[ci][gkey]=(S.courtGroupHist[ci][gkey]||0)+1;
+
+    // Same-team pair history
+    [t1p,t2p].forEach(team=>{
+      for(let i=0;i<team.length;i++) for(let j=i+1;j<team.length;j++){
+        const k=[team[i].no,team[j].no].sort().join('-');
+        S.pairHist[k]=(S.pairHist[k]||0)+1;
+      }
+    });
+    // Opponent history
+    t1p.forEach(a=>t2p.forEach(b=>{
+      const k=[a.no,b.no].sort().join('-');
+      S.oppHist[k]=(S.oppHist[k]||0)+1;
+    }));
+  });
+
+  // Record W/L from scores
+  S.courts.forEach((court,ci)=>{
+    if(court.mode==='unused') return;
+    const s1=parseInt(S.scores[ci].team1), s2=parseInt(S.scores[ci].team2);
+    if(isNaN(s1)||isNaN(s2)) return;
+    const[t1,t2]=court.teams;
+    const w1=s1>s2, w2=s2>s1;
+    (t1||[]).filter(Boolean).forEach(p=>{const sp=S.players.find(x=>x.no===p.no);if(sp){if(w1)sp.wins++;else if(w2)sp.losses++;}});
+    (t2||[]).filter(Boolean).forEach(p=>{const sp=S.players.find(x=>x.no===p.no);if(sp){if(w2)sp.wins++;else if(w1)sp.losses++;}});
+  });
+
+  S.currentRound++;
+  document.getElementById('rnd-num').textContent=S.currentRound+1;
+  resetTimer();
+  autoAssign();
+  showToast(`第${S.currentRound}ゲーム終了 → 次の配置完了`,'ok');
+}
+
+// ══════════════════════════════════════════════════
+//  COURT MODE
+// ══════════════════════════════════════════════════
+function setCourtMode(ci,mode){
+  S.courts[ci].mode=mode;
+  S.courts[ci].teams=mode==='doubles'?[[null,null],[null,null]]:mode==='singles'?[[null],[null]]:[[],[]];
+  // Re-init history for this court if mode changed
+  renderGamePanel();
+}
+
+// ══════════════════════════════════════════════════
+//  SCORE
+// ══════════════════════════════════════════════════
+function recordScore(ci){
+  const v1=document.getElementById(`s1-${ci}`).value;
+  const v2=document.getElementById(`s2-${ci}`).value;
+  if(v1===''||v2===''){showToast('両チームのスコアを入力してください','err');return;}
+  const already = S.scores[ci].team1!==''&&S.scores[ci].team2!=='';
+  S.scores[ci]={team1:v1,team2:v2};
+  // Re-render just the score row to reflect recorded state
+  renderScoreRow(ci);
+  showToast(already?'🔄 スコアを上書き保存しました':'✅ スコアを記録しました','ok');
+}
+
+function renderScoreRow(ci){
+  const sc=S.scores[ci]||{};
+  const recorded=sc.team1!==''&&sc.team2!=='';
+  const el=document.getElementById(`score-row-${ci}`);
+  if(!el)return;
+  el.innerHTML=scoreRowHTML(ci,sc,recorded);
+}
+
+function scoreRowHTML(ci, sc, recorded){
+  const v1 = sc.team1 || '';
+  const v2 = sc.team2 || '';
+  const lbl = '<span class="score-lbl">スコア</span>';
+  const inps = '<div class="score-inps">'
+    + '<input class="sinp" type="number" min="0" max="99" id="s1-' + ci + '" value="' + v1 + '" placeholder="A">'
+    + '<span class="ssep">–</span>'
+    + '<input class="sinp" type="number" min="0" max="99" id="s2-' + ci + '" value="' + v2 + '" placeholder="B">'
+    + '</div>';
+  if(recorded){
+    return lbl + inps
+      + '<span class="score-recorded">✓ 記録済み</span>'
+      + '<button class="btn-rec btn-overwrite" onclick="recordScore(' + ci + ')">上書き</button>';
+  }
+  return lbl + inps
+    + '<button class="btn-rec" onclick="recordScore(' + ci + ')">記録</button>';
+}
+
+// ══════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════
+function renderGamePanel(){ renderCourts(); renderWaitBar(); renderSched(); }
+
+function renderCourts(){
+  document.getElementById('game-center').innerHTML=S.courts.map((court,ci)=>{
+    const mode=court.mode, [t1,t2]=court.teams, sc=S.scores[ci]||{};
+    let body='';
+    if(mode==='unused'){
+      body=`<div class="unused-ph">⬜ 未使用コート</div>`;
+    } else {
+      const isD=mode==='doubles';
+      body=`
+        <div class="match-grid">
+          <div class="team-blk">
+            <div class="team-lbl a">${isD?'チーム A':'プレーヤー 1'}</div>
+            ${(t1||[]).map(p=>renderChip(p,'a')).join('')}
+          </div>
+          <div class="vs-col"><div class="vs-txt">VS</div></div>
+          <div class="team-blk">
+            <div class="team-lbl b">${isD?'チーム B':'プレーヤー 2'}</div>
+            ${(t2||[]).map(p=>renderChip(p,'b')).join('')}
+          </div>
+        </div>
+        <div class="score-row" id="score-row-${ci}">
+          ${scoreRowHTML(ci, sc, sc.team1!=='' && sc.team2!=='')}
+        </div>`;
+    }
+    return `
+    <div class="court-card">
+      <div class="court-hdr">
+        <span class="court-nm">${court.name}</span>
+        <div class="mode-sel">
+          <button class="mbtn ${mode==='doubles'?'on':''}" onclick="setCourtMode(${ci},'doubles')">ダブルス</button>
+          <button class="mbtn ${mode==='singles'?'on':''}" onclick="setCourtMode(${ci},'singles')">シングル</button>
+          <button class="mbtn ${mode==='unused'?'on':''}" onclick="setCourtMode(${ci},'unused')">未使用</button>
+        </div>
+      </div>
+      <div class="court-body">${body}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderChip(p, side){
+  if(!p) return `<div class="pchip emp"><span class="pchip-name">— 未配置 —</span></div>`;
+  const sp=S.players.find(x=>x.no===p.no);
+  const hue=sp?(p.no*47+160)%360:200;
+  const numStyle=`background:rgba(${hslToRgb(hue,35,35)},0.3);border:1px solid rgba(${hslToRgb(hue,45,45)},0.5);color:hsl(${hue},60%,72%)`;
+  return `<div class="pchip">
+    <div class="pnum" style="${numStyle}">${p.no}</div>
+    <span class="pchip-name">${sp?.nick||''}</span>
+    ${sp&&sp.waitCount>0?`<span class="wbadge">待${sp.waitCount}</span>`:''}
+  </div>`;
+}
+
+function renderWaitBar(){
+  const el=document.getElementById('wait-chips');
+  const onCourt=new Set();
+  S.courts.forEach(c=>c.teams.forEach(t=>(t||[]).filter(Boolean).forEach(p=>onCourt.add(p.no))));
+  const waiting=S.players.filter(p=>p.active&&!onCourt.has(p.no));
+  if(!waiting.length){ el.innerHTML=`<span style="color:var(--t-lo);font-size:11px">なし</span>`; return; }
+  el.innerHTML=waiting.map(p=>{
+    const hi=p.lastWaited||p.waitCount>0;
+    const label=p.nick?`No.${p.no} ${p.nick}`:`No.${p.no}`;
+    return `<span class="wchip ${hi?'hi':''}">${label}${p.waitCount>0?` (${p.waitCount})`:''}</span>`;
+  }).join('');
+}
+
+function renderSched(){
+  const el=document.getElementById('sched-list');
+  const items=[];
+  const ps=Math.max(0,S.rounds.length-2);
+  for(let i=ps;i<S.rounds.length;i++) items.push({type:'past',data:S.rounds[i]});
+  items.push({type:'current',data:{
+    round:S.currentRound+1,
+    courts:S.courts.map((c,ci)=>({
+      name:c.name,mode:c.mode,
+      teams:c.teams.map(t=>(t||[]).filter(Boolean).map(p=>dispName(p))),
+      score:S.scores[ci]||{}
+    }))
+  }});
+  S.futureRounds.slice(0,4).forEach(r=>items.push({type:'future',data:r}));
+
+  el.innerHTML=items.map(item=>{
+    const cur=item.type==='current',past=item.type==='past';
+    const cls=past?'past':cur?'cur':'future';
+    const stTxt=past?'終了':cur?'進行中':'予定';
+    const stCls=past?'':'';
+    const courts=item.data.courts||[];
+    const rows=courts.filter(c=>c.mode!=='unused').map(c=>{
+      const t1=(c.teams[0]||[]).join(' / ')||'—';
+      const t2=(c.teams[1]||[]).join(' / ')||'—';
+      const sc=(c.score&&c.score.team1!==''&&c.score.team2!=='')?`${c.score.team1}-${c.score.team2}`:'';
+      return `<div class="sc-row">
+        <span class="sc-ct">${c.name.slice(0,2)}</span>
+        <div class="sc-pl">${t1}<span class="sc-vs">vs</span>${t2}</div>
+        ${sc?`<span class="sc-sc">${sc}</span>`:''}
+      </div>`;
+    }).join('');
+    return `
+    <div class="sc ${cls}">
+      <div class="sc-head">
+        <span class="sc-rn">第${item.data.round}ゲーム</span>
+        <span class="sc-badge">${stTxt}</span>
+      </div>
+      <div class="sc-body">${rows||`<div style="color:var(--t-lo);font-size:10px;padding:2px 0">配置なし</div>`}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderHistory(){
+  const el=document.getElementById('hlist');
+  if(!S.rounds.length){ el.innerHTML=`<div style="color:var(--t-lo);text-align:center;padding:50px;font-size:13px">まだ履歴がありません</div>`; return; }
+  el.innerHTML=[...S.rounds].reverse().map(r=>{
+    const rows=r.courts.filter(c=>c.mode!=='unused').map(c=>{
+      const t1=(c.teams[0]||[]).join(' / ')||'—';
+      const t2=(c.teams[1]||[]).join(' / ')||'—';
+      const sc=(c.score&&c.score.team1!==''&&c.score.team2!=='')?`${c.score.team1} – ${c.score.team2}`:'—';
+      return `<div class="hrow"><span class="hct">${c.name.slice(0,3)}</span><span class="hpl">${t1} vs ${t2}</span><span class="hsc">${sc}</span></div>`;
+    }).join('');
+    return `<div class="hcard"><div class="hhead"><span>第${r.round}ゲーム</span></div><div class="hbody">${rows||'<div style="color:var(--t-lo);font-size:11px">記録なし</div>'}</div></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`show ${type}`;
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.className='',2800);
+}
+
+// ══════════════════════════════════════════════════
+//  PWA
+// ══════════════════════════════════════════════════
+(function(){
+  const m={name:"Pickleball Manager",short_name:"PB Mgr",description:"ピックルボール対戦管理",
+    start_url:".",display:"standalone",background_color:"#151922",theme_color:"#1a1f2e",
+    icons:[
+      {src:"data:image/svg+xml,"+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%231a1f2e'/><text x='96' y='138' font-size='120' text-anchor='middle'>🏓</text></svg>`),sizes:"192x192",type:"image/svg+xml"},
+    ]};
+  document.getElementById('manifest-link').setAttribute('href',
+    URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'})));
+})();
+
+// ══════════════════════════════════════════════════
+//  INIT — start without demo data
+// ══════════════════════════════════════════════════
+updTimer();
+updPax();
+renderGamePanel();
+</script>
+
+</body>
+</html>
