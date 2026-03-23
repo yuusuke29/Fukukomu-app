@@ -8,7 +8,7 @@
   "theme_color": "#FDF9E1",
   "icons": [
     {
-      "src": "icon-fukukomu.png",
+      "src": "icon-fukukomu-pb.png",
       "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"
