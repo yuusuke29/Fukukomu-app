@@ -9,1323 +9,1515 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PB Manager">
-<meta name="theme-color" content="#FAF9F7">
+<meta name="theme-color" content="#1C1C1E">
 <title>Pickleball Manager</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Oswald:wght@500;700&display=swap');
+
+/* ═══════════════════════════════════
+RESET & BASE
+═══════════════════════════════════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:16px;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
 body{
-  font-family:-apple-system,'Helvetica Neue','Hiragino Sans',sans-serif;
-  background:#FAF9F7;color:#333;
-  height:100dvh;overflow:hidden;
+font-family:‘Noto Sans JP’,sans-serif;
+background:#1C1C1E;color:#F5F5F0;
+height:100dvh;overflow:hidden;font-size:15px;line-height:1.5;
 }
 
-/* ── Tokens ── */
+/* ═══════════════════════════════════
+DESIGN TOKENS
+═══════════════════════════════════ */
 :root{
-–pink:#CFA5A5;–pink-dk:#b88080;–pink-lt:#edd8d8;–pink-bg:rgba(207,165,165,0.14);
-–beige:#F5F1ED;–brown:#4A3F3F;
-–bg:#FAF9F7;–bg2:#F5F1ED;–bg3:#EDE8E3;
-–text:#333;–text2:#6B5F5F;–text3:#9E9090;
-–line:rgba(74,63,63,0.13);–line2:rgba(74,63,63,0.07);
-–green:#6A9E7A;–green-bg:rgba(106,158,122,0.13);–green-bd:rgba(106,158,122,0.4);
-–red:#C0705A;–red-bg:rgba(192,112,90,0.13);–red-bd:rgba(192,112,90,0.4);
-–blue:#6B8CAE;–blue-bg:rgba(107,140,174,0.13);–blue-bd:rgba(107,140,174,0.35);
-–sh:0 1px 6px rgba(74,63,63,0.10),0 0 0 1px rgba(74,63,63,0.06);
+/* Background layers */
+–bg0:#1C1C1E;
+–bg1:#2C2C2E;
+–bg2:#3A3A3C;
+–bg3:#48484A;
+
+/* Brand */
+–accent:#E8A87C;      /* warm amber */
+–accent2:#6EC6A0;     /* sage green */
+–accent3:#E87C7C;     /* coral red */
+–accent-blue:#7C9EE8; /* soft blue */
+
+/* Text */
+–t1:#F5F5F0;
+–t2:#AEAEB2;
+–t3:#636366;
+
+/* Lines */
+–ln:rgba(255,255,255,0.10);
+–ln2:rgba(255,255,255,0.06);
+
+/* Shadows */
+–sh:0 2px 12px rgba(0,0,0,0.4);
+–sh2:0 4px 24px rgba(0,0,0,0.5);
+
+/* Radii */
+–r1:12px;–r2:16px;–r3:20px;
 }
 
-/* ── App shell ── */
-#app{display:flex;flex-direction:column;height:100dvh}
+/* ═══════════════════════════════════
+APP LAYOUT
+═══════════════════════════════════ */
+#app{display:flex;flex-direction:column;height:100dvh;background:var(–bg0)}
 
-/* ── Topbar ── */
-#topbar{
-display:flex;align-items:center;gap:8px;padding:0 14px;height:54px;
-background:var(–bg);border-bottom:1px solid var(–line);flex-shrink:0;
+/* ── HEADER ── */
+#header{
+height:52px;display:flex;align-items:center;padding:0 16px;gap:8px;
+background:var(–bg1);border-bottom:1px solid var(–ln);
+flex-shrink:0;z-index:100;
 }
-.logo{font-size:13px;font-weight:700;color:var(–brown);letter-spacing:1px;white-space:nowrap}
-.timer-wrap{flex:1;display:flex;align-items:center;justify-content:center;gap:6px}
-#timer-disp{
-font-size:28px;font-weight:300;letter-spacing:4px;color:var(–brown);
-cursor:pointer;user-select:none;font-variant-numeric:tabular-nums;min-width:90px;text-align:center;
+.logo{
+font-family:‘Oswald’,sans-serif;font-weight:700;font-size:18px;
+color:var(–accent);letter-spacing:2px;margin-right:4px;white-space:nowrap;
 }
-#timer-disp.warn{color:var(–red)}
-#timer-disp.done{color:var(–red);animation:tblink .4s infinite}
+.header-nav{display:flex;gap:4px;flex:1;overflow-x:auto}
+.header-nav::-webkit-scrollbar{display:none}
+.hnav-btn{
+height:34px;padding:0 12px;border-radius:8px;border:none;
+background:transparent;color:var(–t2);font-size:12px;font-weight:500;
+cursor:pointer;white-space:nowrap;transition:all .18s;
+font-family:‘Noto Sans JP’,sans-serif;
+}
+.hnav-btn.active{background:var(–accent);color:#1C1C1E;font-weight:700}
+.hnav-btn:not(.active):hover{background:var(–bg2);color:var(–t1)}
+
+/* timer chip in header */
+.timer-chip{
+display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0;
+}
+#h-timer{
+font-family:‘Oswald’,sans-serif;font-weight:500;font-size:20px;
+color:var(–accent);letter-spacing:2px;cursor:pointer;
+font-variant-numeric:tabular-nums;min-width:64px;text-align:right;
+}
+#h-timer.warn{color:var(–accent3)}
+#h-timer.done{color:var(–accent3);animation:tblink .4s infinite}
 @keyframes tblink{0%,100%{opacity:1}50%{opacity:.3}}
-.tbtn{
-width:38px;height:38px;border-radius:9px;background:var(–bg3);
-border:1px solid var(–line);color:var(–text2);font-size:15px;cursor:pointer;
+
+/* ── MAIN ── */
+#main{flex:1;overflow:hidden;position:relative}
+.screen{
+position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;
+opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.screen.active{opacity:1;pointer-events:all}
+.scrollable{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.scrollable::-webkit-scrollbar{width:3px}
+.scrollable::-webkit-scrollbar-thumb{background:var(–ln);border-radius:2px}
+
+/* ── FOOTER ── */
+#footer{
+height:54px;display:flex;align-items:center;
+background:var(–bg1);border-top:1px solid var(–ln);
+flex-shrink:0;
+}
+.foot-btn{
+flex:1;height:100%;border:none;background:transparent;
+color:var(–t3);font-size:10px;font-weight:500;cursor:pointer;
+display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+transition:color .18s;font-family:‘Noto Sans JP’,sans-serif;
+}
+.foot-btn .icon{font-size:20px;line-height:1}
+.foot-btn.active{color:var(–accent)}
+.foot-btn:not(.active):hover{color:var(–t2)}
+
+/* ═══════════════════════════════════
+COMPONENTS
+═══════════════════════════════════ */
+
+/* Section header */
+.sec-title{
+font-family:‘Oswald’,sans-serif;font-weight:500;font-size:13px;
+letter-spacing:2px;text-transform:uppercase;color:var(–t3);
+padding:16px 16px 8px;
+}
+
+/* Card */
+.card{
+background:var(–bg1);border-radius:var(–r2);border:1px solid var(–ln);
+box-shadow:var(–sh);overflow:hidden;
+}
+
+/* Big action button */
+.btn-action{
+width:100%;height:52px;border:none;border-radius:var(–r1);
+font-family:‘Noto Sans JP’,sans-serif;font-size:16px;font-weight:700;
+cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+transition:all .18s;
+}
+.btn-action.primary{background:var(–accent);color:#1C1C1E}
+.btn-action.primary:active{background:#d4916a}
+.btn-action.secondary{background:var(–bg2);color:var(–t1);border:1px solid var(–ln)}
+.btn-action.secondary:active{background:var(–bg3)}
+.btn-action.green{background:var(–accent2);color:#1C1C1E}
+.btn-action.green:active{background:#58b08a}
+.btn-action.danger{background:var(–accent3);color:#fff}
+
+/* Stepper */
+.stepper{
+display:flex;align-items:center;gap:0;
+background:var(–bg2);border-radius:var(–r1);overflow:hidden;
+border:1px solid var(–ln);width:fit-content;
+}
+.step-btn{
+width:52px;height:52px;border:none;background:transparent;
+color:var(–t1);font-size:26px;cursor:pointer;
 display:flex;align-items:center;justify-content:center;
+transition:background .15s;
 }
-.tbtn.on{background:var(–pink);border-color:var(–pink);color:#fff}
-#tmin-inp{
-width:40px;height:38px;background:var(–bg3);border:1px solid var(–line);
-color:var(–text);font-size:14px;font-weight:600;text-align:center;border-radius:9px;outline:none;
-}
-.topbar-right{display:flex;gap:6px;flex-shrink:0}
-.top-chip{
-font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;
-background:var(–bg3);border:1px solid var(–line);color:var(–text2);white-space:nowrap;
-}
-.top-chip b{color:var(–brown)}
-
-/* ── Tabs ── */
-#tabs{
-display:flex;background:var(–bg);border-bottom:2px solid var(–line2);
-flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;
-}
-#tabs::-webkit-scrollbar{display:none}
-.tab-btn{
-flex:1;min-width:70px;height:44px;font-size:12px;font-weight:600;color:var(–text3);
-background:transparent;border:none;border-bottom:3px solid transparent;
-cursor:pointer;white-space:nowrap;
-display:flex;align-items:center;justify-content:center;gap:3px;padding:0 6px;
-}
-.tab-btn.active{color:var(–brown);border-bottom-color:var(–pink);font-weight:700}
-
-/* ── Panels ── */
-#main{flex:1;overflow:hidden;display:flex;flex-direction:column}
-.tab-panel{display:none;flex:1;overflow:hidden;flex-direction:column}
-.tab-panel.active{display:flex}
-.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px;display:flex;flex-direction:column;gap:12px}
-
-/* ── Court card ── */
-.court-card{
-background:#fff;border-radius:14px;border:1px solid var(–line);
-box-shadow:var(–sh);overflow:hidden;flex-shrink:0;
+.step-btn:active{background:var(–bg3)}
+.step-val{
+min-width:72px;height:52px;border-left:1px solid var(–ln);border-right:1px solid var(–ln);
+background:var(–bg1);font-family:‘Oswald’,sans-serif;font-weight:500;font-size:28px;
+color:var(–t1);text-align:center;display:flex;align-items:center;justify-content:center;
+font-variant-numeric:tabular-nums;
 }
 
-/* Court top bar: name + mode selector */
-.court-top{
-display:flex;align-items:center;justify-content:space-between;
-padding:10px 14px;background:var(–beige);border-bottom:1px solid var(–line);gap:10px;
+/* Segment control */
+.seg{display:flex;gap:6px}
+.seg-btn{
+flex:1;height:40px;border-radius:10px;border:2px solid var(–ln);
+background:var(–bg2);color:var(–t3);font-size:13px;font-weight:700;
+cursor:pointer;transition:all .18s;font-family:‘Noto Sans JP’,sans-serif;
 }
-.court-nm{font-size:14px;font-weight:700;color:var(–brown);white-space:nowrap}
-.mode-sel{display:flex;gap:4px}
-.mbtn{
-height:30px;padding:0 10px;font-size:11px;font-weight:600;
-border-radius:8px;border:1px solid var(–line);
-background:var(–bg3);color:var(–text3);cursor:pointer;white-space:nowrap;
+/* ★ SELECTED STATE: solid fill, high contrast */
+.seg-btn.on{
+background:var(–accent);border-color:var(–accent);
+color:#1C1C1E;
 }
-.mbtn.on{background:var(–pink);border-color:var(–pink);color:#fff;font-weight:700}
+.seg-btn.on.green{background:var(–accent2);border-color:var(–accent2);color:#1C1C1E}
+.seg-btn.on.blue{background:var(–accent-blue);border-color:var(–accent-blue);color:#1C1C1E}
+.seg-btn.on.red{background:var(–accent3);border-color:var(–accent3);color:#fff}
 
-/* ── Match card (the star) ── */
-.match-body{padding:12px 14px}
+/* Number badge */
+.nbadge{
+border-radius:50%;display:flex;align-items:center;justify-content:center;
+font-family:‘Oswald’,sans-serif;font-weight:700;border:2px solid;flex-shrink:0;
+}
+.nbadge.lg{width:48px;height:48px;font-size:18px}
+.nbadge.md{width:40px;height:40px;font-size:15px}
+.nbadge.sm{width:32px;height:32px;font-size:12px}
 
-.match-card{
-border:1px solid var(–line);border-radius:12px;overflow:hidden;
-background:var(–bg2);
+/* Input */
+.inp-field{
+background:var(–bg2);border:1px solid var(–ln);color:var(–t1);
+font-family:‘Noto Sans JP’,sans-serif;font-size:15px;
+padding:10px 14px;border-radius:var(–r1);outline:none;width:100%;
+-webkit-appearance:none;
 }
+.inp-field:focus{border-color:var(–accent)}
+.inp-field::placeholder{color:var(–t3)}
 
-/* Team A header */
-.team-header{
-padding:7px 12px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
-border-bottom:1px solid var(–line2);
+/* Tag badge */
+.tag{
+display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;
+font-size:11px;font-weight:700;
 }
-.team-header.a{color:var(–blue);background:var(–blue-bg)}
-.team-header.b{color:var(–red);background:var(–red-bg)}
+.tag.wait{background:rgba(232,168,124,0.2);color:var(–accent);border:1px solid rgba(232,168,124,0.4)}
+.tag.win{background:rgba(110,198,160,0.2);color:var(–accent2);border:1px solid rgba(110,198,160,0.4)}
+.tag.lose{background:rgba(232,124,124,0.2);color:var(–accent3);border:1px solid rgba(232,124,124,0.4)}
 
-/* Player rows */
-.player-row{
-display:flex;align-items:center;gap:10px;
-padding:10px 12px;border-bottom:1px solid var(–line2);background:#fff;
-}
-.player-row:last-child{border-bottom:none}
-
-.p-badge{
-width:40px;height:40px;border-radius:50%;flex-shrink:0;
-display:flex;align-items:center;justify-content:center;
-font-size:16px;font-weight:700;border:2px solid;
-}
-.p-badge-empty{
-width:40px;height:40px;border-radius:50%;flex-shrink:0;
-display:flex;align-items:center;justify-content:center;
-font-size:20px;color:var(–text3);border:2px dashed var(–line);
-background:var(–bg2);
-}
-.p-info{flex:1;min-width:0}
-.p-no{font-size:11px;font-weight:700;color:var(–text3);line-height:1.2}
-.p-name{font-size:15px;font-weight:600;color:var(–text);line-height:1.3}
-.p-name.empty{font-size:13px;color:var(–text3);font-style:italic;font-weight:400}
-.p-wait{font-size:10px;font-weight:700;color:var(–red);margin-top:1px}
-
-/* VS divider between teams */
-.vs-row{
-display:flex;align-items:center;justify-content:center;
-padding:8px;background:var(–bg2);border-bottom:1px solid var(–line2);
-}
-.vs-text{
-font-size:18px;font-weight:900;color:var(–pink);letter-spacing:3px;
-}
-
-/* Unused */
-.unused-ph{
-padding:24px;text-align:center;color:var(–text3);
-font-size:14px;font-style:italic;background:var(–bg2);
-}
-
-/* ── Score row ── */
-.score-area{
-display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-padding:10px 14px;border-top:1px solid var(–line2);background:#fff;
-}
-.score-lbl{font-size:11px;font-weight:700;color:var(–text3);flex-shrink:0}
-.score-inps{display:flex;align-items:center;gap:6px}
-.sinp{
-width:52px;height:44px;background:var(–bg2);border:1px solid var(–line);
-color:var(–text);font-size:22px;font-weight:600;text-align:center;
-border-radius:9px;outline:none;font-variant-numeric:tabular-nums;
-}
-.sinp:focus{border-color:var(–pink);background:#fff}
-.ssep{color:var(–text3);font-weight:600;font-size:18px}
-.score-done{font-size:12px;font-weight:700;color:var(–green)}
-.btn-rec{
-height:40px;padding:0 14px;background:var(–green-bg);
-border:1px solid var(–green-bd);border-radius:9px;
-color:var(–green);font-size:13px;font-weight:700;cursor:pointer;
-}
-.btn-over{background:var(–blue-bg);border-color:var(–blue-bd);color:var(–blue)}
-
-/* ── Rest card ── */
-.rest-card{
-background:#fff;border-radius:14px;border:1px solid var(–line);
-box-shadow:var(–sh);overflow:hidden;flex-shrink:0;
-}
-.rest-header{
-padding:10px 14px;background:var(–beige);border-bottom:1px solid var(–line);
-font-size:14px;font-weight:700;color:var(–brown);
-}
-.rest-body{padding:12px 14px;display:flex;flex-wrap:wrap;gap:8px}
-.rest-chip{
-display:flex;align-items:center;gap:8px;
-padding:8px 12px;background:var(–bg2);border:1px solid var(–line);border-radius:10px;
-}
-
-/* ── Wait bar ── */
-#wait-bar{
-padding:8px 14px;background:var(–bg2);border-top:1px solid var(–line);
-display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;min-height:40px;
-}
-.wlbl{font-size:10px;font-weight:700;color:var(–text3);letter-spacing:1px;text-transform:uppercase;flex-shrink:0}
-.wchip{
-font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;
-background:var(–bg3);color:var(–text2);border:1px solid var(–line);
-}
-.wchip.hi{background:var(–red-bg);border-color:var(–red-bd);color:var(–red)}
-
-/* ── Action bar ── */
-#action-bar{
-display:flex;gap:10px;align-items:center;padding:10px 14px;
-border-top:1px solid var(–line);background:var(–bg);flex-shrink:0;
-}
-.btn-pri{
-height:46px;padding:0 22px;background:var(–brown);border:none;border-radius:11px;
-color:#fff;font-size:15px;font-weight:700;cursor:pointer;
-display:flex;align-items:center;gap:7px;white-space:nowrap;
-}
-.btn-sec{
-height:46px;padding:0 18px;background:var(–bg3);border:1px solid var(–line);
-border-radius:11px;color:var(–text2);font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;
-}
-.bal-wrap{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:var(–text2)}
-.sw{position:relative;width:40px;height:24px;cursor:pointer;flex-shrink:0}
-.sw input{opacity:0;width:0;height:0;position:absolute}
-.sw-tr{position:absolute;inset:0;background:var(–bg3);border:1px solid var(–line);border-radius:20px;transition:.25s}
-.sw-tr::after{content:’’;position:absolute;left:4px;top:50%;transform:translateY(-50%);width:14px;height:14px;background:var(–text3);border-radius:50%;transition:.25s}
-.sw input:checked+.sw-tr{background:var(–pink);border-color:var(–pink)}
-.sw input:checked+.sw-tr::after{transform:translateX(16px) translateY(-50%);background:#fff}
-
-/* ── Schedule tab ── */
-.sc-card{
-background:#fff;border-radius:14px;border:1px solid var(–line);
-box-shadow:var(–sh);overflow:hidden;flex-shrink:0;
-}
-.sc-card.cur{border-color:var(–pink);box-shadow:0 0 0 2px var(–pink-bg),var(–sh)}
-.sc-card.past{opacity:.5}
-
-.sc-head{
-padding:11px 14px;border-bottom:1px solid var(–line2);
-display:flex;align-items:center;justify-content:space-between;
-}
-.sc-card.cur .sc-head{background:var(–pink-bg)}
-.sc-round{font-size:15px;font-weight:700;color:var(–text2)}
-.sc-card.cur .sc-round{color:var(–brown)}
-.sc-card.past .sc-round{color:var(–text3)}
-.sc-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
-.sc-card.past .sc-badge{background:var(–bg3);color:var(–text3)}
-.sc-card.cur .sc-badge{background:var(–pink);color:#fff;animation:fpulse 2s infinite}
-.sc-card.future .sc-badge{background:var(–blue-bg);color:var(–blue);border:1px solid var(–blue-bd)}
-@keyframes fpulse{0%,100%{opacity:1}50%{opacity:.65}}
-
-.sc-body{padding:10px 14px;display:flex;flex-direction:column;gap:10px}
-
-.sc-court-block{border:1px solid var(–line2);border-radius:10px;overflow:hidden}
-.sc-court-nm{
-padding:6px 10px;background:var(–beige);
-font-size:11px;font-weight:700;color:var(–text3);letter-spacing:.5px;text-transform:uppercase;
-border-bottom:1px solid var(–line2);
-}
-.sc-vs-layout{
-display:grid;grid-template-columns:1fr auto 1fr;
-align-items:center;background:#fff;
-}
-.sc-team{padding:8px 10px;display:flex;flex-direction:column;gap:3px}
-.sc-player{font-size:12px;font-weight:600;color:var(–text);line-height:1.4}
-.sc-player.empty-p{color:var(–text3);font-style:italic}
-.sc-vs{
-font-size:14px;font-weight:900;color:var(–pink);
-padding:0 6px;text-align:center;
-}
-.sc-score{
-padding:5px 10px;background:var(–bg2);border-top:1px solid var(–line2);
-font-size:12px;font-weight:700;color:var(–brown);text-align:center;
-}
-.sc-rest-block{
-border:1px solid var(–line2);border-radius:10px;overflow:hidden;
-}
-.sc-rest-nm{
-padding:6px 10px;background:var(–beige);
-font-size:11px;font-weight:700;color:var(–text3);letter-spacing:.5px;text-transform:uppercase;
-border-bottom:1px solid var(–line2);
-}
-.sc-rest-names{padding:8px 10px;font-size:12px;font-weight:600;color:var(–text);background:#fff;line-height:1.6}
-
-/* ── Participants ── */
-#panel-participants .scroll-area{gap:14px}
-.card-box{
-background:#fff;border-radius:14px;border:1px solid var(–line);
-box-shadow:var(–sh);padding:16px;flex-shrink:0;
-}
-.card-title{font-size:14px;font-weight:700;color:var(–brown);margin-bottom:14px}
-.count-ctrl{display:flex;align-items:center;border:1px solid var(–line);border-radius:11px;overflow:hidden;width:fit-content}
-.count-btn{width:50px;height:50px;background:var(–bg3);border:none;font-size:24px;color:var(–text2);cursor:pointer;display:flex;align-items:center;justify-content:center}
-#inp-count{width:68px;height:50px;border:none;border-left:1px solid var(–line);border-right:1px solid var(–line);background:#fff;font-size:24px;font-weight:300;text-align:center;color:var(–text);outline:none;font-variant-numeric:tabular-nums}
-.count-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.count-unit{font-size:13px;color:var(–text3)}
-.btn-register{height:50px;padding:0 26px;background:var(–pink);border:none;border-radius:11px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;white-space:nowrap}
-.add-hint{font-size:12px;color:var(–text3);margin-top:12px;line-height:1.7}
-.nick-table-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(–line2)}
-.nick-table-row:last-child{border-bottom:none}
-.nick-no{font-size:13px;font-weight:700;color:var(–text2);width:46px;flex-shrink:0}
-.inp{width:100%;background:var(–bg2);border:1px solid var(–line);color:var(–text);font-size:15px;padding:9px 12px;border-radius:9px;outline:none;-webkit-appearance:none}
-.inp:focus{border-color:var(–pink);background:#fff}
-.inp::placeholder{color:var(–text3);font-size:13px}
-.btn-confirm{width:100%;height:46px;background:var(–brown);border:none;border-radius:11px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px}
-.sec-hdr{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(–text3);padding-bottom:8px;border-bottom:1px solid var(–line2);flex-shrink:0}
-.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
-.pcard{
-background:#fff;border:1px solid var(–line);border-radius:12px;
-padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:7px;
-box-shadow:var(–sh);cursor:pointer;position:relative;text-align:center;
-}
-.pcard.inactive{opacity:.35}
-.pno-tag{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;border:2px solid}
-.p-card-name{font-size:14px;font-weight:600;color:var(–text)}
-.p-card-hint{font-size:11px;color:var(–text3);font-style:italic}
-.p-card-stats{font-size:11px;color:var(–text3)}
-.p-wl{display:flex;gap:8px;font-size:12px;font-weight:700}
-.pw{color:var(–green)}.pl{color:var(–red)}
-.p-btn-row{display:flex;gap:6px;width:100%}
-.bxs{flex:1;height:32px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid}
-.bxs.exit{background:var(–red-bg);border-color:var(–red-bd);color:var(–red)}
-.bxs.rejoin{background:var(–green-bg);border-color:var(–green-bd);color:var(–green)}
-.nick-popover{
-position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:200;
-background:#fff;border:1px solid var(–pink);border-radius:12px;
-padding:14px;box-shadow:0 4px 20px rgba(74,63,63,0.18);
-}
-.np-lbl{font-size:12px;font-weight:700;color:var(–text2);margin-bottom:8px}
-.np-row{display:flex;gap:8px;margin-top:10px}
-.btn-save{flex:1;height:40px;background:var(–pink);border:none;border-radius:9px;color:#fff;font-size:14px;font-weight:700;cursor:pointer}
-.btn-cancel{height:40px;padding:0 12px;background:var(–bg3);border:1px solid var(–line);border-radius:9px;color:var(–text2);font-size:13px;font-weight:600;cursor:pointer}
-
-/* ── History ── */
-.hcard{background:#fff;border:1px solid var(–line);border-radius:12px;overflow:hidden;box-shadow:var(–sh);flex-shrink:0}
-.hhead{padding:11px 14px;background:var(–bg2);border-bottom:1px solid var(–line2);font-size:13px;font-weight:700;color:var(–text2)}
-.hbody{padding:8px 14px}
-.hrow{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(–line2);font-size:12px}
-.hrow:last-child{border-bottom:none}
-.hct{font-size:10px;font-weight:700;color:var(–text3);width:34px;flex-shrink:0}
-.hpl{flex:1;color:var(–text2)}
-.hsc{font-size:13px;font-weight:700;color:var(–brown)}
-
-/* ── Toast ── */
+/* Toast */
 #toast{
-position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);
-background:var(–brown);color:#fff;padding:11px 22px;border-radius:30px;
-font-size:14px;font-weight:600;z-index:2000;transition:transform .3s;
-box-shadow:0 4px 20px rgba(74,63,63,.3);white-space:nowrap;pointer-events:none;
+position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(80px);
+background:var(–bg2);color:var(–t1);padding:12px 24px;border-radius:30px;
+font-size:14px;font-weight:700;z-index:9999;transition:transform .3s;
+box-shadow:var(–sh2);white-space:nowrap;pointer-events:none;border:1px solid var(–ln);
 }
 #toast.show{transform:translateX(-50%) translateY(0)}
-#toast.ok{background:var(–green)}
-#toast.err{background:var(–red)}
+#toast.ok{background:var(–accent2);color:#1C1C1E;border-color:transparent}
+#toast.err{background:var(–accent3);color:#fff;border-color:transparent}
+#toast.warn{background:var(–accent);color:#1C1C1E;border-color:transparent}
 
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(–line);border-radius:2px}
+/* ═══════════════════════════════════
+SCREEN: SETUP (TOP)
+═══════════════════════════════════ */
+#screen-setup .scrollable{padding:0 0 24px}
+
+.setup-hero{
+padding:24px 16px 20px;
+background:linear-gradient(160deg,var(–bg1) 0%,var(–bg0) 100%);
+border-bottom:1px solid var(–ln);
+text-align:center;
+}
+.setup-hero h1{
+font-family:‘Oswald’,sans-serif;font-weight:700;font-size:28px;
+color:var(–t1);letter-spacing:1px;margin-bottom:4px;
+}
+.setup-hero p{font-size:13px;color:var(–t2)}
+
+.setup-steps{padding:16px;display:flex;flex-direction:column;gap:12px}
+
+.step-card{
+background:var(–bg1);border-radius:var(–r2);border:1px solid var(–ln);
+overflow:hidden;
+}
+.step-card-header{
+display:flex;align-items:center;gap:12px;padding:14px 16px;
+border-bottom:1px solid var(–ln2);cursor:pointer;
+background:var(–bg1);transition:background .15s;
+}
+.step-card-header:active{background:var(–bg2)}
+.step-num{
+width:28px;height:28px;border-radius:50%;
+background:var(–accent);color:#1C1C1E;
+font-family:‘Oswald’,sans-serif;font-weight:700;font-size:14px;
+display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.step-num.done{background:var(–accent2)}
+.step-title{font-size:15px;font-weight:700;color:var(–t1)}
+.step-summary{font-size:12px;color:var(–t2);margin-left:auto;white-space:nowrap}
+.step-chevron{color:var(–t3);font-size:16px;flex-shrink:0;transition:transform .2s}
+.step-chevron.open{transform:rotate(90deg)}
+
+.step-body{display:none;padding:16px;background:var(–bg0)}
+.step-body.open{display:block}
+
+/* Setup — Participants */
+.count-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+
+/* Setup — Courts */
+.court-config-list{display:flex;flex-direction:column;gap:10px}
+.court-config-row{
+background:var(–bg1);border-radius:var(–r1);border:1px solid var(–ln);
+overflow:hidden;
+}
+.court-config-top{
+display:flex;align-items:center;gap:12px;padding:12px 14px;
+border-bottom:1px solid var(–ln2);
+}
+.court-config-name-inp{
+flex:1;background:transparent;border:none;color:var(–t1);
+font-family:‘Noto Sans JP’,sans-serif;font-size:15px;font-weight:700;
+outline:none;min-width:80px;
+}
+.court-config-name-inp::placeholder{color:var(–t3)}
+.court-config-seg{padding:10px 14px}
+
+/* Setup — Timer */
+.timer-setup-row{display:flex;align-items:center;gap:16px}
+
+/* ═══════════════════════════════════
+SCREEN: GAME
+═══════════════════════════════════ */
+#screen-game .scrollable{padding:0 0 24px}
+
+/* Timer bar */
+.timer-bar-wrap{
+padding:14px 16px 12px;
+background:var(–bg1);border-bottom:1px solid var(–ln);flex-shrink:0;
+}
+.timer-bar-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+#game-timer-disp{
+font-family:‘Oswald’,sans-serif;font-weight:700;font-size:36px;
+color:var(–accent);letter-spacing:4px;font-variant-numeric:tabular-nums;cursor:pointer;
+}
+#game-timer-disp.warn{color:var(–accent3);animation:tblink .5s infinite}
+#game-timer-disp.done{color:var(–accent3);animation:tblink .3s infinite}
+.btn-start{
+height:44px;padding:0 20px;border-radius:10px;border:none;
+background:var(–accent2);color:#1C1C1E;font-size:15px;font-weight:700;
+cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;
+font-family:‘Noto Sans JP’,sans-serif;
+}
+.btn-start:active{background:#58b08a}
+.btn-start.running{background:var(–accent3);color:#fff}
+.btn-timer-reset{
+width:40px;height:40px;border-radius:10px;border:1px solid var(–ln);
+background:var(–bg2);color:var(–t2);font-size:18px;cursor:pointer;
+display:flex;align-items:center;justify-content:center;
+}
+
+/* Progress bar */
+.progress-track{
+height:8px;background:var(–bg2);border-radius:4px;overflow:hidden;
+}
+.progress-fill{
+height:100%;background:var(–accent2);border-radius:4px;
+transition:width .5s linear,background .3s;
+}
+.progress-fill.warn{background:var(–accent)}
+.progress-fill.done{background:var(–accent3)}
+
+/* Game actions */
+.game-actions{display:flex;gap:10px;padding:12px 16px;flex-shrink:0;background:var(–bg0)}
+
+/* Court cards */
+.game-courts{padding:0 16px;display:flex;flex-direction:column;gap:14px}
+
+.court-game-card{
+background:var(–bg1);border-radius:var(–r2);border:1px solid var(–ln);
+box-shadow:var(–sh);overflow:hidden;
+}
+.court-game-header{
+padding:12px 16px;background:var(–bg2);border-bottom:1px solid var(–ln);
+display:flex;align-items:center;justify-content:space-between;
+}
+.court-game-name{
+font-family:‘Oswald’,sans-serif;font-weight:700;font-size:16px;
+color:var(–t1);letter-spacing:1px;
+}
+.court-game-mode{
+font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;
+background:var(–accent);color:#1C1C1E;
+}
+
+/* Match display */
+.match-display{padding:14px 16px}
+.match-teams{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:start}
+.team-col{display:flex;flex-direction:column;gap:6px}
+.team-label{
+font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+padding-bottom:6px;border-bottom:1px solid var(–ln2);margin-bottom:2px;
+}
+.team-label.a{color:var(–accent-blue)}
+.team-label.b{color:var(–accent3)}
+
+.player-row{display:flex;align-items:center;gap:10px;padding:4px 0}
+.player-info{flex:1;min-width:0}
+.player-name{font-size:14px;font-weight:700;color:var(–t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-sub{font-size:11px;color:var(–t3);margin-top:1px}
+.player-empty .player-name{color:var(–t3);font-weight:400;font-style:italic}
+
+.vs-col{
+display:flex;align-items:center;justify-content:center;padding-top:28px;
+}
+.vs-label{
+font-family:‘Oswald’,sans-serif;font-weight:700;font-size:22px;
+color:var(–accent);letter-spacing:2px;
+}
+
+/* Score */
+.score-section{
+padding:12px 16px;border-top:1px solid var(–ln2);
+display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(–bg0);
+}
+.score-label{font-size:12px;font-weight:700;color:var(–t3);flex-shrink:0}
+.score-inputs{display:flex;align-items:center;gap:8px}
+.score-inp{
+width:54px;height:46px;background:var(–bg2);border:1px solid var(–ln);
+color:var(–t1);font-family:‘Oswald’,sans-serif;font-size:24px;font-weight:500;
+text-align:center;border-radius:10px;outline:none;font-variant-numeric:tabular-nums;
+}
+.score-inp:focus{border-color:var(–accent)}
+.score-sep{font-size:20px;color:var(–t3);font-weight:700}
+.score-recorded{font-size:12px;font-weight:700;color:var(–accent2)}
+.btn-score{
+height:40px;padding:0 14px;border-radius:10px;border:none;
+font-size:13px;font-weight:700;cursor:pointer;font-family:‘Noto Sans JP’,sans-serif;
+}
+.btn-score.record{background:var(–accent2);color:#1C1C1E}
+.btn-score.overwrite{background:var(–bg2);color:var(–t2);border:1px solid var(–ln)}
+
+/* Rest section */
+.rest-section{
+margin:0 16px 14px;
+background:var(–bg1);border-radius:var(–r2);border:1px solid var(–ln);overflow:hidden;
+}
+.rest-header{
+padding:10px 14px;background:var(–bg2);border-bottom:1px solid var(–ln);
+font-family:‘Oswald’,sans-serif;font-weight:500;font-size:14px;letter-spacing:1px;
+color:var(–t2);
+}
+.rest-players{padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px}
+.rest-player{display:flex;align-items:center;gap:8px}
+.rest-player-info{display:flex;flex-direction:column}
+.rest-player-name{font-size:13px;font-weight:700;color:var(–t1)}
+.rest-player-sub{font-size:10px;color:var(–t3)}
+
+/* ═══════════════════════════════════
+SCREEN: PARTICIPANTS
+═══════════════════════════════════ */
+#screen-players .scrollable{padding:16px;display:flex;flex-direction:column;gap:12px}
+
+.players-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+
+.pcard{
+background:var(–bg1);border:1px solid var(–ln);border-radius:var(–r1);
+padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;
+cursor:pointer;position:relative;text-align:center;transition:border-color .18s;
+}
+.pcard:active{background:var(–bg2)}
+.pcard.inactive{opacity:.38}
+.pcard:hover{border-color:var(–accent)}
+
+.pcard-name{font-size:14px;font-weight:700;color:var(–t1)}
+.pcard-nick{font-size:12px;color:var(–t2)}
+.pcard-nick.empty{color:var(–t3);font-style:italic}
+.pcard-stats{display:flex;gap:6px}
+
+.p-exit-btn{
+width:100%;height:32px;border-radius:8px;border:none;
+font-size:12px;font-weight:700;cursor:pointer;font-family:‘Noto Sans JP’,sans-serif;
+}
+.p-exit-btn.exit{background:rgba(232,124,124,0.18);color:var(–accent3);border:1px solid rgba(232,124,124,0.35)}
+.p-exit-btn.rejoin{background:rgba(110,198,160,0.18);color:var(–accent2);border:1px solid rgba(110,198,160,0.35)}
+
+.nick-popover{
+position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:200;
+background:var(–bg2);border:1px solid var(–accent);border-radius:var(–r1);
+padding:14px;box-shadow:var(–sh2);
+}
+.np-row{display:flex;gap:8px;margin-top:10px}
+.np-save{flex:1;height:40px;background:var(–accent);border:none;border-radius:9px;color:#1C1C1E;font-size:14px;font-weight:700;cursor:pointer}
+.np-cancel{height:40px;padding:0 12px;background:var(–bg3);border:1px solid var(–ln);border-radius:9px;color:var(–t2);font-size:13px;font-weight:600;cursor:pointer}
+
+/* ═══════════════════════════════════
+SCREEN: COURTS
+═══════════════════════════════════ */
+#screen-courts .scrollable{padding:16px;display:flex;flex-direction:column;gap:12px}
+
+/* ═══════════════════════════════════
+SCREEN: SCHEDULE & HISTORY
+═══════════════════════════════════ */
+#screen-schedule .scrollable,#screen-history .scrollable{
+padding:0 16px 24px;display:flex;flex-direction:column;gap:12px;
+}
+#screen-schedule .scrollable{padding-top:12px}
+#screen-history .scrollable{padding-top:12px}
+
+.sc-card{
+background:var(–bg1);border-radius:var(–r2);border:1px solid var(–ln);
+overflow:hidden;flex-shrink:0;
+}
+.sc-card.cur{border-color:var(–accent);box-shadow:0 0 0 1px var(–accent)}
+.sc-card.past{opacity:.55}
+.sc-head{
+padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
+background:var(–bg2);border-bottom:1px solid var(–ln2);
+}
+.sc-round{font-family:‘Oswald’,sans-serif;font-weight:700;font-size:16px;color:var(–t1);letter-spacing:1px}
+.sc-badge{
+font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;
+}
+.sc-card.past .sc-badge{background:var(–bg3);color:var(–t3)}
+.sc-card.cur  .sc-badge{background:var(–accent);color:#1C1C1E;animation:fpulse 2s infinite}
+.sc-card.future .sc-badge{background:var(–bg2);color:var(–accent-blue);border:1px solid rgba(124,158,232,.35)}
+@keyframes fpulse{0%,100%{opacity:1}50%{opacity:.6}}
+.sc-body{padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.sc-court-block{background:var(–bg2);border-radius:var(–r1);overflow:hidden}
+.sc-court-nm{
+padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:1px;
+text-transform:uppercase;color:var(–t3);border-bottom:1px solid var(–ln2);
+}
+.sc-vs-grid{display:grid;grid-template-columns:1fr auto 1fr;padding:8px 12px;gap:8px;align-items:center;background:var(–bg1)}
+.sc-team{display:flex;flex-direction:column;gap:3px}
+.sc-player{font-size:12px;font-weight:700;color:var(–t1)}
+.sc-player.emp{color:var(–t3);font-style:italic}
+.sc-vs-txt{font-family:‘Oswald’,sans-serif;font-weight:700;font-size:16px;color:var(–accent);text-align:center}
+.sc-score-row{padding:5px 12px;background:var(–bg0);text-align:center;font-size:12px;font-weight:700;color:var(–accent2)}
+.sc-rest{background:var(–bg2);border-radius:var(–r1);padding:8px 12px}
+.sc-rest-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(–t3);margin-bottom:4px}
+.sc-rest-names{font-size:12px;font-weight:700;color:var(–t2)}
+
+.hcard{background:var(–bg1);border-radius:var(–r2);border:1px solid var(–ln);overflow:hidden;flex-shrink:0}
+.hhead{padding:12px 16px;background:var(–bg2);border-bottom:1px solid var(–ln2);font-family:‘Oswald’,sans-serif;font-weight:700;font-size:15px;color:var(–t1);letter-spacing:1px}
+.hbody{padding:10px 16px}
+.hrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(–ln2);font-size:12px}
+.hrow:last-child{border-bottom:none}
+.hct{font-size:10px;font-weight:700;color:var(–t3);width:36px;flex-shrink:0}
+.hpl{flex:1;color:var(–t2)}
+.hsc{font-size:13px;font-weight:700;color:var(–accent)}
+
+/* Bal toggle */
+.bal-row{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(–bg1);border-radius:var(–r1);border:1px solid var(–ln)}
+.bal-lbl{flex:1;font-size:14px;font-weight:700;color:var(–t1)}
+.bal-sub{font-size:11px;color:var(–t3);margin-top:2px}
+.sw{position:relative;width:44px;height:26px;cursor:pointer;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw-tr{position:absolute;inset:0;background:var(–bg3);border:1px solid var(–ln);border-radius:20px;transition:.25s}
+.sw-tr::after{content:’’;position:absolute;left:4px;top:50%;transform:translateY(-50%);width:16px;height:16px;background:var(–t3);border-radius:50%;transition:.25s}
+.sw input:checked+.sw-tr{background:var(–accent);border-color:var(–accent)}
+.sw input:checked+.sw-tr::after{transform:translateX(18px) translateY(-50%);background:#1C1C1E}
 </style>
 
 </head>
 <body>
 <div id="app">
 
-<!-- TOPBAR -->
+<!-- ══ HEADER ══ -->
 
-<div id="topbar">
-  <div class="logo">PB·MGR</div>
-  <div class="timer-wrap">
-    <div id="timer-disp" onclick="toggleTimer()">07:00</div>
-    <div style="display:flex;align-items:center;gap:5px">
-      <button class="tbtn" id="btn-pp" onclick="toggleTimer()">▶</button>
-      <button class="tbtn" onclick="resetTimer()">↺</button>
-      <input type="number" id="tmin-inp" value="7" min="1" max="99" onchange="setTMin(this.value)">
-      <span style="font-size:11px;color:var(--text3)">分</span>
-    </div>
+<div id="header">
+  <div class="logo">PB</div>
+  <div class="header-nav">
+    <button class="hnav-btn active" onclick="gotoScreen('setup')" id="hnav-setup">ホーム</button>
+    <button class="hnav-btn" onclick="gotoScreen('game')" id="hnav-game">ゲーム</button>
+    <button class="hnav-btn" onclick="gotoScreen('players')" id="hnav-players">参加者</button>
+    <button class="hnav-btn" onclick="gotoScreen('courts')" id="hnav-courts">コート</button>
   </div>
-  <div class="topbar-right">
-    <div class="top-chip">参加 <b id="pax-cnt">0</b>人</div>
-    <div class="top-chip"><b id="rnd-num">1</b>G</div>
+  <div class="timer-chip">
+    <div id="h-timer">07:00</div>
   </div>
 </div>
 
-<!-- TABS -->
-
-<div id="tabs">
-  <button class="tab-btn active" onclick="switchTab('game')">🎾 ゲーム</button>
-  <button class="tab-btn" onclick="switchTab('schedule')">📅 スケジュール</button>
-  <button class="tab-btn" onclick="switchTab('participants')">👥 参加者</button>
-  <button class="tab-btn" onclick="switchTab('history')">📋 履歴</button>
-</div>
+<!-- ══ MAIN ══ -->
 
 <div id="main">
 
-  <!-- GAME -->
+  <!-- ╔══ SETUP SCREEN ══╗ -->
 
-  <div id="panel-game" class="tab-panel active">
-    <div class="scroll-area" id="game-scroll"></div>
-    <div id="wait-bar">
-      <span class="wlbl">待機</span>
-      <div id="wait-chips"></div>
+  <div id="screen-setup" class="screen active">
+    <div class="scrollable">
+      <div class="setup-hero">
+        <h1>🎾 Pickleball Manager</h1>
+        <p>3つの設定を完了して自動配置を開始しましょう</p>
+      </div>
+
+```
+  <div class="setup-steps">
+
+    <!-- Step 1: 参加者 -->
+    <div class="step-card">
+      <div class="step-card-header" onclick="toggleStep(1)">
+        <div class="step-num" id="snum-1">1</div>
+        <div>
+          <div class="step-title">参加者</div>
+        </div>
+        <div class="step-summary" id="ssum-1">未設定</div>
+        <div class="step-chevron" id="schev-1">›</div>
+      </div>
+      <div class="step-body" id="sbody-1">
+        <div class="count-row">
+          <div class="stepper">
+            <button class="step-btn" onclick="adjPlayers(-1)">−</button>
+            <div class="step-val" id="player-count-disp">0</div>
+            <button class="step-btn" onclick="adjPlayers(1)">＋</button>
+          </div>
+          <span style="font-size:14px;color:var(--t2)">名（0〜30）</span>
+        </div>
+        <!-- ★ PINK/AMBER register button -->
+        <button class="btn-action primary" onclick="registerPlayers()">参加者を登録する</button>
+      </div>
     </div>
-    <div id="action-bar">
-      <button class="btn-pri" onclick="autoAssign()">🔀 自動配置</button>
-      <button class="btn-sec" onclick="nextRound()">次のゲーム ▶</button>
-      <div class="bal-wrap">
-        <label class="sw"><input type="checkbox" id="bal-tog"><div class="sw-tr"></div></label>
-        <span>均衡</span>
+
+    <!-- Step 2: コート -->
+    <div class="step-card">
+      <div class="step-card-header" onclick="toggleStep(2)">
+        <div class="step-num" id="snum-2">2</div>
+        <div>
+          <div class="step-title">コート設定</div>
+        </div>
+        <div class="step-summary" id="ssum-2">未設定</div>
+        <div class="step-chevron" id="schev-2">›</div>
+      </div>
+      <div class="step-body" id="sbody-2">
+        <div style="margin-bottom:12px">
+          <div style="font-size:13px;color:var(--t2);margin-bottom:10px">使用するコート数</div>
+          <div class="count-row">
+            <div class="stepper">
+              <button class="step-btn" onclick="adjCourts(-1)">−</button>
+              <div class="step-val" id="court-count-disp">3</div>
+              <button class="step-btn" onclick="adjCourts(1)">＋</button>
+            </div>
+            <span style="font-size:14px;color:var(--t2)">面（1〜5）</span>
+          </div>
+        </div>
+        <div class="court-config-list" id="court-config-list"></div>
+        <div style="margin-top:12px">
+          <button class="btn-action primary" onclick="saveCourts()">コートを確定する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: タイマー -->
+    <div class="step-card">
+      <div class="step-card-header" onclick="toggleStep(3)">
+        <div class="step-num" id="snum-3">3</div>
+        <div>
+          <div class="step-title">タイマー設定</div>
+        </div>
+        <div class="step-summary" id="ssum-3">7分</div>
+        <div class="step-chevron" id="schev-3">›</div>
+      </div>
+      <div class="step-body" id="sbody-3">
+        <div style="font-size:13px;color:var(--t2);margin-bottom:12px">1ゲームの時間を設定してください</div>
+        <div class="timer-setup-row">
+          <div class="stepper">
+            <button class="step-btn" onclick="adjTimer(-1)">−</button>
+            <div class="step-val" id="timer-setup-disp">7</div>
+            <button class="step-btn" onclick="adjTimer(1)">＋</button>
+          </div>
+          <span style="font-size:14px;color:var(--t2)">分</span>
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn-action primary" onclick="saveTimer()">タイマーを確定する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auto assign -->
+    <div style="padding-top:8px">
+      <button class="btn-action green" onclick="doAutoAssign()" id="auto-assign-btn" style="font-size:17px;height:58px">
+        🔀 自動配置してゲーム開始
+      </button>
+    </div>
+
+    <div class="bal-row">
+      <div>
+        <div class="bal-lbl">実力均衡モード</div>
+        <div class="bal-sub">勝敗記録をもとに実力が近い人同士でマッチング</div>
+      </div>
+      <label class="sw"><input type="checkbox" id="bal-tog"><div class="sw-tr"></div></label>
+    </div>
+
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- ╔══ GAME SCREEN ══╗ -->
+
+  <div id="screen-game" class="screen">
+    <!-- Timer bar -->
+    <div class="timer-bar-wrap">
+      <div class="timer-bar-top">
+        <div id="game-timer-disp">07:00</div>
+        <button class="btn-start" id="btn-start" onclick="toggleGameTimer()">▶ ゲーム開始</button>
+        <button class="btn-timer-reset" onclick="resetGameTimer()" title="リセット">↺</button>
+        <span style="font-size:13px;color:var(--t2);margin-left:auto" id="rnd-badge">第1ゲーム</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:100%"></div>
+      </div>
+    </div>
+
+```
+<!-- Actions -->
+<div class="game-actions">
+  <button class="btn-action secondary" style="flex:1" onclick="doAutoAssign()">🔀 再配置</button>
+  <button class="btn-action primary" style="flex:1" onclick="nextRound()">次のゲーム ▶</button>
+</div>
+
+<!-- Court cards + rest -->
+<div class="scrollable">
+  <div class="game-courts" id="game-courts"></div>
+</div>
+```
+
+  </div>
+
+  <!-- ╔══ PLAYERS SCREEN ══╗ -->
+
+  <div id="screen-players" class="screen">
+    <div class="scrollable">
+      <div class="players-top">
+        <div class="stepper" style="transform:scale(.85);transform-origin:left">
+          <button class="step-btn" onclick="adjPlayers(-1)">−</button>
+          <div class="step-val" id="player-count-disp2">0</div>
+          <button class="step-btn" onclick="adjPlayers(1)">＋</button>
+        </div>
+        <button class="btn-action primary" style="flex:1;height:44px" onclick="registerPlayers()">登録</button>
+      </div>
+      <div class="pgrid" id="pgrid"></div>
+    </div>
+  </div>
+
+  <!-- ╔══ COURTS SCREEN ══╗ -->
+
+  <div id="screen-courts" class="screen">
+    <div class="scrollable">
+      <div style="font-size:13px;color:var(--t2);margin-bottom:10px">使用するコート数</div>
+      <div class="count-row" style="margin-bottom:12px">
+        <div class="stepper">
+          <button class="step-btn" onclick="adjCourts(-1)">−</button>
+          <div class="step-val" id="court-count-disp2">3</div>
+          <button class="step-btn" onclick="adjCourts(1)">＋</button>
+        </div>
+        <span style="font-size:14px;color:var(--t2)">面（1〜5）</span>
+      </div>
+      <div class="court-config-list" id="court-config-list2"></div>
+      <div style="margin-top:12px">
+        <button class="btn-action primary" onclick="saveCourts()">コートを確定する</button>
       </div>
     </div>
   </div>
 
-  <!-- SCHEDULE -->
+  <!-- ╔══ SCHEDULE SCREEN ══╗ -->
 
-  <div id="panel-schedule" class="tab-panel">
-    <div class="scroll-area" id="sched-scroll"></div>
+  <div id="screen-schedule" class="screen">
+    <div class="scrollable" id="sched-scroll"></div>
   </div>
 
-  <!-- PARTICIPANTS -->
+  <!-- ╔══ HISTORY SCREEN ══╗ -->
 
-  <div id="panel-participants" class="tab-panel">
-    <div class="scroll-area" style="gap:14px">
-
-```
-  <div class="card-box" style="flex-shrink:0">
-    <div class="card-title">① 参加人数を入力</div>
-    <div class="count-row">
-      <div class="count-ctrl">
-        <button class="count-btn" onclick="adjCount(-1)">−</button>
-        <input type="number" id="inp-count" min="0" max="30" value="0" oninput="clampCount(this)">
-        <button class="count-btn" onclick="adjCount(1)">＋</button>
-      </div>
-      <span class="count-unit">名（0〜30）</span>
-      <button class="btn-register" onclick="applyCount()">登録</button>
-    </div>
-    <div class="add-hint">人数を入力して登録するとNo.1から連番で参加者が作成されます。<br>参加者カードをタップするといつでもニックネームを変更できます。</div>
+  <div id="screen-history" class="screen">
+    <div class="scrollable" id="hist-scroll"></div>
   </div>
 
-  <div id="nick-wrap" class="card-box" style="display:none;flex-shrink:0">
-    <div class="card-title">② ニックネームを入力（任意）</div>
-    <div id="nick-tbl"></div>
-    <button class="btn-confirm" onclick="applyNicks()">確定</button>
-  </div>
+</div><!-- /main -->
 
-  <div style="flex-shrink:0">
-    <div class="sec-hdr" style="margin-bottom:10px">参加者一覧（<span id="p-count">0</span>名）</div>
-    <div class="pgrid" id="pgrid"></div>
-  </div>
+<!-- ══ FOOTER ══ -->
+
+<div id="footer">
+  <button class="foot-btn" onclick="gotoScreen('schedule')" id="fnav-schedule">
+    <span class="icon">📅</span>スケジュール
+  </button>
+  <button class="foot-btn" onclick="gotoScreen('history')" id="fnav-history">
+    <span class="icon">📋</span>履歴
+  </button>
 </div>
-```
 
-  </div>
-
-  <!-- HISTORY -->
-
-  <div id="panel-history" class="tab-panel">
-    <div class="scroll-area" id="hist-scroll"></div>
-  </div>
-
-</div>
-</div>
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════
+/* ════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════ */
 var S = {
-  players: [],    // {no, nick, active, waitCount, lastWaited, wins, losses}
+  players: [],
   courts: [
-    {id:0, name:'手前コート', mode:'doubles', teams:[[], []]},
-    {id:1, name:'中央コート', mode:'doubles', teams:[[], []]},
-    {id:2, name:'奥コート',   mode:'doubles', teams:[[], []]}
+    {name:'手前コート', mode:'doubles', teams:[[],[]]},
+    {name:'中央コート', mode:'doubles', teams:[[],[]]},
+    {name:'奥コート',   mode:'doubles', teams:[[],[]]}
   ],
-  scores: [{},{},{}],
+  scores: [],
   rounds: [],
   futureRounds: [],
   currentRound: 0,
-  courtGroupHist: [{},{},{}],
+  courtGroupHist: [],
   pairHist: {},
-  oppHist: {}
+  oppHist: {},
+  timerMin: 7,
+  playerCount: 0,
+  courtCount: 3
 };
+// Temp court config during setup
+var tmpCourtConfig = [
+  {name:'手前コート', mode:'doubles'},
+  {name:'中央コート', mode:'doubles'},
+  {name:'奥コート',   mode:'doubles'}
+];
 
-// ═══════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════
-function pColor(no) {
-  var hs = [355,20,45,80,140,180,210,250,290,320,10,60,160,235,300,35];
-  var h = hs[(no - 1) % hs.length];
-  return {
-    bg: 'hsla('+h+',45%,75%,0.28)',
-    bd: 'hsla('+h+',45%,60%,0.7)',
-    tx: 'hsl('+h+',40%,35%)'
-  };
+function initCourtHist() {
+  S.courtGroupHist = S.courts.map(function(){ return {}; });
+  S.scores = S.courts.map(function(){ return {team1:'', team2:''}; });
+}
+initCourtHist();
+
+/* ════════════════════════════════════════════════════
+   SCREEN NAVIGATION
+════════════════════════════════════════════════════ */
+var SCREENS = ['setup','game','players','courts','schedule','history'];
+var HEADER_NAVS = ['setup','game','players','courts'];
+var FOOTER_NAVS = ['schedule','history'];
+
+function gotoScreen(name) {
+  SCREENS.forEach(function(s){
+    var el = document.getElementById('screen-'+s);
+    if (el) el.classList.toggle('active', s===name);
+  });
+  HEADER_NAVS.forEach(function(n){
+    var b = document.getElementById('hnav-'+n);
+    if (b) b.classList.toggle('active', n===name);
+  });
+  FOOTER_NAVS.forEach(function(n){
+    var b = document.getElementById('fnav-'+n);
+    if (b) b.classList.toggle('active', n===name);
+  });
+  if (name === 'players')  renderPlayers();
+  if (name === 'courts')   renderCourtConfig2();
+  if (name === 'schedule') renderSched();
+  if (name === 'history')  renderHistory();
+  if (name === 'game')     renderGame();
 }
 
-function pLabel(p) {
-  // Returns "No.X" or "No.X ニック" string
-  if (!p) return '—';
-  var sp = S.players.find(function(x){ return x.no === p.no; });
-  if (!sp) return 'No.' + p.no;
-  return sp.nick ? 'No.' + sp.no + ' ' + sp.nick : 'No.' + sp.no;
-}
-
-// ═══════════════════════════════════════
-// TIMER
-// ═══════════════════════════════════════
-var tSec=420, tTotal=420, tRun=false, tIv=null;
-
-function setTMin(v) {
-  var m = Math.max(1, Math.min(99, parseInt(v)||7));
-  document.getElementById('tmin-inp').value = m;
-  tTotal = m*60; tSec = tTotal; tRun = false; clearInterval(tIv);
-  renderTimer();
-}
-function toggleTimer() {
-  if (tRun) { clearInterval(tIv); tRun = false; }
-  else { tRun = true; tIv = setInterval(tickTimer, 1000); }
-  var b = document.getElementById('btn-pp');
-  b.textContent = tRun ? '⏸' : '▶';
-  b.classList.toggle('on', tRun);
-}
-function resetTimer() {
-  clearInterval(tIv); tRun = false; tSec = tTotal;
-  var b = document.getElementById('btn-pp');
-  b.textContent = '▶'; b.classList.remove('on');
-  renderTimer();
-}
-function tickTimer() {
-  if (tSec <= 0) {
-    clearInterval(tIv); tRun = false;
-    document.getElementById('btn-pp').textContent = '▶';
-    document.getElementById('btn-pp').classList.remove('on');
-    playBeep(); toast('⏰ タイム！', 'ok'); return;
+/* ════════════════════════════════════════════════════
+   SETUP STEPS
+════════════════════════════════════════════════════ */
+function toggleStep(n) {
+  var body = document.getElementById('sbody-'+n);
+  var chev = document.getElementById('schev-'+n);
+  var isOpen = body.classList.contains('open');
+  // close all
+  [1,2,3].forEach(function(i){
+    document.getElementById('sbody-'+i).classList.remove('open');
+    document.getElementById('schev-'+i).classList.remove('open');
+  });
+  if (!isOpen) {
+    body.classList.add('open');
+    chev.classList.add('open');
   }
-  tSec--;
-  renderTimer();
-}
-function renderTimer() {
-  var el = document.getElementById('timer-disp');
-  var m = Math.floor(tSec/60), s = tSec % 60;
-  el.textContent = (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
-  el.className = tSec===0 ? 'done' : tSec<=30 ? 'warn' : '';
-}
-function playBeep() {
-  try {
-    var ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [660,880,1100,880,660,880].forEach(function(f,i){
-      var o=ctx.createOscillator(), g=ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.value=f; o.type='sine';
-      var t=ctx.currentTime+i*0.18;
-      g.gain.setValueAtTime(0.4,t);
-      g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
-      o.start(t); o.stop(t+0.15);
-    });
-  } catch(e) {}
 }
 
-// ═══════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════
-var TAB_IDS = ['game','schedule','participants','history'];
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach(function(b, i){
-    b.classList.toggle('active', TAB_IDS[i] === name);
-  });
-  document.querySelectorAll('.tab-panel').forEach(function(p){
-    p.classList.remove('active');
-  });
-  document.getElementById('panel-'+name).classList.add('active');
-  if (name === 'participants') renderPlayers();
-  if (name === 'history')      renderHistory();
-  if (name === 'schedule')     renderSched();
+/* ── Player count ── */
+var _playerCount = 0;
+function adjPlayers(d) {
+  _playerCount = Math.max(0, Math.min(30, _playerCount + d));
+  document.getElementById('player-count-disp').textContent = _playerCount;
+  if (document.getElementById('player-count-disp2'))
+    document.getElementById('player-count-disp2').textContent = _playerCount;
 }
-
-// ═══════════════════════════════════════
-// PARTICIPANTS
-// ═══════════════════════════════════════
-function adjCount(d) {
-  var el = document.getElementById('inp-count');
-  el.value = Math.max(0, Math.min(30, (parseInt(el.value)||0) + d));
-}
-function clampCount(el) {
-  var v = parseInt(el.value);
-  if (isNaN(v) || v < 0) el.value = 0;
-  else if (v > 30) el.value = 30;
-}
-function applyCount() {
-  var count = Math.max(0, Math.min(30, parseInt(document.getElementById('inp-count').value)||0));
-  if (count === 0) { toast('人数を1以上で入力してください', 'err'); return; }
+function registerPlayers() {
+  var count = _playerCount;
+  if (count === 0) { showToast('人数を1以上で入力してください','err'); return; }
   var newP = [];
-  for (var no = 1; no <= count; no++) {
-    var ex = S.players.find(function(p){ return p.no === no; });
+  for (var no=1; no<=count; no++) {
+    var ex = S.players.find(function(p){ return p.no===no; });
     newP.push(ex || {no:no, nick:'', active:true, waitCount:0, lastWaited:false, wins:0, losses:0});
   }
   S.players = newP;
-  renderPlayers(); updPax();
-  buildNickTable(count);
-  document.getElementById('nick-wrap').style.display = 'block';
-  toast(count + '人を登録しました', 'ok');
+  S.playerCount = count;
+  // Mark step done
+  var snum = document.getElementById('snum-1');
+  snum.textContent = '✓'; snum.classList.add('done');
+  document.getElementById('ssum-1').textContent = count + '人';
+  renderPlayers();
+  showToast(count + '人を登録しました', 'ok');
 }
-function buildNickTable(count) {
-  var tbl = document.getElementById('nick-tbl');
-  tbl.innerHTML = '';
-  for (var no = 1; no <= count; no++) {
-    var p = S.players.find(function(x){ return x.no === no; });
-    var row = document.createElement('div'); row.className = 'nick-table-row';
-    var lbl = document.createElement('span'); lbl.className = 'nick-no';
-    lbl.textContent = 'No.' + no; row.appendChild(lbl);
-    var inp = document.createElement('input'); inp.className = 'inp';
-    inp.type = 'text'; inp.id = 'nick-' + no;
-    inp.value = p ? p.nick : ''; inp.placeholder = 'ニックネーム（任意）'; inp.maxLength = 20;
-    row.appendChild(inp); tbl.appendChild(row);
+
+/* ── Court count & config ── */
+var _courtCount = 3;
+var _defaultNames = ['手前コート','中央コート','奥コート','第4コート','第5コート'];
+function adjCourts(d) {
+  _courtCount = Math.max(1, Math.min(5, _courtCount + d));
+  document.getElementById('court-count-disp').textContent = _courtCount;
+  if (document.getElementById('court-count-disp2'))
+    document.getElementById('court-count-disp2').textContent = _courtCount;
+  // Extend tmpCourtConfig
+  while (tmpCourtConfig.length < _courtCount) {
+    var idx = tmpCourtConfig.length;
+    tmpCourtConfig.push({name: _defaultNames[idx]||('第'+(idx+1)+'コート'), mode:'doubles'});
+  }
+  renderCourtConfig1();
+  renderCourtConfig2();
+}
+function setMode(idx, mode, src) {
+  tmpCourtConfig[idx].mode = mode;
+  renderCourtConfig1();
+  renderCourtConfig2();
+}
+
+function buildCourtConfigCard(idx, containerId) {
+  var cfg = tmpCourtConfig[idx];
+  var row = document.createElement('div'); row.className = 'court-config-row';
+  var top = document.createElement('div'); top.className = 'court-config-top';
+  var inp = document.createElement('input'); inp.className = 'court-config-name-inp';
+  inp.type='text'; inp.value=cfg.name; inp.placeholder='コート名';
+  inp.oninput = (function(i){ return function(){ tmpCourtConfig[i].name = this.value; }; })(idx);
+  top.appendChild(inp); row.appendChild(top);
+
+  var seg = document.createElement('div'); seg.className = 'court-config-seg';
+  var segBtns = document.createElement('div'); segBtns.className = 'seg';
+  [{k:'doubles',l:'ダブルス'},{k:'singles',l:'シングル'},{k:'unused',l:'未使用'}].forEach(function(m){
+    var btn = document.createElement('button');
+    btn.className = 'seg-btn' + (cfg.mode===m.k ? ' on' : '');
+    btn.textContent = m.l;
+    btn.onclick = (function(i,mk){ return function(){
+      tmpCourtConfig[i].mode = mk;
+      renderCourtConfig1(); renderCourtConfig2();
+    }; })(idx, m.k);
+    segBtns.appendChild(btn);
+  });
+  seg.appendChild(segBtns); row.appendChild(seg);
+  return row;
+}
+
+function renderCourtConfig1() {
+  var list = document.getElementById('court-config-list');
+  if (!list) return;
+  list.innerHTML = '';
+  for (var i=0; i<_courtCount; i++) list.appendChild(buildCourtConfigCard(i,'court-config-list'));
+}
+function renderCourtConfig2() {
+  var list = document.getElementById('court-config-list2');
+  if (!list) return;
+  list.innerHTML = '';
+  for (var i=0; i<_courtCount; i++) list.appendChild(buildCourtConfigCard(i,'court-config-list2'));
+  var disp2 = document.getElementById('court-count-disp2');
+  if (disp2) disp2.textContent = _courtCount;
+}
+function saveCourts() {
+  S.courts = tmpCourtConfig.slice(0,_courtCount).map(function(c){
+    return {name:c.name, mode:c.mode, teams:[[],[]]};
+  });
+  initCourtHist();
+  S.courtCount = _courtCount;
+  var snum = document.getElementById('snum-2');
+  snum.textContent = '✓'; snum.classList.add('done');
+  document.getElementById('ssum-2').textContent = _courtCount + '面';
+  showToast('コートを確定しました', 'ok');
+}
+
+/* ── Timer ── */
+var _timerMin = 7;
+function adjTimer(d) {
+  _timerMin = Math.max(1, Math.min(60, _timerMin + d));
+  document.getElementById('timer-setup-disp').textContent = _timerMin;
+}
+function saveTimer() {
+  S.timerMin = _timerMin;
+  tTotal = S.timerMin * 60; tSec = tTotal;
+  renderTimerDisplays();
+  var snum = document.getElementById('snum-3');
+  snum.textContent = '✓'; snum.classList.add('done');
+  document.getElementById('ssum-3').textContent = _timerMin + '分';
+  showToast('タイマーを' + _timerMin + '分に設定しました', 'ok');
+}
+
+/* ════════════════════════════════════════════════════
+   TIMER
+════════════════════════════════════════════════════ */
+var tSec=420, tTotal=420, tRun=false, tIv=null;
+
+function toggleGameTimer() {
+  if (tRun) {
+    clearInterval(tIv); tRun=false;
+    document.getElementById('btn-start').textContent='▶ ゲーム開始';
+    document.getElementById('btn-start').classList.remove('running');
+  } else {
+    tRun=true; tIv=setInterval(tickTimer,1000);
+    document.getElementById('btn-start').textContent='⏸ 一時停止';
+    document.getElementById('btn-start').classList.add('running');
   }
 }
-function applyNicks() {
-  S.players.forEach(function(p){
-    var el = document.getElementById('nick-' + p.no);
-    if (el) p.nick = el.value.trim();
-  });
-  renderPlayers(); updPax();
-  document.getElementById('nick-wrap').style.display = 'none';
-  toast('ニックネームを保存しました', 'ok');
+function resetGameTimer() {
+  clearInterval(tIv); tRun=false; tSec=tTotal;
+  document.getElementById('btn-start').textContent='▶ ゲーム開始';
+  document.getElementById('btn-start').classList.remove('running');
+  renderTimerDisplays();
 }
+function tickTimer() {
+  if (tSec<=0) {
+    clearInterval(tIv); tRun=false;
+    document.getElementById('btn-start').textContent='▶ ゲーム開始';
+    document.getElementById('btn-start').classList.remove('running');
+    playBeep(); showToast('⏰ タイム！','ok'); return;
+  }
+  tSec--; renderTimerDisplays();
+}
+function renderTimerDisplays() {
+  var m=Math.floor(tSec/60), s=tSec%60;
+  var txt=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  var cls=tSec===0?'done':tSec<=30?'warn':'';
+  var el1=document.getElementById('game-timer-disp');
+  var el2=document.getElementById('h-timer');
+  if(el1){el1.textContent=txt;el1.className=cls;}
+  if(el2){el2.textContent=txt;el2.className=cls;}
+  // Progress bar
+  var pct = tTotal>0 ? (tSec/tTotal)*100 : 0;
+  var pf=document.getElementById('progress-fill');
+  if(pf){
+    pf.style.width=pct+'%';
+    pf.className='progress-fill'+(tSec<=0?' done':tSec<=tTotal*0.25?' warn':'');
+  }
+}
+function playBeep() {
+  try {
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [660,880,1100,880,660,880].forEach(function(f,i){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);o.frequency.value=f;o.type='sine';
+      var t=ctx.currentTime+i*.18;
+      g.gain.setValueAtTime(.4,t);g.gain.exponentialRampToValueAtTime(.001,t+.15);
+      o.start(t);o.stop(t+.15);
+    });
+  } catch(e){}
+}
+
+/* ════════════════════════════════════════════════════
+   PLAYER HELPERS
+════════════════════════════════════════════════════ */
+function pColor(no) {
+  var hs=[355,20,45,80,140,180,210,250,290,320,10,60,160,235,300,35,160,200];
+  var h=hs[(no-1)%hs.length];
+  return{bg:'hsla('+h+',55%,65%,0.22)',bd:'hsla('+h+',55%,60%,0.7)',tx:'hsl('+h+',70%,70%)'};
+}
+function pLabel(p) {
+  if (!p) return '—';
+  var sp=S.players.find(function(x){return x.no===p.no;});
+  if (!sp) return 'No.'+p.no;
+  return sp.nick?'No.'+sp.no+' '+sp.nick:'No.'+sp.no;
+}
+function makeBadge(no, size) {
+  var col=pColor(no);
+  var d=document.createElement('div');
+  d.className='nbadge '+(size||'md');
+  d.style.background=col.bg;d.style.borderColor=col.bd;d.style.color=col.tx;
+  d.textContent=no;
+  return d;
+}
+
+/* ════════════════════════════════════════════════════
+   PLAYERS
+════════════════════════════════════════════════════ */
 function toggleActive(no) {
-  var p = S.players.find(function(x){ return x.no === no; });
-  if (!p) return;
-  p.active = !p.active;
-  renderPlayers(); updPax();
-  toast('No.' + p.no + (p.nick ? ' ' + p.nick : '') + ' を' + (p.active ? '参加' : '退場') + 'しました');
-  computeFuture(); renderSched();
-}
-function updPax() {
-  var n = S.players.filter(function(p){ return p.active; }).length;
-  document.getElementById('pax-cnt').textContent = n;
-  document.getElementById('p-count').textContent = n;
+  var p=S.players.find(function(x){return x.no===no;});if(!p)return;
+  p.active=!p.active;
+  renderPlayers();
+  showToast('No.'+p.no+(p.nick?' '+p.nick:'')+' を'+(p.active?'参加':'退場')+'しました');
+  renderGame(); renderSched();
 }
 function renderPlayers() {
-  var grid = document.getElementById('pgrid');
-  grid.innerHTML = '';
-  S.players.slice().sort(function(a,b){ return a.no - b.no; }).forEach(function(p){
-    var col = pColor(p.no);
-    var card = document.createElement('div');
-    card.className = 'pcard' + (p.active ? '' : ' inactive');
-    card.onclick = function(e){ openNickEdit(p.no, e); };
+  var grid=document.getElementById('pgrid');if(!grid)return;
+  grid.innerHTML='';
+  var disp2=document.getElementById('player-count-disp2');
+  if(disp2) disp2.textContent=_playerCount;
+  S.players.slice().sort(function(a,b){return a.no-b.no;}).forEach(function(p){
+    var col=pColor(p.no);
+    var card=document.createElement('div');
+    card.className='pcard'+(p.active?'':' inactive');
+    card.onclick=function(e){openNickEdit(p.no,e);};
 
-    var badge = document.createElement('div'); badge.className = 'pno-tag';
-    badge.style.background = col.bg; badge.style.borderColor = col.bd; badge.style.color = col.tx;
-    badge.textContent = p.no; card.appendChild(badge);
+    card.appendChild(makeBadge(p.no,'lg'));
 
-    var nm = document.createElement('div'); nm.className = 'p-card-name';
-    nm.textContent = 'No.' + p.no; card.appendChild(nm);
+    var nm=document.createElement('div');nm.className='pcard-name';nm.textContent='No.'+p.no;card.appendChild(nm);
 
-    if (p.nick) {
-      var nk = document.createElement('div'); nk.className = 'p-card-name';
-      nk.textContent = p.nick; card.appendChild(nk);
-    } else {
-      var ph = document.createElement('div'); ph.className = 'p-card-hint';
-      ph.textContent = 'ニックネームなし'; card.appendChild(ph);
-    }
+    var nk=document.createElement('div');
+    if(p.nick){nk.className='pcard-nick';nk.textContent=p.nick;}
+    else{nk.className='pcard-nick empty';nk.textContent='ニックネームなし';}
+    card.appendChild(nk);
 
-    var st = document.createElement('div'); st.className = 'p-card-stats';
-    st.textContent = '待機 ' + p.waitCount + '回'; card.appendChild(st);
+    var st=document.createElement('div');st.className='p-card-stats';
+    st.textContent='待機 '+p.waitCount+'回';card.appendChild(st);
 
-    var wl = document.createElement('div'); wl.className = 'p-wl';
-    var ws = document.createElement('span'); ws.className = 'pw'; ws.textContent = 'W' + p.wins;
-    var ls = document.createElement('span'); ls.className = 'pl'; ls.textContent = 'L' + p.losses;
-    wl.appendChild(ws); wl.appendChild(ls); card.appendChild(wl);
+    var wl=document.createElement('div');wl.className='pcard-stats';
+    wl.style.cssText='display:flex;gap:6px';
+    var ws=document.createElement('span');ws.className='tag win';ws.textContent='W'+p.wins;
+    var ls=document.createElement('span');ls.className='tag lose';ls.textContent='L'+p.losses;
+    wl.appendChild(ws);wl.appendChild(ls);card.appendChild(wl);
 
-    var br = document.createElement('div'); br.className = 'p-btn-row';
-    var btn = document.createElement('button');
-    btn.className = 'bxs ' + (p.active ? 'exit' : 'rejoin');
-    btn.textContent = p.active ? '退場' : '参加';
-    btn.onclick = function(e){ e.stopPropagation(); toggleActive(p.no); };
-    br.appendChild(btn); card.appendChild(br);
+    var btn=document.createElement('button');
+    btn.className='p-exit-btn '+(p.active?'exit':'rejoin');
+    btn.textContent=p.active?'退場':'参加';
+    btn.onclick=function(e){e.stopPropagation();toggleActive(p.no);};
+    card.appendChild(btn);
+
     grid.appendChild(card);
   });
 }
-function openNickEdit(no, evt) {
+
+function openNickEdit(no,evt) {
   evt.stopPropagation();
-  document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); });
-  var p = S.players.find(function(x){ return x.no === no; }); if (!p) return;
-  var card = evt.currentTarget; card.style.position = 'relative';
-  var pop = document.createElement('div'); pop.className = 'nick-popover';
-  var lbl = document.createElement('div'); lbl.className = 'np-lbl';
-  lbl.textContent = 'No.' + no + ' のニックネーム'; pop.appendChild(lbl);
-  var inp = document.createElement('input'); inp.className = 'inp';
-  inp.type = 'text'; inp.value = p.nick || ''; inp.placeholder = 'ニックネームを入力'; inp.maxLength = 20;
-  inp.onkeydown = function(e){
-    if (e.key === 'Enter') { e.preventDefault(); saveNick(no, inp.value); }
-    if (e.key === 'Escape') closeNickEdit();
+  document.querySelectorAll('.nick-popover').forEach(function(e){e.remove();});
+  var p=S.players.find(function(x){return x.no===no;});if(!p)return;
+  var card=evt.currentTarget;card.style.position='relative';
+  var pop=document.createElement('div');pop.className='nick-popover';
+  var lbl=document.createElement('div');lbl.style.cssText='font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px';
+  lbl.textContent='No.'+no+' のニックネーム';pop.appendChild(lbl);
+  var inp=document.createElement('input');inp.className='inp-field';
+  inp.type='text';inp.value=p.nick||'';inp.placeholder='ニックネームを入力';inp.maxLength=20;
+  inp.onkeydown=function(e){
+    if(e.key==='Enter'){e.preventDefault();saveNick(no,inp.value);}
+    if(e.key==='Escape')closeNickEdit();
   };
   pop.appendChild(inp);
-  var row = document.createElement('div'); row.className = 'np-row';
-  var sb = document.createElement('button'); sb.className = 'btn-save'; sb.textContent = '保存';
-  sb.onclick = function(e){ e.stopPropagation(); saveNick(no, inp.value); }; row.appendChild(sb);
-  var cb = document.createElement('button'); cb.className = 'btn-cancel'; cb.textContent = 'キャンセル';
-  cb.onclick = function(e){ e.stopPropagation(); closeNickEdit(); }; row.appendChild(cb);
-  pop.appendChild(row); card.appendChild(pop);
-  setTimeout(function(){ inp.focus(); inp.select(); }, 30);
-  setTimeout(function(){ document.addEventListener('click', outsideClose, {once:true}); }, 50);
+  var row=document.createElement('div');row.className='np-row';
+  var sb=document.createElement('button');sb.className='np-save';sb.textContent='保存';
+  sb.onclick=function(e){e.stopPropagation();saveNick(no,inp.value);};row.appendChild(sb);
+  var cb=document.createElement('button');cb.className='np-cancel';cb.textContent='キャンセル';
+  cb.onclick=function(e){e.stopPropagation();closeNickEdit();};row.appendChild(cb);
+  pop.appendChild(row);card.appendChild(pop);
+  setTimeout(function(){inp.focus();inp.select();},30);
+  setTimeout(function(){document.addEventListener('click',outsideClose,{once:true});},50);
 }
-function outsideClose(){ document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); }); }
-function closeNickEdit(){ document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); }); }
-function saveNick(no, v) {
-  var p = S.players.find(function(x){ return x.no === no; }); if (!p) return;
-  p.nick = (v || '').trim();
-  closeNickEdit(); renderPlayers();
-  toast(p.nick ? 'No.' + no + ' → ' + p.nick : 'No.' + no + ' ニックネームを削除', 'ok');
+function outsideClose(){document.querySelectorAll('.nick-popover').forEach(function(e){e.remove();});}
+function closeNickEdit(){document.querySelectorAll('.nick-popover').forEach(function(e){e.remove();});}
+function saveNick(no,v) {
+  var p=S.players.find(function(x){return x.no===no;});if(!p)return;
+  p.nick=(v||'').trim();closeNickEdit();renderPlayers();renderGame();
+  showToast(p.nick?'No.'+no+' → '+p.nick:'No.'+no+' ニックネームを削除','ok');
 }
 
-// ═══════════════════════════════════════
-// ASSIGNMENT LOGIC
-// ═══════════════════════════════════════
-function getSlots() {
-  return S.courts.map(function(c){
-    return c.mode === 'doubles' ? 4 : c.mode === 'singles' ? 2 : 0;
-  });
-}
-function waitPri(p) { return -(p.waitCount * 10 + (p.lastWaited ? 8 : 0)); }
-function groupKey(arr) {
-  return arr.filter(Boolean).map(function(p){ return p.no; }).sort(function(a,b){ return a-b; }).join('-');
-}
-function groupAvoid(arr, ci, pH, oH, cgH) {
-  var active = arr.filter(Boolean); if (active.length < 2) return 0;
-  var score = (cgH[ci][groupKey(active)] || 0) * 100;
-  for (var i = 0; i < active.length; i++) {
-    for (var j = i+1; j < active.length; j++) {
-      var k = [active[i].no, active[j].no].sort().join('-');
-      score += (pH[k]||0)*3 + (oH[k]||0);
-    }
+/* ════════════════════════════════════════════════════
+   ASSIGNMENT
+════════════════════════════════════════════════════ */
+function getSlots(){return S.courts.map(function(c){return c.mode==='doubles'?4:c.mode==='singles'?2:0;});}
+function waitPri(p){return-(p.waitCount*10+(p.lastWaited?8:0));}
+function groupKey(arr){return arr.filter(Boolean).map(function(p){return p.no;}).sort(function(a,b){return a-b;}).join('-');}
+function groupAvoid(arr,ci,pH,oH,cgH){
+  var active=arr.filter(Boolean);if(active.length<2)return 0;
+  var score=(cgH[ci]?cgH[ci][groupKey(active)]||0:0)*100;
+  for(var i=0;i<active.length;i++)for(var j=i+1;j<active.length;j++){
+    var k=[active[i].no,active[j].no].sort().join('-');
+    score+=(pH[k]||0)*3+(oH[k]||0);
   }
   return score;
 }
-function bestPairing(four, pH) {
-  while (four.length < 4) four.push(null);
+function bestPairing(four,pH){
+  while(four.length<4)four.push(null);
   var a=four[0],b=four[1],c=four[2],d=four[3];
-  var opts = [[[a,b],[c,d]], [[a,c],[b,d]], [[a,d],[b,c]]];
-  var best = opts[0], bs = Infinity;
+  var opts=[[[a,b],[c,d]],[[a,c],[b,d]],[[a,d],[b,c]]];
+  var best=opts[0],bs=Infinity;
   opts.forEach(function(opt){
-    var pc = function(x,y){ if(!x||!y) return 0; return pH[[x.no,y.no].sort().join('-')]||0; };
-    var s = pc(opt[0][0],opt[0][1]) + pc(opt[1][0],opt[1][1]);
-    if (s < bs) { bs = s; best = opt; }
+    var pc=function(x,y){if(!x||!y)return 0;return pH[[x.no,y.no].sort().join('-')]||0;};
+    var s=pc(opt[0][0],opt[0][1])+pc(opt[1][0],opt[1][1]);
+    if(s<bs){bs=s;best=opt;}
   });
   return best;
 }
-function getCombos(arr, k) {
-  if (k===0) return [[]]; if (!arr.length) return [];
-  if (arr.length > 12) arr = arr.slice(0,12);
-  var f=arr[0], r=arr.slice(1);
-  return getCombos(r,k-1).map(function(c){ return [f].concat(c); }).concat(getCombos(r,k));
+function getCombos(arr,k){
+  if(k===0)return[[]];if(!arr.length)return[];
+  if(arr.length>12)arr=arr.slice(0,12);
+  var f=arr[0],r=arr.slice(1);
+  return getCombos(r,k-1).map(function(c){return[f].concat(c);}).concat(getCombos(r,k));
 }
-function shuffle(arr) {
-  for (var i=arr.length-1; i>0; i--) {
-    var r=Math.floor(Math.random()*(i+1)); var t=arr[i]; arr[i]=arr[r]; arr[r]=t;
-  }
+function shuffleArr(arr){
+  for(var i=arr.length-1;i>0;i--){var r=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[r];arr[r]=t;}
 }
 
-function doAssign(pool, bal, pH, oH, cgH) {
-  var slots = getSlots();
-  var total = slots.reduce(function(a,b){ return a+b; }, 0);
-
-  // Sort by wait priority; shuffle within same-priority groups
-  var sorted = pool.slice().sort(function(a,b){ return waitPri(a)-waitPri(b); });
-  if (bal) {
+function doAssignCalc(pool,bal,pH,oH,cgH){
+  var slots=getSlots();
+  var total=slots.reduce(function(a,b){return a+b;},0);
+  var sorted=pool.slice().sort(function(a,b){return waitPri(a)-waitPri(b);});
+  if(bal){
     sorted.sort(function(a,b){
-      var wd = waitPri(a)-waitPri(b);
-      if (Math.abs(wd) > 5) return wd;
-      var ra=(a.wins+a.losses)?a.wins/(a.wins+a.losses):0.5;
-      var rb=(b.wins+b.losses)?b.wins/(b.wins+b.losses):0.5;
+      var wd=waitPri(a)-waitPri(b);if(Math.abs(wd)>5)return wd;
+      var ra=(a.wins+a.losses)?a.wins/(a.wins+a.losses):.5;
+      var rb=(b.wins+b.losses)?b.wins/(b.wins+b.losses):.5;
       return rb-ra;
     });
   }
-  // Shuffle within same-priority buckets
   var i=0;
-  while (i < sorted.length) {
-    var pri=waitPri(sorted[i]), j=i;
-    while (j<sorted.length && waitPri(sorted[j])===pri) j++;
-    var grp=sorted.slice(i,j); shuffle(grp);
-    for (var k=i; k<j; k++) sorted[k]=grp[k-i];
-    i=j;
+  while(i<sorted.length){
+    var pri=waitPri(sorted[i]),j=i;
+    while(j<sorted.length&&waitPri(sorted[j])===pri)j++;
+    var grp=sorted.slice(i,j);shuffleArr(grp);
+    for(var k=i;k<j;k++)sorted[k]=grp[k-i];i=j;
+  }
+  var toPlay=sorted.slice(0,Math.min(total,sorted.length));
+  var waiters=sorted.slice(toPlay.length);
+  var rem=toPlay.slice();
+  var courtAssignments=[];
+  S.courts.forEach(function(court,ci){
+    var s=slots[ci];
+    if(s===0){courtAssignments.push([[],[]]);return;}
+    if(rem.length<=s){
+      var g=rem.splice(0,s);
+      courtAssignments.push(court.mode==='doubles'?bestPairing(g,pH):[[g[0]||null],[g[1]||null]]);return;
+    }
+    var mustN=Math.max(1,Math.floor(s/2));
+    var must=rem.slice(0,mustN),cands=rem.slice(mustN),need=s-mustN,chosen;
+    if(cands.length<=need){chosen=must.concat(cands);}
+    else{
+      var combos=getCombos(cands,need),bst=combos[0],bss=Infinity;
+      combos.forEach(function(combo){var g=must.concat(combo),sc=groupAvoid(g,ci,pH,oH,cgH);if(sc<bss){bss=sc;bst=combo;}});
+      chosen=must.concat(bst);
+    }
+    chosen.forEach(function(p){var idx=rem.indexOf(p);if(idx!==-1)rem.splice(idx,1);});
+    courtAssignments.push(court.mode==='doubles'?bestPairing(chosen,pH):[[chosen[0]||null],[chosen[1]||null]]);
+  });
+  return{courtAssignments:courtAssignments,waiters:waiters};
+}
+
+function doAutoAssign() {
+  var active=S.players.filter(function(p){return p.active;});
+  if(active.length<2){showToast('参加者が足りません（最低2人）','err');return;}
+
+  // Check capacity
+  var slots=getSlots();
+  var total=slots.reduce(function(a,b){return a+b;},0);
+  if(total===0){showToast('コートを設定してください','err');return;}
+  if(active.length<total){
+    showToast('参加者が不足しています（必要: '+total+'人、現在: '+active.length+'人）','err');return;
   }
 
-  var toPlay = sorted.slice(0, Math.min(total, sorted.length));
-  var waiters = sorted.slice(toPlay.length);
-  var rem = toPlay.slice();
-  var courtAssignments = [];
+  var bal=document.getElementById('bal-tog').checked;
+  var res=doAssignCalc(active,bal,S.pairHist,S.oppHist,S.courtGroupHist);
 
-  S.courts.forEach(function(court, ci){
-    var s = slots[ci];
-    if (s === 0) { courtAssignments.push([[],[]]); return; }
-    if (rem.length <= s) {
-      var g = rem.splice(0, s);
-      courtAssignments.push(court.mode==='doubles' ? bestPairing(g,pH) : [[g[0]||null],[g[1]||null]]);
-      return;
-    }
-    var mustN = Math.max(1, Math.floor(s/2));
-    var must = rem.slice(0, mustN);
-    var cands = rem.slice(mustN);
-    var need = s - mustN;
-    var chosen;
-    if (cands.length <= need) {
-      chosen = must.concat(cands);
-    } else {
-      var combos = getCombos(cands, need);
-      var bst = combos[0], bss = Infinity;
-      combos.forEach(function(combo){
-        var g = must.concat(combo);
-        var sc = groupAvoid(g, ci, pH, oH, cgH);
-        if (sc < bss) { bss=sc; bst=combo; }
-      });
-      chosen = must.concat(bst);
-    }
-    chosen.forEach(function(p){
-      var idx = rem.indexOf(p);
-      if (idx !== -1) rem.splice(idx, 1);
-    });
-    courtAssignments.push(court.mode==='doubles' ? bestPairing(chosen,pH) : [[chosen[0]||null],[chosen[1]||null]]);
-  });
-
-  return { courtAssignments: courtAssignments, waiters: waiters };
-}
-
-function autoAssign() {
-  var active = S.players.filter(function(p){ return p.active; });
-  if (active.length < 2) { toast('参加者が足りません（最低2人）', 'err'); return; }
-  var total = getSlots().reduce(function(a,b){ return a+b; }, 0);
-  if (total === 0) { toast('コートを設定してください', 'err'); return; }
-  var bal = document.getElementById('bal-tog').checked;
-  var res = doAssign(active, bal, S.pairHist, S.oppHist, S.courtGroupHist);
-
-  // Update wait state
-  S.players.forEach(function(p){ if (p.active) p.lastWaited = false; });
+  S.players.forEach(function(p){if(p.active)p.lastWaited=false;});
   res.waiters.forEach(function(w){
-    var sp = S.players.find(function(x){ return x.no === w.no; });
-    if (sp) { sp.waitCount++; sp.lastWaited = true; }
+    var sp=S.players.find(function(x){return x.no===w.no;});
+    if(sp){sp.waitCount++;sp.lastWaited=true;}
   });
-
-  // Apply assignments to courts
-  S.courts.forEach(function(c, ci){
-    c.teams = res.courtAssignments[ci];
-  });
-
-  // Reset scores
-  S.scores = [{},{},{}];
+  S.courts.forEach(function(c,ci){c.teams=res.courtAssignments[ci];});
+  S.scores=S.courts.map(function(){return{team1:'',team2:''};});
 
   computeFuture();
-  renderGame();
-  toast('自動配置完了', 'ok');
+  gotoScreen('game');
+  showToast('自動配置完了！','ok');
 }
 
-function computeFuture() {
-  S.futureRounds = [];
-  var active = S.players.filter(function(p){ return p.active; });
-  var total = getSlots().reduce(function(a,b){ return a+b; }, 0);
-  if (total===0 || active.length<2) return;
-  var bal = document.getElementById('bal-tog').checked;
-  var simPool = active.map(function(p){ return Object.assign({},p); });
-  var sPH = Object.assign({},S.pairHist);
-  var sOH = Object.assign({},S.oppHist);
-  var sCGH = S.courtGroupHist.map(function(h){ return Object.assign({},h); });
-
-  for (var r=0; r<4; r++) {
-    var res = doAssign(simPool, bal, sPH, sOH, sCGH);
-    simPool.forEach(function(p){ p.lastWaited = false; });
-    res.waiters.forEach(function(w){
-      var sp = simPool.find(function(x){ return x.no===w.no; });
-      if (sp) { sp.waitCount++; sp.lastWaited=true; }
-    });
-
-    // Update sim histories
-    S.courts.forEach(function(court, ci){
-      if (court.mode==='unused') return;
-      var t1 = (res.courtAssignments[ci][0]||[]).filter(Boolean);
-      var t2 = (res.courtAssignments[ci][1]||[]).filter(Boolean);
-      var all = t1.concat(t2);
-      var gk = groupKey(all);
-      sCGH[ci][gk] = (sCGH[ci][gk]||0)+1;
-      [t1,t2].forEach(function(team){
-        for (var i=0;i<team.length;i++) for (var j=i+1;j<team.length;j++) {
-          var k=[team[i].no,team[j].no].sort().join('-');
-          sPH[k]=(sPH[k]||0)+1;
-        }
-      });
-      t1.forEach(function(a){ t2.forEach(function(b){
-        var k=[a.no,b.no].sort().join('-'); sOH[k]=(sOH[k]||0)+1;
-      }); });
-    });
-
-    // Waiters for this future round
-    var futOnCourt = {};
+function computeFuture(){
+  S.futureRounds=[];
+  var active=S.players.filter(function(p){return p.active;});
+  var total=getSlots().reduce(function(a,b){return a+b;},0);
+  if(total===0||active.length<2)return;
+  var bal=document.getElementById('bal-tog').checked;
+  var sp=active.map(function(p){return Object.assign({},p);});
+  var sPH=Object.assign({},S.pairHist),sOH=Object.assign({},S.oppHist);
+  var sCGH=S.courtGroupHist.map(function(h){return Object.assign({},h);});
+  for(var r=0;r<4;r++){
+    var res=doAssignCalc(sp,bal,sPH,sOH,sCGH);
+    sp.forEach(function(p){p.lastWaited=false;});
+    res.waiters.forEach(function(w){var x=sp.find(function(p){return p.no===w.no;});if(x){x.waitCount++;x.lastWaited=true;}});
     S.courts.forEach(function(court,ci){
-      (res.courtAssignments[ci]||[[],[]]).forEach(function(team){
-        (team||[]).filter(Boolean).forEach(function(p){ futOnCourt[p.no]=true; });
-      });
+      if(court.mode==='unused')return;
+      var t1=(res.courtAssignments[ci][0]||[]).filter(Boolean);
+      var t2=(res.courtAssignments[ci][1]||[]).filter(Boolean);
+      var gk=groupKey(t1.concat(t2));
+      sCGH[ci][gk]=(sCGH[ci][gk]||0)+1;
+      [t1,t2].forEach(function(team){for(var i=0;i<team.length;i++)for(var j=i+1;j<team.length;j++){var k=[team[i].no,team[j].no].sort().join('-');sPH[k]=(sPH[k]||0)+1;}});
+      t1.forEach(function(a){t2.forEach(function(b){var k=[a.no,b.no].sort().join('-');sOH[k]=(sOH[k]||0)+1;});});
     });
-    var futWaiters = simPool.filter(function(p){ return !futOnCourt[p.no]; }).map(function(p){
-      var orig = S.players.find(function(x){ return x.no===p.no; });
-      return orig ? pLabel(orig) : 'No.'+p.no;
-    });
-
+    var futOnCourt={};
+    S.courts.forEach(function(court,ci){(res.courtAssignments[ci]||[[],[]]).forEach(function(team){(team||[]).filter(Boolean).forEach(function(p){futOnCourt[p.no]=true;});});});
+    var futW=sp.filter(function(p){return!futOnCourt[p.no];}).map(function(p){var o=S.players.find(function(x){return x.no===p.no;});return o?pLabel(o):'No.'+p.no;});
     S.futureRounds.push({
-      round: S.currentRound + 1 + r + 1,
-      waiters: futWaiters,
-      courts: S.courts.map(function(court,ci){
-        var t1 = (res.courtAssignments[ci][0]||[]).filter(Boolean).map(pLabel);
-        var t2 = (res.courtAssignments[ci][1]||[]).filter(Boolean).map(pLabel);
-        return { name:court.name, mode:court.mode, teams:[t1,t2] };
+      round:S.currentRound+1+r+1,waiters:futW,
+      courts:S.courts.map(function(court,ci){
+        return{name:court.name,mode:court.mode,
+          teams:[(res.courtAssignments[ci][0]||[]).filter(Boolean).map(pLabel),(res.courtAssignments[ci][1]||[]).filter(Boolean).map(pLabel)]};
       })
     });
   }
 }
 
-// ═══════════════════════════════════════
-// NEXT ROUND
-// ═══════════════════════════════════════
-function nextRound() {
-  // Capture current waiters
-  var onCourt = {};
-  S.courts.forEach(function(c){
-    c.teams.forEach(function(t){
-      (t||[]).filter(Boolean).forEach(function(p){ onCourt[p.no]=true; });
-    });
-  });
-  var waiters = S.players.filter(function(p){ return p.active && !onCourt[p.no]; }).map(pLabel);
-
+/* ════════════════════════════════════════════════════
+   NEXT ROUND
+════════════════════════════════════════════════════ */
+function nextRound(){
+  var onCourt={};
+  S.courts.forEach(function(c){c.teams.forEach(function(t){(t||[]).filter(Boolean).forEach(function(p){onCourt[p.no]=true;});});});
+  var waiters=S.players.filter(function(p){return p.active&&!onCourt[p.no];}).map(pLabel);
   S.rounds.push({
-    round: S.currentRound+1,
-    waiters: waiters,
-    courts: S.courts.map(function(c,ci){
-      return {
-        name: c.name, mode: c.mode,
-        teams: c.teams.map(function(t){ return (t||[]).filter(Boolean).map(pLabel); }),
-        score: Object.assign({}, S.scores[ci])
-      };
+    round:S.currentRound+1,waiters:waiters,
+    courts:S.courts.map(function(c,ci){
+      return{name:c.name,mode:c.mode,
+        teams:c.teams.map(function(t){return(t||[]).filter(Boolean).map(pLabel);}),
+        score:Object.assign({},S.scores[ci])};
     })
   });
-
-  // Record histories
   S.courts.forEach(function(court,ci){
-    if (court.mode==='unused') return;
-    var t1=(court.teams[0]||[]).filter(Boolean);
-    var t2=(court.teams[1]||[]).filter(Boolean);
+    if(court.mode==='unused')return;
+    var t1=(court.teams[0]||[]).filter(Boolean),t2=(court.teams[1]||[]).filter(Boolean);
     var gk=groupKey(t1.concat(t2));
     S.courtGroupHist[ci][gk]=(S.courtGroupHist[ci][gk]||0)+1;
-    [t1,t2].forEach(function(team){
-      for(var i=0;i<team.length;i++) for(var j=i+1;j<team.length;j++){
-        var k=[team[i].no,team[j].no].sort().join('-');
-        S.pairHist[k]=(S.pairHist[k]||0)+1;
-      }
-    });
-    t1.forEach(function(a){ t2.forEach(function(b){
-      var k=[a.no,b.no].sort().join('-'); S.oppHist[k]=(S.oppHist[k]||0)+1;
-    }); });
+    [t1,t2].forEach(function(team){for(var i=0;i<team.length;i++)for(var j=i+1;j<team.length;j++){var k=[team[i].no,team[j].no].sort().join('-');S.pairHist[k]=(S.pairHist[k]||0)+1;}});
+    t1.forEach(function(a){t2.forEach(function(b){var k=[a.no,b.no].sort().join('-');S.oppHist[k]=(S.oppHist[k]||0)+1;});});
   });
-
-  // Record W/L
   S.courts.forEach(function(court,ci){
-    if (court.mode==='unused') return;
-    var s1=parseInt(S.scores[ci].team1), s2=parseInt(S.scores[ci].team2);
-    if (isNaN(s1)||isNaN(s2)) return;
-    var t1=(court.teams[0]||[]).filter(Boolean), t2=(court.teams[1]||[]).filter(Boolean);
-    var w1=s1>s2, w2=s2>s1;
-    t1.forEach(function(p){
-      var sp=S.players.find(function(x){return x.no===p.no;}); if(sp){if(w1)sp.wins++;else if(w2)sp.losses++;}
-    });
-    t2.forEach(function(p){
-      var sp=S.players.find(function(x){return x.no===p.no;}); if(sp){if(w2)sp.wins++;else if(w1)sp.losses++;}
-    });
+    if(court.mode==='unused')return;
+    var s1=parseInt(S.scores[ci].team1),s2=parseInt(S.scores[ci].team2);if(isNaN(s1)||isNaN(s2))return;
+    var t1=(court.teams[0]||[]).filter(Boolean),t2=(court.teams[1]||[]).filter(Boolean),w1=s1>s2,w2=s2>s1;
+    t1.forEach(function(p){var sp=S.players.find(function(x){return x.no===p.no;});if(sp){if(w1)sp.wins++;else if(w2)sp.losses++;}});
+    t2.forEach(function(p){var sp=S.players.find(function(x){return x.no===p.no;});if(sp){if(w2)sp.wins++;else if(w1)sp.losses++;}});
   });
-
   S.currentRound++;
-  document.getElementById('rnd-num').textContent = S.currentRound+1;
-  resetTimer();
-  autoAssign();
-  toast('第' + S.currentRound + 'ゲーム終了', 'ok');
+  document.getElementById('rnd-badge').textContent='第'+(S.currentRound+1)+'ゲーム';
+  resetGameTimer();
+  doAutoAssign();
+  showToast('第'+S.currentRound+'ゲーム終了','ok');
 }
 
-function setCourtMode(ci, mode) {
-  S.courts[ci].mode = mode;
-  S.courts[ci].teams = [[], []];
-  renderGame();
-}
-
-// ═══════════════════════════════════════
-// SCORE
-// ═══════════════════════════════════════
-function recordScore(ci) {
+/* ════════════════════════════════════════════════════
+   SCORE
+════════════════════════════════════════════════════ */
+function recordScore(ci){
   var v1=document.getElementById('sa-'+ci).value;
   var v2=document.getElementById('sb-'+ci).value;
-  if (v1===''||v2==='') { toast('両チームのスコアを入力してください','err'); return; }
-  var already = S.scores[ci].team1!=='' && S.scores[ci].team2!=='';
-  S.scores[ci] = {team1:v1, team2:v2};
-  // Re-render just the score area
-  var sa = document.getElementById('score-area-'+ci);
-  if (sa) sa.innerHTML = buildScoreHTML(ci);
-  toast(already ? 'スコアを上書きしました' : 'スコアを記録しました', 'ok');
+  if(v1===''||v2===''){showToast('両チームのスコアを入力してください','err');return;}
+  var already=S.scores[ci].team1!==''&&S.scores[ci].team2!=='';
+  S.scores[ci]={team1:v1,team2:v2};
+  var sa=document.getElementById('score-section-'+ci);
+  if(sa)sa.innerHTML=buildScoreHTML(ci);
+  showToast(already?'スコアを上書きしました':'スコアを記録しました','ok');
+}
+function buildScoreHTML(ci){
+  var sc=S.scores[ci]||{};
+  var v1=sc.team1||'',v2=sc.team2||'',recorded=v1!==''&&v2!=='';
+  var h='<span class="score-label">スコア</span>'
+    +'<div class="score-inputs">'
+    +'<input class="score-inp" type="number" min="0" max="99" id="sa-'+ci+'" value="'+v1+'" placeholder="A">'
+    +'<span class="score-sep">–</span>'
+    +'<input class="score-inp" type="number" min="0" max="99" id="sb-'+ci+'" value="'+v2+'" placeholder="B">'
+    +'</div>';
+  if(recorded){h+='<span class="score-recorded">✓ 記録済み</span><button class="btn-score overwrite" onclick="recordScore('+ci+')">上書き</button>';}
+  else{h+='<button class="btn-score record" onclick="recordScore('+ci+')">記録</button>';}
+  return h;
 }
 
-function buildScoreHTML(ci) {
-  var sc = S.scores[ci]||{};
-  var v1=sc.team1||'', v2=sc.team2||'';
-  var recorded = v1!=='' && v2!=='';
-  var html = '<span class="score-lbl">スコア</span>'
-    + '<div class="score-inps">'
-    + '<input class="sinp" type="number" min="0" max="99" id="sa-'+ci+'" value="'+v1+'" placeholder="A">'
-    + '<span class="ssep">–</span>'
-    + '<input class="sinp" type="number" min="0" max="99" id="sb-'+ci+'" value="'+v2+'" placeholder="B">'
-    + '</div>';
-  if (recorded) {
-    html += '<span class="score-done">✓ 記録済み</span>';
-    html += '<button class="btn-rec btn-over" onclick="recordScore('+ci+')">上書き</button>';
-  } else {
-    html += '<button class="btn-rec" onclick="recordScore('+ci+')">記録</button>';
-  }
-  return html;
-}
+/* ════════════════════════════════════════════════════
+   RENDER GAME
+════════════════════════════════════════════════════ */
+function renderGame(){
+  var gc=document.getElementById('game-courts');if(!gc)return;
+  gc.innerHTML='';
 
-// ═══════════════════════════════════════
-// RENDER GAME
-// ═══════════════════════════════════════
-function renderGame() {
-  renderCourts();
-  renderWaitBar();
-  renderSched();
-}
+  S.courts.forEach(function(court,ci){
+    var mode=court.mode;
+    var t1=court.teams[0]||[];
+    var t2=court.teams[1]||[];
+    var sc=S.scores[ci]||{};
 
-function makePlayerRow(p) {
-  // p is either a player object {no,...} or null
-  var row = document.createElement('div');
-  row.className = 'player-row';
-  if (!p) {
-    var badge = document.createElement('div'); badge.className = 'p-badge-empty'; badge.textContent = '?';
-    var info = document.createElement('div'); info.className = 'p-info';
-    var nm = document.createElement('div'); nm.className = 'p-name empty'; nm.textContent = '— 未配置 —';
-    info.appendChild(nm); row.appendChild(badge); row.appendChild(info);
-    return row;
-  }
-  var sp = S.players.find(function(x){ return x.no === p.no; });
-  var col = pColor(p.no);
-  var badge = document.createElement('div'); badge.className = 'p-badge';
-  badge.style.background = col.bg; badge.style.borderColor = col.bd; badge.style.color = col.tx;
-  badge.textContent = p.no; row.appendChild(badge);
-  var info = document.createElement('div'); info.className = 'p-info';
-  var noLbl = document.createElement('div'); noLbl.className = 'p-no'; noLbl.textContent = 'No.' + p.no;
-  info.appendChild(noLbl);
-  var nm = document.createElement('div'); nm.className = 'p-name';
-  nm.textContent = (sp && sp.nick) ? sp.nick : '—'; info.appendChild(nm);
-  if (sp && sp.waitCount > 0) {
-    var wt = document.createElement('div'); wt.className = 'p-wait';
-    wt.textContent = '待機 ' + sp.waitCount + '回'; info.appendChild(wt);
-  }
-  row.appendChild(info);
-  return row;
-}
+    var card=document.createElement('div');card.className='court-game-card';
 
-function renderCourts() {
-  var gc = document.getElementById('game-scroll');
-  gc.innerHTML = '';
+    // Header
+    var hdr=document.createElement('div');hdr.className='court-game-header';
+    var nm=document.createElement('span');nm.className='court-game-name';nm.textContent=court.name;hdr.appendChild(nm);
+    var modeChip=document.createElement('span');modeChip.className='court-game-mode';
+    modeChip.textContent=mode==='doubles'?'ダブルス':mode==='singles'?'シングル':'未使用';
+    hdr.appendChild(modeChip);card.appendChild(hdr);
 
-  S.courts.forEach(function(court, ci){
-    var mode = court.mode;
-    var t1 = court.teams[0] || [];
-    var t2 = court.teams[1] || [];
-    var sc = S.scores[ci] || {};
-
-    var card = document.createElement('div'); card.className = 'court-card';
-
-    // Top bar: court name + mode buttons
-    var top = document.createElement('div'); top.className = 'court-top';
-    var nm = document.createElement('span'); nm.className = 'court-nm'; nm.textContent = court.name;
-    top.appendChild(nm);
-    var msel = document.createElement('div'); msel.className = 'mode-sel';
-    [{k:'doubles',l:'ダブルス'},{k:'singles',l:'シングル'},{k:'unused',l:'未使用'}].forEach(function(m){
-      var btn = document.createElement('button');
-      btn.className = 'mbtn' + (mode===m.k ? ' on' : '');
-      btn.textContent = m.l;
-      btn.onclick = (function(mk){ return function(){ setCourtMode(ci,mk); }; })(m.k);
-      msel.appendChild(btn);
-    });
-    top.appendChild(msel); card.appendChild(top);
-
-    if (mode === 'unused') {
-      var ph = document.createElement('div'); ph.className = 'unused-ph'; ph.textContent = '未使用コート';
-      card.appendChild(ph);
+    if(mode==='unused'){
+      var ph=document.createElement('div');ph.style.cssText='padding:24px;text-align:center;color:var(--t3);font-style:italic';
+      ph.textContent='未使用コート';card.appendChild(ph);
     } else {
-      var isD = mode === 'doubles';
-      var mb = document.createElement('div'); mb.className = 'match-body';
+      var isD=mode==='doubles';
+      var md=document.createElement('div');md.className='match-display';
+      var mt=document.createElement('div');mt.className='match-teams';
 
-      var mc = document.createElement('div'); mc.className = 'match-card';
+      // Team A col
+      var colA=document.createElement('div');colA.className='team-col';
+      var lblA=document.createElement('div');lblA.className='team-label a';lblA.textContent=isD?'チーム A':'プレーヤー 1';colA.appendChild(lblA);
+      var psA=isD?t1:[t1[0]||null];
+      if(psA.length===0)psA=isD?[null,null]:[null];
+      psA.forEach(function(p){colA.appendChild(makePlayerRowEl(p));});
 
-      // Team A
-      var hA = document.createElement('div'); hA.className = 'team-header a';
-      hA.textContent = isD ? 'チーム A' : 'プレーヤー 1'; mc.appendChild(hA);
+      // VS col
+      var vsCol=document.createElement('div');vsCol.className='vs-col';
+      var vsLbl=document.createElement('div');vsLbl.className='vs-label';vsLbl.textContent='VS';vsCol.appendChild(vsLbl);
 
-      var playersA = isD ? t1 : [t1[0]||null];
-      if (playersA.length === 0) playersA = isD ? [null,null] : [null];
-      playersA.forEach(function(p){ mc.appendChild(makePlayerRow(p)); });
+      // Team B col
+      var colB=document.createElement('div');colB.className='team-col';
+      var lblB=document.createElement('div');lblB.className='team-label b';lblB.textContent=isD?'チーム B':'プレーヤー 2';colB.appendChild(lblB);
+      var psB=isD?t2:[t2[0]||null];
+      if(psB.length===0)psB=isD?[null,null]:[null];
+      psB.forEach(function(p){colB.appendChild(makePlayerRowEl(p));});
 
-      // VS row
-      var vsRow = document.createElement('div'); vsRow.className = 'vs-row';
-      var vs = document.createElement('div'); vs.className = 'vs-text'; vs.textContent = 'VS';
-      vsRow.appendChild(vs); mc.appendChild(vsRow);
+      mt.appendChild(colA);mt.appendChild(vsCol);mt.appendChild(colB);
+      md.appendChild(mt);card.appendChild(md);
 
-      // Team B
-      var hB = document.createElement('div'); hB.className = 'team-header b';
-      hB.textContent = isD ? 'チーム B' : 'プレーヤー 2'; mc.appendChild(hB);
-
-      var playersB = isD ? t2 : [t2[0]||null];
-      if (playersB.length === 0) playersB = isD ? [null,null] : [null];
-      playersB.forEach(function(p){ mc.appendChild(makePlayerRow(p)); });
-
-      mb.appendChild(mc);
-
-      // Score area
-      var sa = document.createElement('div'); sa.className = 'score-area'; sa.id = 'score-area-' + ci;
-      sa.innerHTML = buildScoreHTML(ci); mb.appendChild(sa);
-
-      card.appendChild(mb);
+      // Score
+      var ss=document.createElement('div');ss.className='score-section';ss.id='score-section-'+ci;
+      ss.innerHTML=buildScoreHTML(ci);card.appendChild(ss);
     }
     gc.appendChild(card);
   });
 
-  // Rest/wait section
-  var onCourt = {};
-  S.courts.forEach(function(c){
-    c.teams.forEach(function(t){
-      (t||[]).filter(Boolean).forEach(function(p){ onCourt[p.no]=true; });
-    });
-  });
-  var waiting = S.players.filter(function(p){ return p.active && !onCourt[p.no]; });
-  if (waiting.length > 0) {
-    var rc = document.createElement('div'); rc.className = 'rest-card';
-    var rh = document.createElement('div'); rh.className = 'rest-header'; rh.textContent = '🪑 休憩';
-    rc.appendChild(rh);
-    var rb = document.createElement('div'); rb.className = 'rest-body';
+  // Rest section
+  var onCourt={};
+  S.courts.forEach(function(c){c.teams.forEach(function(t){(t||[]).filter(Boolean).forEach(function(p){onCourt[p.no]=true;});});});
+  var waiting=S.players.filter(function(p){return p.active&&!onCourt[p.no];});
+  if(waiting.length>0){
+    var rs=document.createElement('div');rs.className='rest-section';
+    var rh=document.createElement('div');rh.className='rest-header';rh.textContent='🪑 休憩 （'+waiting.length+'人）';rs.appendChild(rh);
+    var rb=document.createElement('div');rb.className='rest-players';
     waiting.forEach(function(p){
-      var col = pColor(p.no);
-      var chip = document.createElement('div'); chip.className = 'rest-chip';
-      var badge = document.createElement('div'); badge.className = 'p-badge';
-      badge.style.cssText = 'width:36px;height:36px;font-size:14px;background:'+col.bg+';border-color:'+col.bd+';color:'+col.tx;
-      badge.style.borderRadius='50%'; badge.style.display='flex'; badge.style.alignItems='center'; badge.style.justifyContent='center';
-      badge.style.fontWeight='700'; badge.style.border='2px solid';
-      badge.textContent = p.no; chip.appendChild(badge);
-      var info = document.createElement('div');
-      var noLbl = document.createElement('div'); noLbl.style.cssText='font-size:11px;font-weight:700;color:var(--text3)';
-      noLbl.textContent = 'No.'+p.no; info.appendChild(noLbl);
-      if (p.nick) {
-        var nk = document.createElement('div'); nk.style.cssText='font-size:14px;font-weight:600;color:var(--text)';
-        nk.textContent = p.nick; info.appendChild(nk);
-      }
-      if (p.waitCount > 0) {
-        var wt = document.createElement('div'); wt.style.cssText='font-size:10px;font-weight:700;color:var(--red)';
-        wt.textContent = '待機'+p.waitCount+'回'; info.appendChild(wt);
-      }
-      chip.appendChild(info); rb.appendChild(chip);
+      var chip=document.createElement('div');chip.className='rest-player';
+      chip.appendChild(makeBadge(p.no,'sm'));
+      var info=document.createElement('div');info.className='rest-player-info';
+      var pnm=document.createElement('div');pnm.className='rest-player-name';
+      pnm.textContent='No.'+p.no+(p.nick?' '+p.nick:'');info.appendChild(pnm);
+      if(p.waitCount>0){var wt=document.createElement('div');wt.className='rest-player-sub';wt.textContent='待機'+p.waitCount+'回';info.appendChild(wt);}
+      chip.appendChild(info);rb.appendChild(chip);
     });
-    rc.appendChild(rb); gc.appendChild(rc);
+    rs.appendChild(rb);
+    gc.appendChild(rs);
   }
 }
 
-function renderWaitBar() {
-  var el = document.getElementById('wait-chips');
-  var onCourt = {};
-  S.courts.forEach(function(c){
-    c.teams.forEach(function(t){
-      (t||[]).filter(Boolean).forEach(function(p){ onCourt[p.no]=true; });
-    });
-  });
-  var waiting = S.players.filter(function(p){ return p.active && !onCourt[p.no]; });
-  el.innerHTML = '';
-  if (!waiting.length) {
-    var s = document.createElement('span'); s.style.cssText='color:var(--text3);font-size:13px';
-    s.textContent = 'なし'; el.appendChild(s); return;
+function makePlayerRowEl(p){
+  var row=document.createElement('div');
+  if(!p){
+    row.className='player-row player-empty';
+    var ph=document.createElement('div');ph.className='p-badge-empty';ph.style.cssText='width:36px;height:36px;border-radius:50%;border:2px dashed var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:18px;flex-shrink:0';ph.textContent='?';
+    var pinfo=document.createElement('div');pinfo.className='player-info';
+    var pnm=document.createElement('div');pnm.className='player-name empty';pnm.textContent='— 未配置 —';pinfo.appendChild(pnm);
+    row.appendChild(ph);row.appendChild(pinfo);return row;
   }
-  waiting.forEach(function(p){
-    var chip = document.createElement('span');
-    chip.className = 'wchip' + (p.lastWaited||p.waitCount>0 ? ' hi' : '');
-    chip.textContent = (p.nick ? 'No.'+p.no+' '+p.nick : 'No.'+p.no) + (p.waitCount>0 ? ' ('+p.waitCount+')' : '');
-    el.appendChild(chip);
-  });
+  row.className='player-row';
+  var sp=S.players.find(function(x){return x.no===p.no;});
+  var badge=makeBadge(p.no,'sm');badge.style.cssText+='width:36px;height:36px;font-size:14px';
+  row.appendChild(badge);
+  var pinfo=document.createElement('div');pinfo.className='player-info';
+  var pnm=document.createElement('div');pnm.className='player-name';
+  pnm.textContent='No.'+p.no+(sp&&sp.nick?' '+sp.nick:'');pinfo.appendChild(pnm);
+  if(sp&&sp.waitCount>0){var sub=document.createElement('div');sub.className='player-sub';sub.textContent='待機 '+sp.waitCount+'回';pinfo.appendChild(sub);}
+  row.appendChild(pinfo);return row;
 }
 
-// ═══════════════════════════════════════
-// RENDER SCHEDULE
-// ═══════════════════════════════════════
-function renderSched() {
-  var el = document.getElementById('sched-scroll');
-  el.innerHTML = '';
-
-  var items = [];
-  var ps = Math.max(0, S.rounds.length-2);
-  for (var i=ps; i<S.rounds.length; i++) items.push({type:'past', data:S.rounds[i]});
-
-  // Current
-  var curOnCourt = {};
-  S.courts.forEach(function(c){
-    c.teams.forEach(function(t){
-      (t||[]).filter(Boolean).forEach(function(p){ curOnCourt[p.no]=true; });
-    });
+/* ════════════════════════════════════════════════════
+   RENDER SCHEDULE
+════════════════════════════════════════════════════ */
+function renderSched(){
+  var el=document.getElementById('sched-scroll');if(!el)return;el.innerHTML='';
+  var items=[];
+  var ps=Math.max(0,S.rounds.length-2);
+  for(var i=ps;i<S.rounds.length;i++)items.push({type:'past',data:S.rounds[i]});
+  var curOnCourt={};
+  S.courts.forEach(function(c){c.teams.forEach(function(t){(t||[]).filter(Boolean).forEach(function(p){curOnCourt[p.no]=true;});});});
+  var curW=S.players.filter(function(p){return p.active&&!curOnCourt[p.no];}).map(pLabel);
+  items.push({type:'current',data:{round:S.currentRound+1,waiters:curW,courts:S.courts.map(function(c,ci){return{name:c.name,mode:c.mode,teams:c.teams.map(function(t){return(t||[]).filter(Boolean).map(pLabel);}),score:S.scores[ci]||{}};}) }});
+  S.futureRounds.slice(0,4).forEach(function(r){items.push({type:'future',data:r});});
+  items.forEach(function(item){el.appendChild(buildScCard(item));});
+}
+function buildScCard(item){
+  var past=item.type==='past',cur=item.type==='current';
+  var card=document.createElement('div');
+  card.className='sc-card'+(past?' past':cur?' cur':' future');
+  var head=document.createElement('div');head.className='sc-head';
+  var rn=document.createElement('span');rn.className='sc-round';rn.textContent='第'+item.data.round+'ゲーム';
+  var badge=document.createElement('span');badge.className='sc-badge';badge.textContent=past?'終了':cur?'進行中':'予定';
+  head.appendChild(rn);head.appendChild(badge);card.appendChild(head);
+  var body=document.createElement('div');body.className='sc-body';
+  (item.data.courts||[]).filter(function(c){return c.mode!=='unused';}).forEach(function(c){
+    var blk=document.createElement('div');blk.className='sc-court-block';
+    var cnm=document.createElement('div');cnm.className='sc-court-nm';cnm.textContent=c.name;blk.appendChild(cnm);
+    var vsg=document.createElement('div');vsg.className='sc-vs-grid';
+    var ta=document.createElement('div');ta.className='sc-team';
+    (c.teams[0]||[]).forEach(function(n){var p=document.createElement('div');p.className='sc-player';p.textContent=n;ta.appendChild(p);});
+    if(!(c.teams[0]||[]).length){var ep=document.createElement('div');ep.className='sc-player emp';ep.textContent='—';ta.appendChild(ep);}
+    var vs=document.createElement('div');vs.className='sc-vs-txt';vs.textContent='VS';
+    var tb=document.createElement('div');tb.className='sc-team';
+    (c.teams[1]||[]).forEach(function(n){var p=document.createElement('div');p.className='sc-player';p.textContent=n;tb.appendChild(p);});
+    if(!(c.teams[1]||[]).length){var ep2=document.createElement('div');ep2.className='sc-player emp';ep2.textContent='—';tb.appendChild(ep2);}
+    vsg.appendChild(ta);vsg.appendChild(vs);vsg.appendChild(tb);blk.appendChild(vsg);
+    if(c.score&&c.score.team1!==''&&c.score.team2!==''){var sc=document.createElement('div');sc.className='sc-score-row';sc.textContent=c.score.team1+' – '+c.score.team2;blk.appendChild(sc);}
+    body.appendChild(blk);
   });
-  var curWaiters = S.players.filter(function(p){ return p.active && !curOnCourt[p.no]; }).map(pLabel);
-  items.push({type:'current', data:{
-    round: S.currentRound+1,
-    waiters: curWaiters,
-    courts: S.courts.map(function(c,ci){
-      return {
-        name:c.name, mode:c.mode,
-        teams: c.teams.map(function(t){ return (t||[]).filter(Boolean).map(pLabel); }),
-        score: S.scores[ci]||{}
-      };
-    })
-  }});
-
-  S.futureRounds.slice(0,4).forEach(function(r){ items.push({type:'future',data:r}); });
-
-  items.forEach(function(item){
-    var past=item.type==='past', cur=item.type==='current';
-    var card = document.createElement('div');
-    card.className = 'sc-card' + (past?' past':cur?' cur':' future');
-
-    var head = document.createElement('div'); head.className = 'sc-head';
-    var rn = document.createElement('span'); rn.className = 'sc-round';
-    rn.textContent = '第' + item.data.round + 'ゲーム'; head.appendChild(rn);
-    var badge = document.createElement('span'); badge.className = 'sc-badge';
-    badge.textContent = past?'終了':cur?'進行中':'予定'; head.appendChild(badge);
-    card.appendChild(head);
-
-    var body = document.createElement('div'); body.className = 'sc-body';
-
-    // Courts
-    (item.data.courts||[]).filter(function(c){ return c.mode!=='unused'; }).forEach(function(c){
-      var blk = document.createElement('div'); blk.className = 'sc-court-block';
-      var cnm = document.createElement('div'); cnm.className = 'sc-court-nm';
-      cnm.textContent = c.name; blk.appendChild(cnm);
-
-      var vsl = document.createElement('div'); vsl.className = 'sc-vs-layout';
-      var ta = document.createElement('div'); ta.className = 'sc-team';
-      (c.teams[0]||[]).forEach(function(name){
-        var p=document.createElement('div'); p.className='sc-player'; p.textContent=name; ta.appendChild(p);
-      });
-      if (!(c.teams[0]||[]).length) {
-        var ep=document.createElement('div'); ep.className='sc-player empty-p'; ep.textContent='—'; ta.appendChild(ep);
-      }
-      var vs = document.createElement('div'); vs.className = 'sc-vs'; vs.textContent = 'VS';
-      var tb = document.createElement('div'); tb.className = 'sc-team';
-      (c.teams[1]||[]).forEach(function(name){
-        var p=document.createElement('div'); p.className='sc-player'; p.textContent=name; tb.appendChild(p);
-      });
-      if (!(c.teams[1]||[]).length) {
-        var ep2=document.createElement('div'); ep2.className='sc-player empty-p'; ep2.textContent='—'; tb.appendChild(ep2);
-      }
-      vsl.appendChild(ta); vsl.appendChild(vs); vsl.appendChild(tb);
-      blk.appendChild(vsl);
-
-      if (c.score && c.score.team1!=='' && c.score.team2!=='') {
-        var st = document.createElement('div'); st.className = 'sc-score';
-        st.textContent = c.score.team1 + ' – ' + c.score.team2; blk.appendChild(st);
-      }
-      body.appendChild(blk);
-    });
-
-    // Waiters / rest
-    if (item.data.waiters && item.data.waiters.length > 0) {
-      var rb = document.createElement('div'); rb.className = 'sc-rest-block';
-      var rnm = document.createElement('div'); rnm.className = 'sc-rest-nm'; rnm.textContent = '🪑 休憩';
-      rb.appendChild(rnm);
-      var rnames = document.createElement('div'); rnames.className = 'sc-rest-names';
-      rnames.textContent = item.data.waiters.join('　/　');
-      rb.appendChild(rnames); body.appendChild(rb);
-    }
-
-    card.appendChild(body); el.appendChild(card);
-  });
+  if(item.data.waiters&&item.data.waiters.length>0){
+    var rb=document.createElement('div');rb.className='sc-rest';
+    var rl=document.createElement('div');rl.className='sc-rest-lbl';rl.textContent='🪑 休憩';rb.appendChild(rl);
+    var rn2=document.createElement('div');rn2.className='sc-rest-names';rn2.textContent=item.data.waiters.join(' / ');rb.appendChild(rn2);body.appendChild(rb);
+  }
+  card.appendChild(body);return card;
 }
 
-// ═══════════════════════════════════════
-// RENDER HISTORY
-// ═══════════════════════════════════════
-function renderHistory() {
-  var el = document.getElementById('hist-scroll');
-  el.innerHTML = '';
-  if (!S.rounds.length) {
-    var empty = document.createElement('div');
-    empty.style.cssText='color:var(--text3);text-align:center;padding:48px;font-size:14px';
-    empty.textContent = 'まだ履歴がありません'; el.appendChild(empty); return;
+/* ════════════════════════════════════════════════════
+   RENDER HISTORY
+════════════════════════════════════════════════════ */
+function renderHistory(){
+  var el=document.getElementById('hist-scroll');if(!el)return;el.innerHTML='';
+  if(!S.rounds.length){
+    var e=document.createElement('div');e.style.cssText='color:var(--t3);text-align:center;padding:48px;font-size:14px';
+    e.textContent='まだ履歴がありません';el.appendChild(e);return;
   }
   S.rounds.slice().reverse().forEach(function(r){
-    var card = document.createElement('div'); card.className = 'hcard';
-    var head = document.createElement('div'); head.className = 'hhead';
-    head.textContent = '第' + r.round + 'ゲーム'; card.appendChild(head);
-    var body = document.createElement('div'); body.className = 'hbody';
-    r.courts.filter(function(c){ return c.mode!=='unused'; }).forEach(function(c){
-      var row = document.createElement('div'); row.className = 'hrow';
-      var ct = document.createElement('span'); ct.className = 'hct'; ct.textContent = c.name.slice(0,3);
-      var pl = document.createElement('span'); pl.className = 'hpl';
-      pl.textContent = (c.teams[0]||[]).join(' / ') + ' vs ' + (c.teams[1]||[]).join(' / ');
-      var sc = document.createElement('span'); sc.className = 'hsc';
-      sc.textContent = (c.score&&c.score.team1!==''&&c.score.team2!=='') ? c.score.team1+' – '+c.score.team2 : '—';
-      row.appendChild(ct); row.appendChild(pl); row.appendChild(sc); body.appendChild(row);
+    var card=document.createElement('div');card.className='hcard';
+    var head=document.createElement('div');head.className='hhead';head.textContent='第'+r.round+'ゲーム';card.appendChild(head);
+    var body=document.createElement('div');body.className='hbody';
+    r.courts.filter(function(c){return c.mode!=='unused';}).forEach(function(c){
+      var row=document.createElement('div');row.className='hrow';
+      var ct=document.createElement('span');ct.className='hct';ct.textContent=c.name.slice(0,3);
+      var pl=document.createElement('span');pl.className='hpl';pl.textContent=(c.teams[0]||[]).join(' / ')+' vs '+(c.teams[1]||[]).join(' / ');
+      var sc=document.createElement('span');sc.className='hsc';sc.textContent=(c.score&&c.score.team1!==''&&c.score.team2!=='')?c.score.team1+' – '+c.score.team2:'—';
+      row.appendChild(ct);row.appendChild(pl);row.appendChild(sc);body.appendChild(row);
     });
-    card.appendChild(body); el.appendChild(card);
+    card.appendChild(body);el.appendChild(card);
   });
 }
 
-// ═══════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════
-var toastTimer;
-function toast(msg, type) {
-  var t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'show' + (type ? ' '+type : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(function(){ t.className=''; }, 2800);
+/* ════════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════════ */
+var toastT;
+function showToast(msg,type){
+  var t=document.getElementById('toast');t.textContent=msg;t.className='show'+(type?' '+type:'');
+  clearTimeout(toastT);toastT=setTimeout(function(){t.className='';},3000);
 }
 
-// ═══════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════
-renderTimer();
-updPax();
-renderGame();
+/* ════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════ */
+// Init court config UI
+renderCourtConfig1();
+renderTimerDisplays();
 </script>
 
 </body>
