@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -18,21 +18,6 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-    }
-
-    html {
-      -webkit-text-size-adjust: 100%;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      font-family: 'Noto Sans JP', sans-serif;
-      background: #111214;
-      color: #F5F2EA;
-      height: 100dvh;
-      overflow: hidden;
-      font-size: 15px;
-      line-height: 1.5;
     }
 
     :root {
@@ -64,29 +49,57 @@
       --r1: 14px;
       --r2: 18px;
       --r3: 24px;
+
+      --safe-top: max(env(safe-area-inset-top), 10px);
+      --safe-bottom: max(env(safe-area-inset-bottom), 10px);
+      --header-h: 62px;
+      --footer-h: 68px;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+      background: #111214;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: #111214;
+      color: #F5F2EA;
+      height: 100dvh;
+      overflow: hidden;
+      font-size: 15px;
+      line-height: 1.5;
     }
 
     #app {
-      display: flex;
-      flex-direction: column;
+      position: relative;
       height: 100dvh;
       background:
         radial-gradient(circle at top, rgba(216,184,156,0.08), transparent 28%),
         linear-gradient(180deg, #131417 0%, #101113 100%);
+      overflow: hidden;
     }
 
     #header {
-      height: 58px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding-top: var(--safe-top);
+      background: rgba(17,18,20,0.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--ln2);
+    }
+
+    .header-inner {
+      height: var(--header-h);
       display: flex;
       align-items: center;
       padding: 0 16px;
       gap: 10px;
-      background: rgba(17,18,20,0.9);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-bottom: 1px solid var(--ln2);
-      flex-shrink: 0;
-      z-index: 100;
     }
 
     .logo {
@@ -97,6 +110,7 @@
       letter-spacing: 1px;
       margin-right: 6px;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .header-nav {
@@ -104,6 +118,7 @@
       gap: 6px;
       flex: 1;
       overflow-x: auto;
+      min-width: 0;
     }
 
     .header-nav::-webkit-scrollbar {
@@ -111,8 +126,8 @@
     }
 
     .hnav-btn {
-      height: 36px;
-      padding: 0 12px;
+      height: 38px;
+      padding: 0 14px;
       border-radius: 999px;
       border: none;
       background: transparent;
@@ -123,6 +138,7 @@
       white-space: nowrap;
       transition: all .18s;
       font-family: 'Noto Sans JP', sans-serif;
+      flex-shrink: 0;
     }
 
     .hnav-btn.active {
@@ -134,8 +150,8 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-left: auto;
       flex-shrink: 0;
+      margin-left: 4px;
     }
 
     #h-timer {
@@ -159,9 +175,11 @@
     }
 
     #main {
-      flex: 1;
+      position: absolute;
+      inset: 0;
+      padding-top: calc(var(--safe-top) + var(--header-h));
+      padding-bottom: calc(var(--safe-bottom) + var(--footer-h));
       overflow: hidden;
-      position: relative;
     }
 
     .screen {
@@ -184,7 +202,7 @@
       flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: env(safe-area-inset-bottom);
+      padding-bottom: 18px;
     }
 
     .scrollable::-webkit-scrollbar {
@@ -197,15 +215,22 @@
     }
 
     #footer {
-      height: 60px;
-      display: flex;
-      align-items: center;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1000;
+      padding-bottom: var(--safe-bottom);
       background: rgba(17,18,20,0.92);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border-top: 1px solid var(--ln2);
-      flex-shrink: 0;
-      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .footer-inner {
+      height: var(--footer-h);
+      display: flex;
+      align-items: center;
     }
 
     .foot-btn {
@@ -222,7 +247,7 @@
       align-items: center;
       justify-content: center;
       gap: 3px;
-      transition: color .18s;
+      transition: color .18s, background .18s;
       font-family: 'Noto Sans JP', sans-serif;
     }
 
@@ -233,6 +258,7 @@
 
     .foot-btn.active {
       color: var(--accent4);
+      background: rgba(255,255,255,0.04);
     }
 
     .card {
@@ -423,8 +449,8 @@
 
     #toast {
       position: fixed;
-      bottom: 76px;
       left: 50%;
+      bottom: calc(var(--safe-bottom) + var(--footer-h) + 10px);
       transform: translateX(-50%) translateY(80px);
       background: rgba(36,38,43,0.92);
       color: var(--t1);
@@ -433,16 +459,20 @@
       font-size: 14px;
       font-weight: 800;
       z-index: 9999;
-      transition: transform .3s;
+      transition: transform .3s, opacity .3s;
       box-shadow: var(--shadow2);
       white-space: nowrap;
       pointer-events: none;
       border: 1px solid var(--ln);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
+      opacity: 0;
+      max-width: calc(100vw - 32px);
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     #toast.ok   { background: rgba(151,184,167,0.94); color: #172019; border-color: transparent; }
     #toast.err  { background: rgba(201,143,143,0.94); color: #fff; border-color: transparent; }
     #toast.warn { background: rgba(216,184,156,0.96); color: #1A1B1E; border-color: transparent; }
@@ -670,35 +700,58 @@
       flex-shrink: 0;
     }
 
-    .timer-bar-top {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .timer-top-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
       margin-bottom: 12px;
-      flex-wrap: wrap;
+    }
+
+    .timer-left {
+      min-width: 0;
     }
 
     #game-timer-disp {
+      display: block;
       font-family: 'Oswald', sans-serif;
       font-weight: 700;
-      font-size: 42px;
+      font-size: 56px;
+      line-height: 0.95;
       color: var(--t1);
-      letter-spacing: 3px;
+      letter-spacing: 2px;
       font-variant-numeric: tabular-nums;
+      min-width: 4.8ch;
+      white-space: nowrap;
       cursor: pointer;
     }
 
     #game-timer-disp.warn { color: #E4B57A; animation: tblink .5s infinite; }
     #game-timer-disp.done { color: #E18C8C; animation: tblink .3s infinite; }
 
+    .timer-round-label {
+      margin-top: 10px;
+      font-size: 15px;
+      color: var(--t2);
+      font-weight: 700;
+    }
+
+    .timer-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
     .btn-start {
-      height: 46px;
-      padding: 0 18px;
-      border-radius: 14px;
+      height: 54px;
+      padding: 0 20px;
+      border-radius: 16px;
       border: 1px solid var(--ln);
       background: rgba(255,255,255,0.06);
       color: var(--t1);
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 800;
       cursor: pointer;
       display: flex;
@@ -715,17 +768,18 @@
     }
 
     .btn-timer-reset {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
       border: 1px solid var(--ln);
       background: rgba(255,255,255,0.05);
       color: var(--t2);
-      font-size: 18px;
+      font-size: 22px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
 
     .progress-track {
@@ -960,8 +1014,7 @@
       overflow: hidden;
       box-shadow: var(--shadow1);
     }
-
-    .rest-header {
+        .rest-header {
       padding: 12px 14px;
       border-bottom: 1px solid var(--ln2);
       font-size: 16px;
@@ -1002,7 +1055,8 @@
       color: var(--t3);
     }
 
-    #screen-players .scrollable {
+    #screen-players .scrollable,
+    #screen-courts .scrollable {
       padding: 16px;
       display: flex;
       flex-direction: column;
@@ -1145,13 +1199,6 @@
       cursor: pointer;
     }
 
-    #screen-courts .scrollable {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
     #screen-schedule .scrollable,
     #screen-history .scrollable {
       padding: 12px 16px 24px;
@@ -1201,10 +1248,6 @@
       box-shadow: 0 0 0 1px rgba(158,177,199,0.16), var(--shadow1);
     }
 
-    .sc-card.past {
-      opacity: .6;
-    }
-
     .sc-head,
     .hhead {
       padding: 13px 16px;
@@ -1226,11 +1269,8 @@
       font-weight: 800;
       padding: 4px 10px;
       border-radius: 999px;
-    }
-
-    .sc-card.past .sc-badge {
       background: rgba(255,255,255,0.06);
-      color: var(--t3);
+      color: var(--t2);
     }
 
     .sc-card.cur .sc-badge {
@@ -1241,11 +1281,6 @@
     .sc-card.next .sc-badge {
       background: rgba(158,177,199,0.14);
       color: #C7D2DE;
-    }
-
-    .sc-card.future .sc-badge {
-      background: rgba(255,255,255,0.06);
-      color: var(--t2);
     }
 
     .sc-body {
@@ -1268,6 +1303,15 @@
       font-weight: 800;
       color: var(--t3);
       border-bottom: 1px solid var(--ln2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .sc-court-mode {
+      font-size: 11px;
+      color: var(--t2);
     }
 
     .sc-vs-grid {
@@ -1368,27 +1412,40 @@
       color: var(--accent);
     }
 
+    @media (max-width: 640px) {
+      .timer-top-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .timer-right {
+        justify-content: flex-start;
+      }
+    }
+
     @media (max-width: 390px) {
       .setup-hero h1 { font-size: 30px; }
-      #game-timer-disp { font-size: 38px; }
+      #game-timer-disp { font-size: 48px; }
       .court-game-name { font-size: 20px; }
       .match-teams { gap: 8px; }
       .vs-label { font-size: 24px; }
+      .logo { font-size: 26px; }
+      .hnav-btn { padding: 0 12px; font-size: 14px; }
     }
   </style>
 </head>
 <body>
   <div id="app">
     <div id="header">
-      <div class="logo">PB</div>
-      <div class="header-nav">
-        <button class="hnav-btn active" onclick="gotoScreen('setup')" id="hnav-setup">ホーム</button>
-        <button class="hnav-btn" onclick="gotoScreen('game')" id="hnav-game">ゲーム</button>
-        <button class="hnav-btn" onclick="gotoScreen('players')" id="hnav-players">参加者</button>
-        <button class="hnav-btn" onclick="gotoScreen('courts')" id="hnav-courts">コート</button>
-      </div>
-      <div class="timer-chip">
-        <div id="h-timer">07:00</div>
+      <div class="header-inner">
+        <div class="logo">PB</div>
+        <div class="header-nav">
+          <button class="hnav-btn active" onclick="gotoScreen('setup')" id="hnav-setup">ホーム</button>
+          <button class="hnav-btn" onclick="gotoScreen('game')" id="hnav-game">ゲーム</button>
+          <button class="hnav-btn" onclick="gotoScreen('players')" id="hnav-players">参加者</button>
+        </div>
+        <div class="timer-chip">
+          <div id="h-timer">07:00</div>
+        </div>
       </div>
     </div>
 
@@ -1491,11 +1548,15 @@
 
       <div id="screen-game" class="screen">
         <div class="timer-bar-wrap">
-          <div class="timer-bar-top">
-            <div id="game-timer-disp">07:00</div>
-            <button class="btn-start" id="btn-start" onclick="toggleGameTimer()">▶ ゲーム開始</button>
-            <button class="btn-timer-reset" onclick="resetGameTimer()" title="リセット">↺</button>
-            <span style="font-size:13px;color:var(--t2);margin-left:auto" id="rnd-badge">第1ゲーム</span>
+          <div class="timer-top-grid">
+            <div class="timer-left">
+              <div id="game-timer-disp">07:00</div>
+              <div class="timer-round-label" id="rnd-badge">第1ゲーム</div>
+            </div>
+            <div class="timer-right">
+              <button class="btn-start" id="btn-start" onclick="toggleGameTimer()">▶ ゲーム開始</button>
+              <button class="btn-timer-reset" onclick="resetGameTimer()" title="リセット">↺</button>
+            </div>
           </div>
           <div class="progress-track">
             <div class="progress-fill" id="progress-fill" style="width:100%"></div>
@@ -1563,12 +1624,17 @@
     </div>
 
     <div id="footer">
-      <button class="foot-btn" onclick="gotoScreen('schedule')" id="fnav-schedule">
-        <span class="icon">📅</span>スケジュール
-      </button>
-      <button class="foot-btn" onclick="gotoScreen('history')" id="fnav-history">
-        <span class="icon">📋</span>履歴
-      </button>
+      <div class="footer-inner">
+        <button class="foot-btn" onclick="gotoScreen('schedule')" id="fnav-schedule">
+          <span class="icon">📅</span>進行
+        </button>
+        <button class="foot-btn active" onclick="gotoScreen('setup')" id="fnav-setup">
+          <span class="icon">🏠</span>ホーム
+        </button>
+        <button class="foot-btn" onclick="gotoScreen('history')" id="fnav-history">
+          <span class="icon">📋</span>履歴
+        </button>
+      </div>
     </div>
 
     <div id="toast"></div>
@@ -1612,8 +1678,8 @@
     initCourtHist();
 
     var SCREENS = ['setup','game','players','courts','schedule','history'];
-    var HEADER_NAVS = ['setup','game','players','courts'];
-    var FOOTER_NAVS = ['schedule','history'];
+    var HEADER_NAVS = ['setup','game','players'];
+    var FOOTER_NAVS = ['schedule','setup','history'];
 
     function gotoScreen(name) {
       SCREENS.forEach(function(s){
@@ -1671,6 +1737,7 @@
       var cs = document.getElementById('setup-court-summary');
       var ts = document.getElementById('setup-timer-summary');
       var c2 = document.getElementById('court-screen-summary');
+
       if (ps) ps.textContent = _playerCount + '名';
       if (cs) cs.textContent = _courtCount + '面';
       if (ts) ts.textContent = _timerMin + '分';
@@ -1701,7 +1768,7 @@
       updateSetupSummary();
     }
 
-    function registerPlayers() {
+    function registerPlayers(showMsg) {
       var count = _playerCount;
       if (count === 0) {
         showToast('人数を1名以上にしてください', 'err');
@@ -1725,7 +1792,10 @@
       S.playerCount = count;
       updateSetupSummary();
       renderPlayers();
-      showToast(count + '名の参加者を登録しました', 'ok');
+
+      if (showMsg !== false) {
+        showToast(count + '名の参加者を登録しました', 'ok');
+      }
     }
 
     function adjCourts(d) {
@@ -1819,14 +1889,17 @@
       if (disp2) disp2.textContent = _courtCount;
     }
 
-    function saveCourts() {
+    function saveCourts(showMsg) {
       S.courts = tmpCourtConfig.slice(0, _courtCount).map(function(c){
         return {name:c.name, mode:c.mode, teams:[[],[]]};
       });
       initCourtHist();
       S.courtCount = _courtCount;
       updateSetupSummary();
-      showToast('コート設定を保存しました', 'ok');
+
+      if (showMsg !== false) {
+        showToast('コート設定を保存しました', 'ok');
+      }
     }
 
     function adjTimer(d) {
@@ -1835,28 +1908,42 @@
       updateSetupSummary();
     }
 
-    function saveTimer() {
-      S.timerMin = _timerMin;
+    function applyTimerSetting(min, silent) {
+      S.timerMin = min;
+      _timerMin = min;
       tTotal = S.timerMin * 60;
       tSec = tTotal;
+
+      var disp = document.getElementById('timer-setup-disp');
+      if (disp) disp.textContent = min;
+
       renderTimerDisplays();
       updateSetupSummary();
-      showToast('タイマーを' + _timerMin + '分に設定しました', 'ok');
+
+      if (!silent) {
+        showToast('タイマーを' + min + '分に設定しました', 'ok');
+      }
+    }
+
+    function saveTimer() {
+      applyTimerSetting(_timerMin, false);
     }
 
     var tSec = 420, tTotal = 420, tRun = false, tIv = null;
 
     function toggleGameTimer() {
+      var btn = document.getElementById('btn-start');
+
       if (tRun) {
         clearInterval(tIv);
         tRun = false;
-        document.getElementById('btn-start').textContent = '▶ ゲーム開始';
-        document.getElementById('btn-start').classList.remove('running');
+        btn.textContent = '▶ ゲーム開始';
+        btn.classList.remove('running');
       } else {
         tRun = true;
         tIv = setInterval(tickTimer, 1000);
-        document.getElementById('btn-start').textContent = '⏸ 一時停止';
-        document.getElementById('btn-start').classList.add('running');
+        btn.textContent = '⏸ 一時停止';
+        btn.classList.add('running');
       }
     }
 
@@ -1864,8 +1951,11 @@
       clearInterval(tIv);
       tRun = false;
       tSec = tTotal;
-      document.getElementById('btn-start').textContent = '▶ ゲーム開始';
-      document.getElementById('btn-start').classList.remove('running');
+
+      var btn = document.getElementById('btn-start');
+      btn.textContent = '▶ ゲーム開始';
+      btn.classList.remove('running');
+
       renderTimerDisplays();
     }
 
@@ -1873,12 +1963,16 @@
       if (tSec <= 0) {
         clearInterval(tIv);
         tRun = false;
-        document.getElementById('btn-start').textContent = '▶ ゲーム開始';
-        document.getElementById('btn-start').classList.remove('running');
+
+        var btn = document.getElementById('btn-start');
+        btn.textContent = '▶ ゲーム開始';
+        btn.classList.remove('running');
+
         playBeep();
         showToast('⏰ タイムです', 'ok');
         return;
       }
+
       tSec--;
       renderTimerDisplays();
     }
@@ -2288,7 +2382,7 @@
       var sPH = Object.assign({}, S.pairHist), sOH = Object.assign({}, S.oppHist);
       var sCGH = S.courtGroupHist.map(function(h){ return Object.assign({}, h); });
 
-      for (var r = 0; r < 5; r++) {
+      for (var r = 0; r < 3; r++) {
         var res = doAssignCalc(sp, bal, sPH, sOH, sCGH);
 
         sp.forEach(function(p){ p.lastWaited = false; });
@@ -2342,13 +2436,13 @@
           });
 
         S.futureRounds.push({
-          round:S.currentRound + 1 + r + 1,
-          waiters:futW,
-          courts:S.courts.map(function(court, ci){
+          round: S.currentRound + 1 + r + 1,
+          waiters: futW,
+          courts: S.courts.map(function(court, ci){
             return {
-              name:court.name,
-              mode:court.mode,
-              teams:[
+              name: court.name,
+              mode: court.mode,
+              teams: [
                 (res.courtAssignments[ci][0] || []).filter(Boolean).map(pLabel),
                 (res.courtAssignments[ci][1] || []).filter(Boolean).map(pLabel)
               ]
@@ -2373,14 +2467,14 @@
       }).map(pLabel);
 
       S.rounds.push({
-        round:S.currentRound + 1,
-        waiters:waiters,
-        courts:S.courts.map(function(c, ci){
+        round: S.currentRound + 1,
+        waiters: waiters,
+        courts: S.courts.map(function(c, ci){
           return {
-            name:c.name,
-            mode:c.mode,
-            teams:c.teams.map(function(t){ return (t || []).filter(Boolean).map(pLabel); }),
-            score:Object.assign({}, S.scores[ci])
+            name: c.name,
+            mode: c.mode,
+            teams: c.teams.map(function(t){ return (t || []).filter(Boolean).map(pLabel); }),
+            score: Object.assign({}, S.scores[ci])
           };
         })
       });
@@ -2440,6 +2534,7 @@
 
       S.currentRound++;
       document.getElementById('rnd-badge').textContent = '第' + (S.currentRound + 1) + 'ゲーム';
+
       resetGameTimer();
       doAutoAssign();
       renderPlayers();
@@ -2689,14 +2784,8 @@
 
       var head = document.createElement('div');
       head.className = 'timeline-head';
-      head.innerHTML = '<div class="timeline-head-title">進行予定</div><div class="timeline-head-sub">現在のゲームと、次の最大5ゲーム分を確認できます</div>';
+      head.innerHTML = '<div class="timeline-head-title">進行状況</div><div class="timeline-head-sub">現在のゲームと、次に入る組み合わせを確認できます</div>';
       el.appendChild(head);
-
-      var items = [];
-      var ps = Math.max(0, S.rounds.length - 2);
-      for (var i = ps; i < S.rounds.length; i++) {
-        items.push({type:'past', data:S.rounds[i]});
-      }
 
       var curOnCourt = {};
       S.courts.forEach(function(c){
@@ -2711,7 +2800,7 @@
         return p.active && !curOnCourt[p.no];
       }).map(pLabel);
 
-      items.push({
+      var currentItem = {
         type:'current',
         data:{
           round:S.currentRound + 1,
@@ -2725,24 +2814,24 @@
             };
           })
         }
-      });
+      };
 
-      S.futureRounds.slice(0, 5).forEach(function(r, idx){
-        items.push({type: idx === 0 ? 'next' : 'future', data:r});
-      });
+      el.appendChild(buildScCard(currentItem));
 
-      items.forEach(function(item){
-        el.appendChild(buildScCard(item));
+      S.futureRounds.slice(0, 3).forEach(function(r, idx){
+        el.appendChild(buildScCard({
+          type: idx === 0 ? 'next' : 'future',
+          data: r
+        }));
       });
     }
 
     function buildScCard(item) {
-      var past = item.type === 'past';
       var cur = item.type === 'current';
       var next = item.type === 'next';
 
       var card = document.createElement('div');
-      card.className = 'sc-card' + (past ? ' past' : cur ? ' cur' : next ? ' next' : ' future');
+      card.className = 'sc-card' + (cur ? ' cur' : next ? ' next' : ' future');
 
       var head = document.createElement('div');
       head.className = 'sc-head';
@@ -2753,7 +2842,7 @@
 
       var badge = document.createElement('span');
       badge.className = 'sc-badge';
-      badge.textContent = past ? '終了' : cur ? '進行中' : next ? '次' : '予定';
+      badge.textContent = cur ? '進行中' : next ? '次' : '予定';
 
       head.appendChild(rn);
       head.appendChild(badge);
@@ -2768,7 +2857,7 @@
 
         var cnm = document.createElement('div');
         cnm.className = 'sc-court-nm';
-        cnm.textContent = c.name;
+        cnm.innerHTML = '<span>' + c.name + '</span><span class="sc-court-mode">' + (c.mode === 'doubles' ? 'ダブルス' : 'シングル') + '</span>';
         blk.appendChild(cnm);
 
         var vsg = document.createElement('div');
@@ -2849,6 +2938,11 @@
       if (!el) return;
       el.innerHTML = '';
 
+      var intro = document.createElement('div');
+      intro.className = 'timeline-head';
+      intro.innerHTML = '<div class="timeline-head-title">履歴</div><div class="timeline-head-sub">終了したゲーム結果を確認できます</div>';
+      el.appendChild(intro);
+
       if (!S.rounds.length) {
         var empty = document.createElement('div');
         empty.className = 'timeline-head';
@@ -2891,6 +2985,13 @@
           body.appendChild(row);
         });
 
+        if (r.waiters && r.waiters.length) {
+          var waitRow = document.createElement('div');
+          waitRow.className = 'hrow';
+          waitRow.innerHTML = '<span class="hct">待機</span><span class="hpl">' + r.waiters.join(' / ') + '</span><span class="hsc"> </span>';
+          body.appendChild(waitRow);
+        }
+
         card.appendChild(body);
         el.appendChild(card);
       });
@@ -2904,18 +3005,24 @@
       clearTimeout(toastT);
       toastT = setTimeout(function(){
         t.className = '';
-      }, 3000);
+      }, 2200);
     }
 
-    renderCourtConfig1();
-    renderCourtConfig2();
-    renderTimerDisplays();
-    registerPlayers();
-    saveCourts();
-    saveTimer();
-    updateSetupSummary();
-    renderPlayers();
-    renderGame();
+    function initialSetup() {
+      renderCourtConfig1();
+      renderCourtConfig2();
+      registerPlayers(false);
+      saveCourts(false);
+      applyTimerSetting(_timerMin, true);
+      updateSetupSummary();
+      renderPlayers();
+      renderGame();
+      renderSched();
+      renderHistory();
+      gotoScreen('setup');
+    }
+
+    initialSetup();
   </script>
 </body>
 </html>
