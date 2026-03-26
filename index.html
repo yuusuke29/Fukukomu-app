@@ -1,4 +1,5 @@
  <!DOCTYPE html>
+
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -175,10 +176,11 @@
     }
 
     #main {
-      position: absolute;
-      inset: 0;
-      padding-top: calc(var(--safe-top) + var(--header-h));
-      padding-bottom: calc(var(--safe-bottom) + var(--footer-h));
+      position: fixed;
+      top: calc(var(--safe-top) + var(--header-h));
+      left: 0;
+      right: 0;
+      bottom: calc(var(--safe-bottom) + var(--footer-h));
       overflow: hidden;
     }
 
@@ -198,11 +200,12 @@
       pointer-events: all;
     }
 
+    /* ── 共通スクロール ── */
     .scrollable {
       flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: 18px;
+      padding: 16px 16px 28px;
     }
 
     .scrollable::-webkit-scrollbar {
@@ -477,6 +480,7 @@
     #toast.err  { background: rgba(201,143,143,0.94); color: #fff; border-color: transparent; }
     #toast.warn { background: rgba(216,184,156,0.96); color: #1A1B1E; border-color: transparent; }
 
+    /* ── Setup Screen ── */
     #screen-setup .scrollable {
       padding: 0 0 28px;
     }
@@ -687,6 +691,7 @@
       color: var(--t2);
     }
 
+    /* ── Game Screen ── */
     #screen-game .scrollable {
       padding: 0 0 24px;
     }
@@ -1014,7 +1019,8 @@
       overflow: hidden;
       box-shadow: var(--shadow1);
     }
-        .rest-header {
+
+    .rest-header {
       padding: 12px 14px;
       border-bottom: 1px solid var(--ln2);
       font-size: 16px;
@@ -1055,32 +1061,27 @@
       color: var(--t3);
     }
 
- #screen-players .scrollable {
-  padding: 24px 16px 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  overflow-x: visible;
-}
-#screen-courts .scrollable {
-  padding: 16px 16px 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
+    /* ── Players Screen ──
+       FIX: scrollableにflexを当てず、pgridが2カラムで正しく展開できるようにする */
+    #screen-players .scrollable {
+      padding: 16px 16px 24px;
+    }
+
     .players-top {
       display: flex;
       gap: 10px;
       align-items: center;
       flex-wrap: wrap;
+      margin-bottom: 14px;
     }
 
+    /* FIX: pgridの親(scrollable)がflexコンテナではないのでwidthが100%になる */
     .pgrid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
-      overflow: visible;
     }
+
     .pcard {
       background: var(--card);
       border: 1px solid var(--ln);
@@ -1097,8 +1098,6 @@
       box-shadow: var(--shadow1);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      overflow: visible;
-      z-index: 1;
     }
 
     .pcard:active {
@@ -1174,7 +1173,7 @@
       border-radius: 18px;
       padding: 14px;
       box-shadow: var(--shadow2);
-     }
+    }
 
     .np-row {
       display: flex;
@@ -1206,9 +1205,24 @@
       cursor: pointer;
     }
 
+    /* ── Courts Screen ── */
+    #screen-courts .scrollable {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px 16px 24px;
+    }
+
+    /* ── Schedule & History ──
+       FIX: gap付きflexをscrollableに当てると高さが正しく計算されないため
+            内側のwrapperで管理する */
     #screen-schedule .scrollable,
     #screen-history .scrollable {
       padding: 12px 16px 24px;
+    }
+
+    .sched-inner,
+    .hist-inner {
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -1264,7 +1278,12 @@
       border-bottom: 1px solid var(--ln2);
     }
 
-    .sc-round,
+    .sc-round {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--t1);
+    }
+
     .hhead {
       font-size: 18px;
       font-weight: 800;
@@ -1335,14 +1354,14 @@
       gap: 6px;
     }
 
-   .sc-player {
+    .sc-player {
       font-size: 15px;
       font-weight: 700;
       color: var(--t1);
       line-height: 1.5;
       word-break: break-word;
-   }
-  
+    }
+
     .sc-player.emp {
       color: var(--t4);
       font-style: italic;
@@ -1386,14 +1405,14 @@
       color: var(--t2);
     }
 
-   .hbody {
+    .hbody {
       padding: 12px 16px 16px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-   
-   .hrow {
+
+    .hrow {
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -1441,6 +1460,7 @@
       .hnav-btn { padding: 0 12px; font-size: 14px; }
     }
   </style>
+
 </head>
 <body>
   <div id="app">
@@ -1458,197 +1478,212 @@
       </div>
     </div>
 
-    <div id="main">
-      <div id="screen-setup" class="screen active">
-        <div class="scrollable">
-          <div class="setup-hero">
-            <h1>Pickleball Manager</h1>
-            <p>参加者・コート・タイマーを設定して、すぐにゲームを回せます</p>
-          </div>
-
-          <div class="setup-area">
-            <div class="setup-card">
-              <div class="setup-card-head">
-                <div class="setup-card-title">参加者</div>
-                <div class="setup-card-summary" id="setup-player-summary">12名</div>
-              </div>
-              <div class="setup-card-body">
-                <div class="setup-help">当日の参加人数を設定します（0〜30名）</div>
-                <div class="count-row">
-                  <div class="stepper">
-                    <button class="step-btn" onclick="adjPlayers(-1)">−</button>
-                    <div class="step-val" id="player-count-disp">12</div>
-                    <button class="step-btn" onclick="adjPlayers(1)">＋</button>
-                  </div>
-                  <span style="font-size:14px;color:var(--t2)">名</span>
-                </div>
-                <button class="btn-action primary" onclick="registerPlayers()">参加者を登録する</button>
-              </div>
-            </div>
-
-            <div class="setup-card">
-              <div class="setup-card-head">
-                <div class="setup-card-title">コート設定</div>
-                <div class="setup-card-summary" id="setup-court-summary">3面</div>
-              </div>
-              <div class="setup-card-body">
-                <div class="setup-help">使用するコート数と、各コートの形式を設定します</div>
-                <div class="count-row">
-                  <div class="stepper">
-                    <button class="step-btn" onclick="adjCourts(-1)">−</button>
-                    <div class="step-val" id="court-count-disp">3</div>
-                    <button class="step-btn" onclick="adjCourts(1)">＋</button>
-                  </div>
-                  <span style="font-size:14px;color:var(--t2)">面（1〜6）</span>
-                </div>
-                <div class="court-config-list" id="court-config-list"></div>
-                <div style="margin-top:14px">
-                  <button class="btn-action primary" onclick="saveCourts()">コートを保存する</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="setup-card">
-              <div class="setup-card-head">
-                <div class="setup-card-title">タイマー設定</div>
-                <div class="setup-card-summary" id="setup-timer-summary">7分</div>
-              </div>
-              <div class="setup-card-body">
-                <div class="setup-help">1ゲームあたりの時間を設定します</div>
-                <div class="timer-setup-row">
-                  <div class="stepper">
-                    <button class="step-btn" onclick="adjTimer(-1)">−</button>
-                    <div class="step-val" id="timer-setup-disp">7</div>
-                    <button class="step-btn" onclick="adjTimer(1)">＋</button>
-                  </div>
-                  <span style="font-size:14px;color:var(--t2)">分</span>
-                </div>
-                <button class="btn-action primary" onclick="saveTimer()">タイマーを保存する</button>
-              </div>
-            </div>
-
-            <div class="bal-row">
-              <div>
-                <div class="bal-lbl">実力均衡モード</div>
-                <div class="bal-sub">勝敗記録をもとに近い実力同士でマッチングします</div>
-              </div>
-              <label class="sw">
-                <input type="checkbox" id="bal-tog">
-                <div class="sw-tr"></div>
-              </label>
-            </div>
-
-            <div class="setup-card">
-              <div class="setup-card-head">
-                <div class="setup-card-title">開始準備</div>
-                <div class="setup-card-summary">自動配置</div>
-              </div>
-              <div class="setup-card-body">
-                <div class="setup-help">現在の設定内容でゲームを自動配置します</div>
-                <button class="btn-action green" onclick="doAutoAssign()" id="auto-assign-btn" style="height:58px;font-size:18px;">
-                  🔀 自動配置してゲーム開始
-                </button>
-                <div class="status-chips" id="setup-status-chips"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+```
+<div id="main">
+  <!-- ホーム -->
+  <div id="screen-setup" class="screen active">
+    <div class="scrollable">
+      <div class="setup-hero">
+        <h1>Pickleball Manager</h1>
+        <p>参加者・コート・タイマーを設定して、すぐにゲームを回せます</p>
       </div>
 
-      <div id="screen-game" class="screen">
-        <div class="timer-bar-wrap">
-          <div class="timer-top-grid">
-            <div class="timer-left">
-              <div id="game-timer-disp">07:00</div>
-              <div class="timer-round-label" id="rnd-badge">第1ゲーム</div>
-            </div>
-            <div class="timer-right">
-              <button class="btn-start" id="btn-start" onclick="toggleGameTimer()">▶ ゲーム開始</button>
-              <button class="btn-timer-reset" onclick="resetGameTimer()" title="リセット">↺</button>
-            </div>
+      <div class="setup-area">
+        <div class="setup-card">
+          <div class="setup-card-head">
+            <div class="setup-card-title">参加者</div>
+            <div class="setup-card-summary" id="setup-player-summary">12名</div>
           </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="progress-fill" style="width:100%"></div>
-          </div>
-        </div>
-
-        <div class="game-actions">
-          <button class="btn-action secondary" style="flex:1" onclick="doAutoAssign()">🔀 再配置</button>
-          <button class="btn-action primary" style="flex:1" onclick="nextRound()">次のゲーム ▶</button>
-        </div>
-
-        <div class="scrollable">
-          <div class="game-courts" id="game-courts"></div>
-        </div>
-      </div>
-
-      <div id="screen-players" class="screen">
-        <div class="scrollable">
-          <div class="players-top">
-              <button class="btn-action primary" style="width:100%;height:48px" onclick="registerPlayers()">参加者を更新</button>
-             </div>          
-            <div class="stepper" style="transform:scale(.85);transform-origin:left">
-              <button class="step-btn" onclick="adjPlayers(-1)">−</button>
-              <div class="step-val" id="player-count-disp2">12</div>
-              <button class="step-btn" onclick="adjPlayers(1)">＋</button>
-            </div>
-            <button class="btn-action primary" style="flex:1;height:44px" onclick="registerPlayers()">登録を更新</button>
-          </div>
-          <div class="pgrid" id="pgrid"></div>
-        </div>
-      </div>
-
-      <div id="screen-courts" class="screen">
-        <div class="scrollable">
-          <div class="setup-card">
-            <div class="setup-card-head">
-              <div class="setup-card-title">コート数</div>
-              <div class="setup-card-summary" id="court-screen-summary">3面</div>
-            </div>
-            <div class="setup-card-body">
-              <div class="count-row">
-                <div class="stepper">
-                  <button class="step-btn" onclick="adjCourts(-1)">−</button>
-                  <div class="step-val" id="court-count-disp2">3</div>
-                  <button class="step-btn" onclick="adjCourts(1)">＋</button>
-                </div>
-                <span style="font-size:14px;color:var(--t2)">面（1〜6）</span>
+          <div class="setup-card-body">
+            <div class="setup-help">当日の参加人数を設定します（0〜30名）</div>
+            <div class="count-row">
+              <div class="stepper">
+                <button class="step-btn" onclick="adjPlayers(-1)">−</button>
+                <div class="step-val" id="player-count-disp">12</div>
+                <button class="step-btn" onclick="adjPlayers(1)">＋</button>
               </div>
+              <span style="font-size:14px;color:var(--t2)">名</span>
+            </div>
+            <button class="btn-action primary" onclick="registerPlayers()">参加者を登録する</button>
+          </div>
+        </div>
+
+        <div class="setup-card">
+          <div class="setup-card-head">
+            <div class="setup-card-title">コート設定</div>
+            <div class="setup-card-summary" id="setup-court-summary">3面</div>
+          </div>
+          <div class="setup-card-body">
+            <div class="setup-help">使用するコート数と、各コートの形式を設定します</div>
+            <div class="count-row">
+              <div class="stepper">
+                <button class="step-btn" onclick="adjCourts(-1)">−</button>
+                <div class="step-val" id="court-count-disp">3</div>
+                <button class="step-btn" onclick="adjCourts(1)">＋</button>
+              </div>
+              <span style="font-size:14px;color:var(--t2)">面（1〜6）</span>
+            </div>
+            <div class="court-config-list" id="court-config-list"></div>
+            <div style="margin-top:14px">
+              <button class="btn-action primary" onclick="saveCourts()">コートを保存する</button>
             </div>
           </div>
+        </div>
 
-          <div class="court-config-list" id="court-config-list2"></div>
+        <div class="setup-card">
+          <div class="setup-card-head">
+            <div class="setup-card-title">タイマー設定</div>
+            <div class="setup-card-summary" id="setup-timer-summary">7分</div>
+          </div>
+          <div class="setup-card-body">
+            <div class="setup-help">1ゲームあたりの時間を設定します</div>
+            <div class="timer-setup-row">
+              <div class="stepper">
+                <button class="step-btn" onclick="adjTimer(-1)">−</button>
+                <div class="step-val" id="timer-setup-disp">7</div>
+                <button class="step-btn" onclick="adjTimer(1)">＋</button>
+              </div>
+              <span style="font-size:14px;color:var(--t2)">分</span>
+            </div>
+            <button class="btn-action primary" onclick="saveTimer()">タイマーを保存する</button>
+          </div>
+        </div>
 
+        <div class="bal-row">
           <div>
-            <button class="btn-action primary" onclick="saveCourts()">コートを保存する</button>
+            <div class="bal-lbl">実力均衡モード</div>
+            <div class="bal-sub">勝敗記録をもとに近い実力同士でマッチングします</div>
+          </div>
+          <label class="sw">
+            <input type="checkbox" id="bal-tog">
+            <div class="sw-tr"></div>
+          </label>
+        </div>
+
+        <div class="setup-card">
+          <div class="setup-card-head">
+            <div class="setup-card-title">開始準備</div>
+            <div class="setup-card-summary">自動配置</div>
+          </div>
+          <div class="setup-card-body">
+            <div class="setup-help">現在の設定内容でゲームを自動配置します</div>
+            <button class="btn-action green" onclick="doAutoAssign()" id="auto-assign-btn" style="height:58px;font-size:18px;">
+              🔀 自動配置してゲーム開始
+            </button>
+            <div class="status-chips" id="setup-status-chips"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ゲーム -->
+  <div id="screen-game" class="screen">
+    <div class="timer-bar-wrap">
+      <div class="timer-top-grid">
+        <div class="timer-left">
+          <div id="game-timer-disp">07:00</div>
+          <div class="timer-round-label" id="rnd-badge">第1ゲーム</div>
+        </div>
+        <div class="timer-right">
+          <button class="btn-start" id="btn-start" onclick="toggleGameTimer()">▶ ゲーム開始</button>
+          <button class="btn-timer-reset" onclick="resetGameTimer()" title="リセット">↺</button>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:100%"></div>
+      </div>
+    </div>
+
+    <div class="game-actions">
+      <button class="btn-action secondary" style="flex:1" onclick="doAutoAssign()">🔀 再配置</button>
+      <button class="btn-action primary" style="flex:1" onclick="nextRound()">次のゲーム ▶</button>
+    </div>
+
+    <div class="scrollable">
+      <div class="game-courts" id="game-courts"></div>
+    </div>
+  </div>
+
+  <!-- 参加者
+       FIX: HTMLの構造を修正（ネストのズレを解消）。
+            players-topの中に余分なdivが混入していたのを整理。 -->
+  <div id="screen-players" class="screen">
+    <div class="scrollable">
+      <div class="players-top">
+        <div class="stepper" style="transform:scale(.85);transform-origin:left">
+          <button class="step-btn" onclick="adjPlayers(-1)">−</button>
+          <div class="step-val" id="player-count-disp2">12</div>
+          <button class="step-btn" onclick="adjPlayers(1)">＋</button>
+        </div>
+        <button class="btn-action primary" style="flex:1;height:44px" onclick="registerPlayers()">登録を更新</button>
+      </div>
+      <div class="pgrid" id="pgrid"></div>
+    </div>
+  </div>
+
+  <!-- コート -->
+  <div id="screen-courts" class="screen">
+    <div class="scrollable">
+      <div class="setup-card">
+        <div class="setup-card-head">
+          <div class="setup-card-title">コート数</div>
+          <div class="setup-card-summary" id="court-screen-summary">3面</div>
+        </div>
+        <div class="setup-card-body">
+          <div class="count-row">
+            <div class="stepper">
+              <button class="step-btn" onclick="adjCourts(-1)">−</button>
+              <div class="step-val" id="court-count-disp2">3</div>
+              <button class="step-btn" onclick="adjCourts(1)">＋</button>
+            </div>
+            <span style="font-size:14px;color:var(--t2)">面（1〜6）</span>
           </div>
         </div>
       </div>
 
-      <div id="screen-schedule" class="screen">
-        <div class="scrollable" id="sched-scroll"></div>
-      </div>
+      <div class="court-config-list" id="court-config-list2"></div>
 
-      <div id="screen-history" class="screen">
-        <div class="scrollable" id="hist-scroll"></div>
+      <div>
+        <button class="btn-action primary" onclick="saveCourts()">コートを保存する</button>
       </div>
     </div>
+  </div>
 
-    <div id="footer">
-      <div class="footer-inner">
-        <button class="foot-btn" onclick="gotoScreen('schedule')" id="fnav-schedule">
-          <span class="icon">📅</span>進行
-        </button>
-        <button class="foot-btn active" onclick="gotoScreen('setup')" id="fnav-setup">
-          <span class="icon">🏠</span>ホーム
-        </button>
-        <button class="foot-btn" onclick="gotoScreen('history')" id="fnav-history">
-          <span class="icon">📋</span>履歴
-        </button>
-      </div>
+  <!-- 進行
+       FIX: scrollableの直下にsched-innerラッパーを挟む -->
+  <div id="screen-schedule" class="screen">
+    <div class="scrollable">
+      <div class="sched-inner" id="sched-scroll"></div>
     </div>
+  </div>
 
-    <div id="toast"></div>
+  <!-- 履歴
+       FIX: scrollableの直下にhist-innerラッパーを挟む -->
+  <div id="screen-history" class="screen">
+    <div class="scrollable">
+      <div class="hist-inner" id="hist-scroll"></div>
+    </div>
+  </div>
+</div>
+
+<div id="footer">
+  <div class="footer-inner">
+    <button class="foot-btn" onclick="gotoScreen('schedule')" id="fnav-schedule">
+      <span class="icon">📅</span>進行
+    </button>
+    <button class="foot-btn active" onclick="gotoScreen('setup')" id="fnav-setup">
+      <span class="icon">🏠</span>ホーム
+    </button>
+    <button class="foot-btn" onclick="gotoScreen('history')" id="fnav-history">
+      <span class="icon">📋</span>履歴
+    </button>
+  </div>
+</div>
+
+<div id="toast"></div>
+```
+
   </div>
 
   <script>
@@ -1773,9 +1808,8 @@
     function adjPlayers(d) {
       _playerCount = Math.max(0, Math.min(30, _playerCount + d));
       document.getElementById('player-count-disp').textContent = _playerCount;
-      if (document.getElementById('player-count-disp2')) {
-        document.getElementById('player-count-disp2').textContent = _playerCount;
-      }
+      var d2 = document.getElementById('player-count-disp2');
+      if (d2) d2.textContent = _playerCount;
       updateSetupSummary();
     }
 
@@ -1790,13 +1824,9 @@
       for (var no = 1; no <= count; no++) {
         var ex = S.players.find(function(p){ return p.no === no; });
         newP.push(ex || {
-          no:no,
-          nick:'',
-          active:true,
-          waitCount:0,
-          lastWaited:false,
-          wins:0,
-          losses:0
+          no:no, nick:'', active:true,
+          waitCount:0, lastWaited:false,
+          wins:0, losses:0
         });
       }
       S.players = newP;
@@ -1812,9 +1842,8 @@
     function adjCourts(d) {
       _courtCount = Math.max(1, Math.min(6, _courtCount + d));
       document.getElementById('court-count-disp').textContent = _courtCount;
-      if (document.getElementById('court-count-disp2')) {
-        document.getElementById('court-count-disp2').textContent = _courtCount;
-      }
+      var d2 = document.getElementById('court-count-disp2');
+      if (d2) d2.textContent = _courtCount;
 
       while (tmpCourtConfig.length < _courtCount) {
         var idx = tmpCourtConfig.length;
@@ -1841,9 +1870,7 @@
       inp.value = cfg.name;
       inp.placeholder = 'コート名';
       inp.oninput = (function(i){
-        return function(){
-          tmpCourtConfig[i].name = this.value;
-        };
+        return function(){ tmpCourtConfig[i].name = this.value; };
       })(idx);
 
       top.appendChild(inp);
@@ -1907,10 +1934,7 @@
       initCourtHist();
       S.courtCount = _courtCount;
       updateSetupSummary();
-
-      if (showMsg !== false) {
-        showToast('コート設定を保存しました', 'ok');
-      }
+      if (showMsg !== false) showToast('コート設定を保存しました', 'ok');
     }
 
     function adjTimer(d) {
@@ -1931,9 +1955,7 @@
       renderTimerDisplays();
       updateSetupSummary();
 
-      if (!silent) {
-        showToast('タイマーを' + min + '分に設定しました', 'ok');
-      }
+      if (!silent) showToast('タイマーを' + min + '分に設定しました', 'ok');
     }
 
     function saveTimer() {
@@ -1944,7 +1966,6 @@
 
     function toggleGameTimer() {
       var btn = document.getElementById('btn-start');
-
       if (tRun) {
         clearInterval(tIv);
         tRun = false;
@@ -1962,11 +1983,9 @@
       clearInterval(tIv);
       tRun = false;
       tSec = tTotal;
-
       var btn = document.getElementById('btn-start');
       btn.textContent = '▶ ゲーム開始';
       btn.classList.remove('running');
-
       renderTimerDisplays();
     }
 
@@ -1974,16 +1993,13 @@
       if (tSec <= 0) {
         clearInterval(tIv);
         tRun = false;
-
         var btn = document.getElementById('btn-start');
         btn.textContent = '▶ ゲーム開始';
         btn.classList.remove('running');
-
         playBeep();
         showToast('⏰ タイムです', 'ok');
         return;
       }
-
       tSec--;
       renderTimerDisplays();
     }
@@ -1994,15 +2010,8 @@
       var cls = tSec === 0 ? 'done' : tSec <= 30 ? 'warn' : '';
       var el1 = document.getElementById('game-timer-disp');
       var el2 = document.getElementById('h-timer');
-
-      if (el1) {
-        el1.textContent = txt;
-        el1.className = cls;
-      }
-      if (el2) {
-        el2.textContent = txt;
-        el2.className = cls;
-      }
+      if (el1) { el1.textContent = txt; el1.className = cls; }
+      if (el2) { el2.textContent = txt; el2.className = cls; }
 
       var pct = tTotal > 0 ? (tSec / tTotal) * 100 : 0;
       var pf = document.getElementById('progress-fill');
@@ -2017,15 +2026,12 @@
         var ctx = new (window.AudioContext || window.webkitAudioContext)();
         [660,880,1100,880,660,880].forEach(function(f, i){
           var o = ctx.createOscillator(), g = ctx.createGain();
-          o.connect(g);
-          g.connect(ctx.destination);
-          o.frequency.value = f;
-          o.type = 'sine';
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.value = f; o.type = 'sine';
           var t = ctx.currentTime + i * .18;
           g.gain.setValueAtTime(.4, t);
           g.gain.exponentialRampToValueAtTime(.001, t + .15);
-          o.start(t);
-          o.stop(t + .15);
+          o.start(t); o.stop(t + .15);
         });
       } catch(e){}
     }
@@ -2040,10 +2046,12 @@
       showToast((p.nick ? p.nick + '（No.' + p.no + '）' : 'No.' + p.no) + ' を' + (p.active ? '参加' : '退場') + 'にしました');
     }
 
+    /* ── FIX: renderPlayers ──
+       pgridの親(scrollable)にflex指定がなくなったので、
+       グリッドが全幅でレンダリングされ全員分のカードが表示される */
     function renderPlayers() {
       var grid = document.getElementById('pgrid');
       if (!grid) return;
-
       grid.innerHTML = '';
 
       var disp2 = document.getElementById('player-count-disp2');
@@ -2081,15 +2089,12 @@
 
           var wl = document.createElement('div');
           wl.className = 'pcard-stats';
-
           var ws = document.createElement('span');
           ws.className = 'tag win';
           ws.textContent = 'W ' + p.wins;
-
           var ls = document.createElement('span');
           ls.className = 'tag lose';
           ls.textContent = 'L ' + p.losses;
-
           wl.appendChild(ws);
           wl.appendChild(ls);
           card.appendChild(wl);
@@ -2107,92 +2112,69 @@
         });
     }
 
-function openNickEdit(no, evt) {
-  evt.stopPropagation();
+    function openNickEdit(no, evt) {
+      evt.stopPropagation();
+      document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); });
 
-  document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); });
-  document.querySelectorAll('.pcard').forEach(function(card){
-    card.style.zIndex = 1;
-  });
+      var p = S.players.find(function(x){ return x.no === no; });
+      if (!p) return;
 
-  var p = S.players.find(function(x){ return x.no === no; });
-  if (!p) return;
+      var card = evt.currentTarget;
+      card.style.position = 'relative';
+      card.style.zIndex = '50';
 
-  var card = evt.currentTarget;
-  card.style.position = 'relative';
-  card.style.zIndex = 50;
+      var pop = document.createElement('div');
+      pop.className = 'nick-popover';
 
-  var pop = document.createElement('div');
-  pop.className = 'nick-popover';
+      var lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:12px;font-weight:800;color:var(--t2);margin-bottom:8px';
+      lbl.textContent = 'No.' + no + ' のニックネーム';
+      pop.appendChild(lbl);
 
-  var lbl = document.createElement('div');
-  lbl.style.cssText = 'font-size:12px;font-weight:800;color:var(--t2);margin-bottom:8px';
-  lbl.textContent = 'No.' + no + ' のニックネーム';
-  pop.appendChild(lbl);
+      var inp = document.createElement('input');
+      inp.className = 'inp-field';
+      inp.type = 'text';
+      inp.value = p.nick || '';
+      inp.placeholder = 'ニックネームを入力';
+      inp.maxLength = 20;
+      inp.onkeydown = function(e){
+        if (e.key === 'Enter') { e.preventDefault(); saveNick(no, inp.value); }
+        if (e.key === 'Escape') closeNickEdit();
+      };
+      pop.appendChild(inp);
 
-  var inp = document.createElement('input');
-  inp.className = 'inp-field';
-  inp.type = 'text';
-  inp.value = p.nick || '';
-  inp.placeholder = 'ニックネームを入力';
-  inp.maxLength = 20;
-  inp.onkeydown = function(e){
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      saveNick(no, inp.value);
+      var row = document.createElement('div');
+      row.className = 'np-row';
+
+      var sb = document.createElement('button');
+      sb.className = 'np-save';
+      sb.textContent = '保存';
+      sb.onclick = function(e){ e.stopPropagation(); saveNick(no, inp.value); };
+      row.appendChild(sb);
+
+      var cb = document.createElement('button');
+      cb.className = 'np-cancel';
+      cb.textContent = 'キャンセル';
+      cb.onclick = function(e){ e.stopPropagation(); closeNickEdit(); };
+      row.appendChild(cb);
+
+      pop.appendChild(row);
+      card.appendChild(pop);
+
+      setTimeout(function(){ inp.focus(); inp.select(); }, 30);
+      setTimeout(function(){
+        document.addEventListener('click', outsideClose, {once:true});
+      }, 50);
     }
-    if (e.key === 'Escape') closeNickEdit();
-  };
-  pop.appendChild(inp);
 
-  var row = document.createElement('div');
-  row.className = 'np-row';
-
-  var sb = document.createElement('button');
-  sb.className = 'np-save';
-  sb.textContent = '保存';
-  sb.onclick = function(e){
-    e.stopPropagation();
-    saveNick(no, inp.value);
-  };
-  row.appendChild(sb);
-
-  var cb = document.createElement('button');
-  cb.className = 'np-cancel';
-  cb.textContent = 'キャンセル';
-  cb.onclick = function(e){
-    e.stopPropagation();
-    closeNickEdit();
-  };
-  row.appendChild(cb);
-
-  pop.appendChild(row);
-  card.appendChild(pop);
-
-  setTimeout(function(){
-    inp.focus();
-    inp.select();
-  }, 30);
-
-  setTimeout(function(){
-    document.addEventListener('click', outsideClose, {once:true});
-  }, 50);
-}
-
-   
     function outsideClose() {
       document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); });
     }
 
+    function closeNickEdit() {
+      document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); });
+    }
 
-function closeNickEdit() {
-  document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); });
-  document.querySelectorAll('.pcard').forEach(function(card){
-    card.style.zIndex = 1;
-  });
-}
-
-   
     function saveNick(no, v) {
       var p = S.players.find(function(x){ return x.no === no; });
       if (!p) return;
@@ -2236,19 +2218,14 @@ function closeNickEdit() {
       var a = four[0], b = four[1], c = four[2], d = four[3];
       var opts = [[[a,b],[c,d]], [[a,c],[b,d]], [[a,d],[b,c]]];
       var best = opts[0], bs = Infinity;
-
       opts.forEach(function(opt){
         var pc = function(x, y){
           if (!x || !y) return 0;
           return pH[[x.no, y.no].sort().join('-')] || 0;
         };
         var s = pc(opt[0][0], opt[0][1]) + pc(opt[1][0], opt[1][1]);
-        if (s < bs) {
-          bs = s;
-          best = opt;
-        }
+        if (s < bs) { bs = s; best = opt; }
       });
-
       return best;
     }
 
@@ -2256,7 +2233,6 @@ function closeNickEdit() {
       if (k === 0) return [[]];
       if (!arr.length) return [];
       if (arr.length > 12) arr = arr.slice(0, 12);
-
       var f = arr[0], r = arr.slice(1);
       return getCombos(r, k - 1).map(function(c){ return [f].concat(c); }).concat(getCombos(r, k));
     }
@@ -2264,9 +2240,7 @@ function closeNickEdit() {
     function shuffleArr(arr) {
       for (var i = arr.length - 1; i > 0; i--) {
         var r = Math.floor(Math.random() * (i + 1));
-        var t = arr[i];
-        arr[i] = arr[r];
-        arr[r] = t;
+        var t = arr[i]; arr[i] = arr[r]; arr[r] = t;
       }
     }
 
@@ -2274,9 +2248,7 @@ function closeNickEdit() {
       var slots = getSlots();
       var total = slots.reduce(function(a, b){ return a + b; }, 0);
 
-      var sorted = pool.slice().sort(function(a, b){
-        return waitPri(a) - waitPri(b);
-      });
+      var sorted = pool.slice().sort(function(a, b){ return waitPri(a) - waitPri(b); });
 
       if (bal) {
         sorted.sort(function(a, b){
@@ -2305,10 +2277,7 @@ function closeNickEdit() {
 
       S.courts.forEach(function(court, ci){
         var s = slots[ci];
-        if (s === 0) {
-          courtAssignments.push([[],[]]);
-          return;
-        }
+        if (s === 0) { courtAssignments.push([[],[]]); return; }
 
         if (rem.length <= s) {
           var g = rem.splice(0, s);
@@ -2325,10 +2294,7 @@ function closeNickEdit() {
           var combos = getCombos(cands, need), bst = combos[0], bss = Infinity;
           combos.forEach(function(combo){
             var g2 = must.concat(combo), sc = groupAvoid(g2, ci, pH, oH, cgH);
-            if (sc < bss) {
-              bss = sc;
-              bst = combo;
-            }
+            if (sc < bss) { bss = sc; bst = combo; }
           });
           chosen = must.concat(bst);
         }
@@ -2344,19 +2310,13 @@ function closeNickEdit() {
       return {courtAssignments:courtAssignments, waiters:waiters};
     }
 
-        function doAutoAssign() {
+    function doAutoAssign() {
       var active = S.players.filter(function(p){ return p.active; });
-      if (active.length < 2) {
-        showToast('参加者が足りません（最低2名）', 'err');
-        return;
-      }
+      if (active.length < 2) { showToast('参加者が足りません（最低2名）', 'err'); return; }
 
       var slots = getSlots();
       var total = slots.reduce(function(a, b){ return a + b; }, 0);
-      if (total === 0) {
-        showToast('使用コートを設定してください', 'err');
-        return;
-      }
+      if (total === 0) { showToast('使用コートを設定してください', 'err'); return; }
 
       if (active.length < total) {
         showToast('参加者が不足しています（必要 ' + total + '名 / 現在 ' + active.length + '名）', 'err');
@@ -2366,25 +2326,15 @@ function closeNickEdit() {
       var bal = document.getElementById('bal-tog').checked;
       var res = doAssignCalc(active, bal, S.pairHist, S.oppHist, S.courtGroupHist);
 
-      S.players.forEach(function(p){
-        if (p.active) p.lastWaited = false;
-      });
+      S.players.forEach(function(p){ if (p.active) p.lastWaited = false; });
 
       res.waiters.forEach(function(w){
         var sp = S.players.find(function(x){ return x.no === w.no; });
-        if (sp) {
-          sp.waitCount++;
-          sp.lastWaited = true;
-        }
+        if (sp) { sp.waitCount++; sp.lastWaited = true; }
       });
 
-      S.courts.forEach(function(c, ci){
-        c.teams = res.courtAssignments[ci];
-      });
-
-      S.scores = S.courts.map(function(){
-        return {team1:'', team2:''};
-      });
+      S.courts.forEach(function(c, ci){ c.teams = res.courtAssignments[ci]; });
+      S.scores = S.courts.map(function(){ return {team1:'', team2:''}; });
 
       computeFuture();
       renderGame();
@@ -2408,13 +2358,9 @@ function closeNickEdit() {
         var res = doAssignCalc(sp, bal, sPH, sOH, sCGH);
 
         sp.forEach(function(p){ p.lastWaited = false; });
-
         res.waiters.forEach(function(w){
           var x = sp.find(function(p){ return p.no === w.no; });
-          if (x) {
-            x.waitCount++;
-            x.lastWaited = true;
-          }
+          if (x) { x.waitCount++; x.lastWaited = true; }
         });
 
         S.courts.forEach(function(court, ci){
@@ -2444,9 +2390,7 @@ function closeNickEdit() {
         var futOnCourt = {};
         S.courts.forEach(function(court, ci){
           (res.courtAssignments[ci] || [[],[]]).forEach(function(team){
-            (team || []).filter(Boolean).forEach(function(p){
-              futOnCourt[p.no] = true;
-            });
+            (team || []).filter(Boolean).forEach(function(p){ futOnCourt[p.no] = true; });
           });
         });
 
@@ -2462,8 +2406,7 @@ function closeNickEdit() {
           waiters: futW,
           courts: S.courts.map(function(court, ci){
             return {
-              name: court.name,
-              mode: court.mode,
+              name: court.name, mode: court.mode,
               teams: [
                 (res.courtAssignments[ci][0] || []).filter(Boolean).map(pLabel),
                 (res.courtAssignments[ci][1] || []).filter(Boolean).map(pLabel)
@@ -2478,9 +2421,7 @@ function closeNickEdit() {
       var onCourt = {};
       S.courts.forEach(function(c){
         c.teams.forEach(function(t){
-          (t || []).filter(Boolean).forEach(function(p){
-            onCourt[p.no] = true;
-          });
+          (t || []).filter(Boolean).forEach(function(p){ onCourt[p.no] = true; });
         });
       });
 
@@ -2493,8 +2434,7 @@ function closeNickEdit() {
         waiters: waiters,
         courts: S.courts.map(function(c, ci){
           return {
-            name: c.name,
-            mode: c.mode,
+            name: c.name, mode: c.mode,
             teams: c.teams.map(function(t){ return (t || []).filter(Boolean).map(pLabel); }),
             score: Object.assign({}, S.scores[ci])
           };
@@ -2503,7 +2443,6 @@ function closeNickEdit() {
 
       S.courts.forEach(function(court, ci){
         if (court.mode === 'unused') return;
-
         var t1 = (court.teams[0] || []).filter(Boolean);
         var t2 = (court.teams[1] || []).filter(Boolean);
         var gk = groupKey(t1.concat(t2));
@@ -2531,26 +2470,17 @@ function closeNickEdit() {
         var s1 = parseInt(S.scores[ci].team1, 10);
         var s2 = parseInt(S.scores[ci].team2, 10);
         if (isNaN(s1) || isNaN(s2)) return;
-
         var t1 = (court.teams[0] || []).filter(Boolean);
         var t2 = (court.teams[1] || []).filter(Boolean);
-        var w1 = s1 > s2;
-        var w2 = s2 > s1;
+        var w1 = s1 > s2, w2 = s2 > s1;
 
         t1.forEach(function(p){
           var sp = S.players.find(function(x){ return x.no === p.no; });
-          if (sp) {
-            if (w1) sp.wins++;
-            else if (w2) sp.losses++;
-          }
+          if (sp) { if (w1) sp.wins++; else if (w2) sp.losses++; }
         });
-
         t2.forEach(function(p){
           var sp = S.players.find(function(x){ return x.no === p.no; });
-          if (sp) {
-            if (w2) sp.wins++;
-            else if (w1) sp.losses++;
-          }
+          if (sp) { if (w2) sp.wins++; else if (w1) sp.losses++; }
         });
       });
 
@@ -2567,62 +2497,45 @@ function closeNickEdit() {
     function recordScore(ci) {
       var v1 = document.getElementById('sa-' + ci).value;
       var v2 = document.getElementById('sb-' + ci).value;
-
-      if (v1 === '' || v2 === '') {
-        showToast('両チームのスコアを入力してください', 'err');
-        return;
-      }
-
+      if (v1 === '' || v2 === '') { showToast('両チームのスコアを入力してください', 'err'); return; }
       var already = S.scores[ci].team1 !== '' && S.scores[ci].team2 !== '';
       S.scores[ci] = {team1:v1, team2:v2};
-
       var sa = document.getElementById('score-section-' + ci);
       if (sa) sa.innerHTML = buildScoreHTML(ci);
-
       showToast(already ? 'スコアを上書きしました' : 'スコアを記録しました', 'ok');
     }
 
     function buildScoreHTML(ci) {
       var sc = S.scores[ci] || {};
-      var v1 = sc.team1 || '';
-      var v2 = sc.team2 || '';
+      var v1 = sc.team1 || '', v2 = sc.team2 || '';
       var recorded = v1 !== '' && v2 !== '';
-
-      var h = ''
-        + '<span class="score-label">スコア</span>'
+      var h = '<span class="score-label">スコア</span>'
         + '<div class="score-inputs">'
         + '<input class="score-inp" type="number" min="0" max="99" id="sa-' + ci + '" value="' + v1 + '" placeholder="A">'
         + '<span class="score-sep">-</span>'
         + '<input class="score-inp" type="number" min="0" max="99" id="sb-' + ci + '" value="' + v2 + '" placeholder="B">'
         + '</div>';
-
       if (recorded) {
         h += '<span class="score-recorded">記録済み</span>';
         h += '<button class="btn-score overwrite" onclick="recordScore(' + ci + ')">上書き</button>';
       } else {
         h += '<button class="btn-score record" onclick="recordScore(' + ci + ')">記録</button>';
       }
-
       return h;
     }
 
     function makePlayerRowEl(p) {
       var row = document.createElement('div');
-
       if (!p) {
         row.className = 'player-row player-empty';
-
         var ph = document.createElement('div');
         ph.style.cssText = 'width:36px;height:36px;border-radius:50%;border:1px dashed rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:var(--t4);font-size:16px;flex-shrink:0';
         ph.textContent = '–';
-
         var pinfo = document.createElement('div');
         pinfo.className = 'player-info';
-
         var pnm = document.createElement('div');
         pnm.className = 'player-name';
         pnm.textContent = '未配置';
-
         pinfo.appendChild(pnm);
         row.appendChild(ph);
         row.appendChild(pinfo);
@@ -2630,24 +2543,19 @@ function closeNickEdit() {
       }
 
       row.className = 'player-row';
-
       var sp = S.players.find(function(x){ return x.no === p.no; });
-      var badge = makeBadge(p.no, 'sm');
-      row.appendChild(badge);
+      row.appendChild(makeBadge(p.no, 'sm'));
 
       var pinfo = document.createElement('div');
       pinfo.className = 'player-info';
-
       var pnm = document.createElement('div');
       pnm.className = 'player-name';
       pnm.textContent = sp && sp.nick ? (sp.nick + '（No.' + p.no + '）') : ('No.' + p.no);
       pinfo.appendChild(pnm);
-
       var sub = document.createElement('div');
       sub.className = 'player-sub';
       sub.textContent = '待機 ' + (sp ? sp.waitCount : 0) + '回';
       pinfo.appendChild(sub);
-
       row.appendChild(pinfo);
       return row;
     }
@@ -2667,17 +2575,14 @@ function closeNickEdit() {
 
         var hdr = document.createElement('div');
         hdr.className = 'court-game-header';
-
         var nm = document.createElement('span');
         nm.className = 'court-game-name';
         nm.textContent = court.name;
         hdr.appendChild(nm);
-
         var modeChip = document.createElement('span');
         modeChip.className = 'court-game-mode';
         modeChip.textContent = mode === 'doubles' ? 'ダブルス' : mode === 'singles' ? 'シングル' : '未使用';
         hdr.appendChild(modeChip);
-
         card.appendChild(hdr);
 
         if (mode === 'unused') {
@@ -2687,26 +2592,20 @@ function closeNickEdit() {
           card.appendChild(ph);
         } else {
           var isD = mode === 'doubles';
-
           var md = document.createElement('div');
           md.className = 'match-display';
-
           var mt = document.createElement('div');
           mt.className = 'match-teams';
 
           var colA = document.createElement('div');
           colA.className = 'team-col';
-
           var lblA = document.createElement('div');
           lblA.className = 'team-label';
           lblA.textContent = isD ? 'TEAM A' : 'PLAYER 1';
           colA.appendChild(lblA);
-
           var psA = isD ? t1 : [t1[0] || null];
           if (psA.length === 0) psA = isD ? [null, null] : [null];
-          psA.forEach(function(p){
-            colA.appendChild(makePlayerRowEl(p));
-          });
+          psA.forEach(function(p){ colA.appendChild(makePlayerRowEl(p)); });
 
           var vsCol = document.createElement('div');
           vsCol.className = 'vs-col';
@@ -2717,22 +2616,17 @@ function closeNickEdit() {
 
           var colB = document.createElement('div');
           colB.className = 'team-col';
-
           var lblB = document.createElement('div');
           lblB.className = 'team-label';
           lblB.textContent = isD ? 'TEAM B' : 'PLAYER 2';
           colB.appendChild(lblB);
-
           var psB = isD ? t2 : [t2[0] || null];
           if (psB.length === 0) psB = isD ? [null, null] : [null];
-          psB.forEach(function(p){
-            colB.appendChild(makePlayerRowEl(p));
-          });
+          psB.forEach(function(p){ colB.appendChild(makePlayerRowEl(p)); });
 
           mt.appendChild(colA);
           mt.appendChild(vsCol);
           mt.appendChild(colB);
-
           md.appendChild(mt);
           card.appendChild(md);
 
@@ -2749,20 +2643,15 @@ function closeNickEdit() {
       var onCourt = {};
       S.courts.forEach(function(c){
         c.teams.forEach(function(t){
-          (t || []).filter(Boolean).forEach(function(p){
-            onCourt[p.no] = true;
-          });
+          (t || []).filter(Boolean).forEach(function(p){ onCourt[p.no] = true; });
         });
       });
 
-      var waiting = S.players.filter(function(p){
-        return p.active && !onCourt[p.no];
-      });
+      var waiting = S.players.filter(function(p){ return p.active && !onCourt[p.no]; });
 
       if (waiting.length > 0) {
         var rs = document.createElement('div');
         rs.className = 'rest-section';
-
         var rh = document.createElement('div');
         rh.className = 'rest-header';
         rh.textContent = '待機中 ' + waiting.length + '人';
@@ -2770,26 +2659,20 @@ function closeNickEdit() {
 
         var rb = document.createElement('div');
         rb.className = 'rest-players';
-
         waiting.forEach(function(p){
           var chip = document.createElement('div');
           chip.className = 'rest-player';
-
           chip.appendChild(makeBadge(p.no, 'sm'));
-
           var info = document.createElement('div');
           info.className = 'rest-player-info';
-
           var pnm = document.createElement('div');
           pnm.className = 'rest-player-name';
           pnm.textContent = p.nick ? (p.nick + '（No.' + p.no + '）') : ('No.' + p.no);
           info.appendChild(pnm);
-
           var wt = document.createElement('div');
           wt.className = 'rest-player-sub';
           wt.textContent = p.waitCount > 0 ? ('待機 ' + p.waitCount + '回 / 次回優先') : '今回休憩';
           info.appendChild(wt);
-
           chip.appendChild(info);
           rb.appendChild(chip);
         });
@@ -2799,6 +2682,9 @@ function closeNickEdit() {
       }
     }
 
+    /* ── FIX: renderSched ──
+       sched-scrollはscrollableの内側のwrapperになったので
+       innerHTML = ''でwrapperをクリアしてappendChildする */
     function renderSched() {
       var el = document.getElementById('sched-scroll');
       if (!el) return;
@@ -2812,25 +2698,20 @@ function closeNickEdit() {
       var curOnCourt = {};
       S.courts.forEach(function(c){
         c.teams.forEach(function(t){
-          (t || []).filter(Boolean).forEach(function(p){
-            curOnCourt[p.no] = true;
-          });
+          (t || []).filter(Boolean).forEach(function(p){ curOnCourt[p.no] = true; });
         });
       });
 
-      var curW = S.players.filter(function(p){
-        return p.active && !curOnCourt[p.no];
-      }).map(pLabel);
+      var curW = S.players.filter(function(p){ return p.active && !curOnCourt[p.no]; }).map(pLabel);
 
       var currentItem = {
         type:'current',
         data:{
-          round:S.currentRound + 1,
-          waiters:curW,
-          courts:S.courts.map(function(c, ci){
+          round: S.currentRound + 1,
+          waiters: curW,
+          courts: S.courts.map(function(c, ci){
             return {
-              name:c.name,
-              mode:c.mode,
+              name:c.name, mode:c.mode,
               teams:c.teams.map(function(t){ return (t || []).filter(Boolean).map(pLabel); }),
               score:S.scores[ci] || {}
             };
@@ -2841,209 +2722,193 @@ function closeNickEdit() {
       el.appendChild(buildScCard(currentItem));
 
       S.futureRounds.slice(0, 3).forEach(function(r, idx){
-        el.appendChild(buildScCard({
-          type: idx === 0 ? 'next' : 'future',
-          data: r
-        }));
+        el.appendChild(buildScCard({ type: idx === 0 ? 'next' : 'future', data: r }));
       });
     }
 
+    function buildScCard(item) {
+      var cur = item.type === 'current';
+      var next = item.type === 'next';
 
-  function buildScCard(item) {
-  var cur = item.type === 'current';
-  var next = item.type === 'next';
+      var card = document.createElement('div');
+      card.className = 'sc-card' + (cur ? ' cur' : next ? ' next' : '');
 
-  var card = document.createElement('div');
-  card.className = 'sc-card' + (cur ? ' cur' : next ? ' next' : ' future');
+      var head = document.createElement('div');
+      head.className = 'sc-head';
+      var rn = document.createElement('span');
+      rn.className = 'sc-round';
+      rn.textContent = '第' + item.data.round + 'ゲーム';
+      var badge = document.createElement('span');
+      badge.className = 'sc-badge';
+      badge.textContent = cur ? '進行中' : next ? '次' : '予定';
+      head.appendChild(rn);
+      head.appendChild(badge);
+      card.appendChild(head);
 
-  var head = document.createElement('div');
-  head.className = 'sc-head';
+      var body = document.createElement('div');
+      body.className = 'sc-body';
 
-  var rn = document.createElement('span');
-  rn.className = 'sc-round';
-  rn.textContent = '第' + item.data.round + 'ゲーム';
+      (item.data.courts || []).filter(function(c){ return c.mode !== 'unused'; }).forEach(function(c){
+        var blk = document.createElement('div');
+        blk.className = 'sc-court-block';
 
-  var badge = document.createElement('span');
-  badge.className = 'sc-badge';
-  badge.textContent = cur ? '進行中' : next ? '次' : '予定';
+        var cnm = document.createElement('div');
+        cnm.className = 'sc-court-nm';
+        cnm.innerHTML = '<span>' + c.name + '</span><span class="sc-court-mode">' + (c.mode === 'doubles' ? 'ダブルス' : 'シングル') + '</span>';
+        blk.appendChild(cnm);
 
-  head.appendChild(rn);
-  head.appendChild(badge);
-  card.appendChild(head);
+        var vsg = document.createElement('div');
+        vsg.className = 'sc-vs-grid';
 
-  var body = document.createElement('div');
-  body.className = 'sc-body';
+        var ta = document.createElement('div');
+        ta.className = 'sc-team';
+        (c.teams[0] || []).forEach(function(n){
+          var p = document.createElement('div');
+          p.className = 'sc-player';
+          p.textContent = n;
+          ta.appendChild(p);
+        });
+        if (!(c.teams[0] || []).length) {
+          var ep = document.createElement('div');
+          ep.className = 'sc-player emp';
+          ep.textContent = '—';
+          ta.appendChild(ep);
+        }
 
-  (item.data.courts || []).filter(function(c){ return c.mode !== 'unused'; }).forEach(function(c){
-    var blk = document.createElement('div');
-    blk.className = 'sc-court-block';
+        var vs = document.createElement('div');
+        vs.className = 'sc-vs-txt';
+        vs.textContent = 'VS';
 
-    var cnm = document.createElement('div');
-    cnm.className = 'sc-court-nm';
-    cnm.innerHTML = '<span>' + c.name + '</span><span class="sc-court-mode">' + (c.mode === 'doubles' ? 'ダブルス' : 'シングル') + '</span>';
-    blk.appendChild(cnm);
+        var tb = document.createElement('div');
+        tb.className = 'sc-team';
+        (c.teams[1] || []).forEach(function(n){
+          var p2 = document.createElement('div');
+          p2.className = 'sc-player';
+          p2.textContent = n;
+          tb.appendChild(p2);
+        });
+        if (!(c.teams[1] || []).length) {
+          var ep2 = document.createElement('div');
+          ep2.className = 'sc-player emp';
+          ep2.textContent = '—';
+          tb.appendChild(ep2);
+        }
 
-    var vsg = document.createElement('div');
-    vsg.className = 'sc-vs-grid';
+        vsg.appendChild(ta);
+        vsg.appendChild(vs);
+        vsg.appendChild(tb);
+        blk.appendChild(vsg);
 
-    var ta = document.createElement('div');
-    ta.className = 'sc-team';
+        if (c.score && c.score.team1 !== '' && c.score.team2 !== '') {
+          var sc = document.createElement('div');
+          sc.className = 'sc-score-row';
+          sc.textContent = c.score.team1 + ' - ' + c.score.team2;
+          blk.appendChild(sc);
+        }
 
-    (c.teams[0] || []).forEach(function(n){
-      var p = document.createElement('div');
-      p.className = 'sc-player';
-      p.textContent = n;
-      ta.appendChild(p);
-    });
+        body.appendChild(blk);
+      });
 
-    if (!(c.teams[0] || []).length) {
-      var ep = document.createElement('div');
-      ep.className = 'sc-player emp';
-      ep.textContent = '—';
-      ta.appendChild(ep);
+      if (item.data.waiters && item.data.waiters.length > 0) {
+        var rb = document.createElement('div');
+        rb.className = 'sc-rest';
+        var rl = document.createElement('div');
+        rl.className = 'sc-rest-lbl';
+        rl.textContent = '待機';
+        rb.appendChild(rl);
+        var rn2 = document.createElement('div');
+        rn2.className = 'sc-rest-names';
+        rn2.textContent = item.data.waiters.join(' / ');
+        rb.appendChild(rn2);
+        body.appendChild(rb);
+      }
+
+      card.appendChild(body);
+      return card;
     }
 
-    var vs = document.createElement('div');
-    vs.className = 'sc-vs-txt';
-    vs.textContent = 'VS';
-
-    var tb = document.createElement('div');
-    tb.className = 'sc-team';
-
-    (c.teams[1] || []).forEach(function(n){
-      var p2 = document.createElement('div');
-      p2.className = 'sc-player';
-      p2.textContent = n;
-      tb.appendChild(p2);
-    });
-
-    if (!(c.teams[1] || []).length) {
-      var ep2 = document.createElement('div');
-      ep2.className = 'sc-player emp';
-      ep2.textContent = '—';
-      tb.appendChild(ep2);
-    }
-
-    vsg.appendChild(ta);
-    vsg.appendChild(vs);
-    vsg.appendChild(tb);
-    blk.appendChild(vsg);
-
-    if (c.score && c.score.team1 !== '' && c.score.team2 !== '') {
-      var sc = document.createElement('div');
-      sc.className = 'sc-score-row';
-      sc.textContent = c.score.team1 + ' - ' + c.score.team2;
-      blk.appendChild(sc);
-    }
-
-    body.appendChild(blk);
-  });
-
-  if (item.data.waiters && item.data.waiters.length > 0) {
-    var rb = document.createElement('div');
-    rb.className = 'sc-rest';
-
-    var rl = document.createElement('div');
-    rl.className = 'sc-rest-lbl';
-    rl.textContent = '待機';
-    rb.appendChild(rl);
-
-    var rn2 = document.createElement('div');
-    rn2.className = 'sc-rest-names';
-    rn2.textContent = item.data.waiters.join(' / ');
-    rb.appendChild(rn2);
-
-    body.appendChild(rb);
-  }
-
-  card.appendChild(body);
-  return card;
-}
-
+    /* ── FIX: renderHistory ──
+       hist-scrollはscrollableの内側のwrapperになったので同様に修正 */
     function renderHistory() {
-  var el = document.getElementById('hist-scroll');
-  if (!el) return;
-  el.innerHTML = '';
+      var el = document.getElementById('hist-scroll');
+      if (!el) return;
+      el.innerHTML = '';
 
-  var intro = document.createElement('div');
-  intro.className = 'timeline-head';
-  intro.innerHTML = '<div class="timeline-head-title">履歴</div><div class="timeline-head-sub">終了したゲーム結果を確認できます</div>';
-  el.appendChild(intro);
+      var intro = document.createElement('div');
+      intro.className = 'timeline-head';
+      intro.innerHTML = '<div class="timeline-head-title">履歴</div><div class="timeline-head-sub">終了したゲーム結果を確認できます</div>';
+      el.appendChild(intro);
 
-  if (!S.rounds.length) {
-    var empty = document.createElement('div');
-    empty.className = 'timeline-head';
-    empty.innerHTML = '<div class="timeline-head-title">履歴はまだありません</div><div class="timeline-head-sub">ゲームが終了すると、ここに対戦結果が保存されます</div>';
-    el.appendChild(empty);
-    return;
-  }
+      if (!S.rounds.length) {
+        var empty = document.createElement('div');
+        empty.className = 'timeline-head';
+        empty.innerHTML = '<div class="timeline-head-title">履歴はまだありません</div><div class="timeline-head-sub">ゲームが終了すると、ここに対戦結果が保存されます</div>';
+        el.appendChild(empty);
+        return;
+      }
 
-  S.rounds.slice().reverse().forEach(function(r){
-    var card = document.createElement('div');
-    card.className = 'hcard';
+      S.rounds.slice().reverse().forEach(function(r){
+        var card = document.createElement('div');
+        card.className = 'hcard';
 
-    var head = document.createElement('div');
-    head.className = 'hhead';
-    head.textContent = '第' + r.round + 'ゲーム';
-    card.appendChild(head);
+        var head = document.createElement('div');
+        head.className = 'hhead';
+        head.textContent = '第' + r.round + 'ゲーム';
+        card.appendChild(head);
 
-    var body = document.createElement('div');
-    body.className = 'hbody';
+        var body = document.createElement('div');
+        body.className = 'hbody';
 
-    r.courts.filter(function(c){ return c.mode !== 'unused'; }).forEach(function(c){
-      var row = document.createElement('div');
-      row.className = 'hrow';
+        r.courts.filter(function(c){ return c.mode !== 'unused'; }).forEach(function(c){
+          var row = document.createElement('div');
+          row.className = 'hrow';
 
-      var ct = document.createElement('div');
-      ct.className = 'hct';
-      ct.textContent = c.name + ' / ' + (c.mode === 'doubles' ? 'ダブルス' : 'シングル');
+          var ct = document.createElement('div');
+          ct.className = 'hct';
+          ct.textContent = c.name + ' / ' + (c.mode === 'doubles' ? 'ダブルス' : 'シングル');
 
-      var pl = document.createElement('div');
-      pl.className = 'hpl';
-      pl.textContent = (c.teams[0] || []).join(' / ') + ' vs ' + (c.teams[1] || []).join(' / ');
+          var pl = document.createElement('div');
+          pl.className = 'hpl';
+          pl.textContent = (c.teams[0] || []).join(' / ') + ' vs ' + (c.teams[1] || []).join(' / ');
 
-      var sc = document.createElement('div');
-      sc.className = 'hsc';
-      sc.textContent = (c.score && c.score.team1 !== '' && c.score.team2 !== '') ? ('スコア ' + c.score.team1 + ' - ' + c.score.team2) : 'スコア未記録';
+          var sc = document.createElement('div');
+          sc.className = 'hsc';
+          sc.textContent = (c.score && c.score.team1 !== '' && c.score.team2 !== '')
+            ? ('スコア ' + c.score.team1 + ' - ' + c.score.team2)
+            : 'スコア未記録';
 
-      row.appendChild(ct);
-      row.appendChild(pl);
-      row.appendChild(sc);
-      body.appendChild(row);
-    });
+          row.appendChild(ct);
+          row.appendChild(pl);
+          row.appendChild(sc);
+          body.appendChild(row);
+        });
 
-    if (r.waiters && r.waiters.length) {
-      var waitRow = document.createElement('div');
-      waitRow.className = 'hrow';
+        if (r.waiters && r.waiters.length) {
+          var waitRow = document.createElement('div');
+          waitRow.className = 'hrow';
+          var waitCt = document.createElement('div');
+          waitCt.className = 'hct';
+          waitCt.textContent = '待機';
+          var waitPl = document.createElement('div');
+          waitPl.className = 'hpl';
+          waitPl.textContent = r.waiters.join(' / ');
+          waitRow.appendChild(waitCt);
+          waitRow.appendChild(waitPl);
+          body.appendChild(waitRow);
+        }
 
-      var waitCt = document.createElement('div');
-      waitCt.className = 'hct';
-      waitCt.textContent = '待機';
-
-      var waitPl = document.createElement('div');
-      waitPl.className = 'hpl';
-      waitPl.textContent = r.waiters.join(' / ');
-
-      waitRow.appendChild(waitCt);
-      waitRow.appendChild(waitPl);
-      body.appendChild(waitRow);
+        card.appendChild(body);
+        el.appendChild(card);
+      });
     }
 
-    card.appendChild(body);
-    el.appendChild(card);
-  });
-}
-
-   
     var toastT;
     function showToast(msg, type) {
       var t = document.getElementById('toast');
       t.textContent = msg;
       t.className = 'show' + (type ? ' ' + type : '');
       clearTimeout(toastT);
-      toastT = setTimeout(function(){
-        t.className = '';
-      }, 2200);
+      toastT = setTimeout(function(){ t.className = ''; }, 2200);
     }
 
     function initialSetup() {
@@ -3062,5 +2927,6 @@ function closeNickEdit() {
 
     initialSetup();
   </script>
+
 </body>
 </html>
