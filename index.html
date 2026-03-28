@@ -4,2929 +4,2022 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-fukukomu-pb.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="PB Manager">
   <meta name="theme-color" content="#111214">
-  <title>Pickleball Manager</title>
-
+  <title>PB Manager</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Oswald:wght@500;700&display=swap');
 
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    :root {
-      --bg0: #111214;
-      --bg1: #1A1C1F;
-      --bg2: #23262B;
-      --bg3: #2D3138;
-      --bg-soft: #17191C;
-
-      --card: rgba(255, 255, 255, 0.045);
-      --card-strong: rgba(255, 255, 255, 0.07);
-
-      --accent: #D8B89C;
-      --accent2: #97B8A7;
-      --accent3: #C98F8F;
-      --accent4: #9EB1C7;
-
-      --t1: #F7F4EE;
-      --t2: #C9C3B8;
-      --t3: #918A80;
-      --t4: #6C6A66;
-
-      --ln: rgba(255,255,255,0.08);
-      --ln2: rgba(255,255,255,0.05);
-
-      --shadow1: 0 8px 24px rgba(0,0,0,0.22);
-      --shadow2: 0 18px 50px rgba(0,0,0,0.28);
-
-      --r1: 14px;
-      --r2: 18px;
-      --r3: 24px;
-
-      --safe-top: max(env(safe-area-inset-top), 10px);
-      --safe-bottom: max(env(safe-area-inset-bottom), 10px);
-      --header-h: 62px;
-      --footer-h: 68px;
-    }
-
-    html {
-      -webkit-text-size-adjust: 100%;
-      -webkit-tap-highlight-color: transparent;
-      background: #111214;
-    }
-
-    body {
-      font-family: 'Noto Sans JP', sans-serif;
-      background: #111214;
-      color: #F5F2EA;
-      height: 100dvh;
-      overflow: hidden;
-      font-size: 15px;
-      line-height: 1.5;
-    }
-
-    #app {
-      position: relative;
-      height: 100dvh;
-      background:
-        radial-gradient(circle at top, rgba(216,184,156,0.08), transparent 28%),
-        linear-gradient(180deg, #131417 0%, #101113 100%);
-      overflow: hidden;
-    }
-
-    #header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      padding-top: var(--safe-top);
-      background: rgba(17,18,20,0.88);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-bottom: 1px solid var(--ln2);
-    }
-
-    .header-inner {
-      height: var(--header-h);
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      gap: 10px;
-    }
-
-    .logo {
-      font-family: 'Oswald', sans-serif;
-      font-weight: 700;
-      font-size: 28px;
-      color: var(--t1);
-      letter-spacing: 1px;
-      margin-right: 6px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .header-nav {
-      display: flex;
-      gap: 6px;
-      flex: 1;
-      overflow-x: auto;
-      min-width: 0;
-    }
-
-    .header-nav::-webkit-scrollbar {
-      display: none;
-    }
-
-    .hnav-btn {
-      height: 38px;
-      padding: 0 14px;
-      border-radius: 999px;
-      border: none;
-      background: transparent;
-      color: var(--accent4);
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all .18s;
-      font-family: 'Noto Sans JP', sans-serif;
-      flex-shrink: 0;
-    }
-
-    .hnav-btn.active {
-      background: rgba(255,255,255,0.06);
-      color: var(--t1);
-    }
-
-    .timer-chip {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-      margin-left: 4px;
-    }
-
-    #h-timer {
-      font-family: 'Oswald', sans-serif;
-      font-weight: 500;
-      font-size: 22px;
-      color: var(--t1);
-      letter-spacing: 2px;
-      font-variant-numeric: tabular-nums;
-      min-width: 72px;
-      text-align: right;
-      cursor: pointer;
-    }
-
-    #h-timer.warn { color: #E4B57A; }
-    #h-timer.done { color: #E18C8C; animation: tblink .45s infinite; }
-
-    @keyframes tblink {
-      0%,100% { opacity: 1; }
-      50% { opacity: .35; }
-    }
-
-    #main {
-      position: fixed;
-      top: calc(var(--safe-top) + var(--header-h));
-      left: 0;
-      right: 0;
-      bottom: calc(var(--safe-bottom) + var(--footer-h));
-      overflow: hidden;
-    }
-
-    .screen {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s;
-    }
-
-    .screen.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    /* ── 共通スクロール ── */
-    .scrollable {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 16px 16px 28px;
-    }
-
-    .scrollable::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .scrollable::-webkit-scrollbar-thumb {
-      background: var(--ln);
-      border-radius: 999px;
-    }
-
-    #footer {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 1000;
-      padding-bottom: var(--safe-bottom);
-      background: rgba(17,18,20,0.92);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-top: 1px solid var(--ln2);
-    }
-
-    .footer-inner {
-      height: var(--footer-h);
-      display: flex;
-      align-items: center;
-    }
-
-    .foot-btn {
-      flex: 1;
-      height: 100%;
-      border: none;
-      background: transparent;
-      color: var(--t4);
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      transition: color .18s, background .18s;
-      font-family: 'Noto Sans JP', sans-serif;
-    }
-
-    .foot-btn .icon {
-      font-size: 19px;
-      line-height: 1;
-    }
-
-    .foot-btn.active {
-      color: var(--accent4);
-      background: rgba(255,255,255,0.04);
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 20px;
-      border: 1px solid var(--ln);
-      box-shadow: var(--shadow1);
-      overflow: hidden;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-
-    .btn-action {
-      width: 100%;
-      height: 52px;
-      border: none;
-      border-radius: 16px;
-      font-family: 'Noto Sans JP', sans-serif;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: transform .12s ease, opacity .18s ease, background .18s ease;
-    }
-
-    .btn-action:active {
-      transform: scale(.985);
-    }
-
-    .btn-action.primary {
-      background: #F2EEE8;
-      color: #191A1D;
-    }
-
-    .btn-action.secondary {
-      background: rgba(255,255,255,0.055);
-      color: var(--t1);
-      border: 1px solid var(--ln);
-    }
-
-    .btn-action.green {
-      background: linear-gradient(180deg, #F3EFE9 0%, #E7DED1 100%);
-      color: #1A1B1E;
-    }
-
-    .btn-action.danger {
-      background: rgba(201,143,143,0.18);
-      color: #F4CECE;
-      border: 1px solid rgba(201,143,143,0.22);
-    }
-
-    .stepper {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      background: rgba(255,255,255,0.04);
-      border-radius: 18px;
-      overflow: hidden;
-      border: 1px solid var(--ln);
-      width: fit-content;
-    }
-
-    .step-btn {
-      width: 58px;
-      height: 56px;
-      border: none;
-      background: transparent;
-      color: var(--accent4);
-      font-size: 34px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .step-btn:active {
-      background: rgba(255,255,255,0.05);
-    }
-
-    .step-val {
-      min-width: 84px;
-      height: 56px;
-      border-left: 1px solid var(--ln);
-      border-right: 1px solid var(--ln);
-      background: transparent;
-      font-family: 'Oswald', sans-serif;
-      font-weight: 500;
-      font-size: 34px;
-      color: var(--t1);
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .seg {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-
-    .seg-btn {
-      height: 44px;
-      border-radius: 14px;
-      border: 1px solid var(--ln);
-      background: rgba(255,255,255,0.04);
-      color: var(--accent4);
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: all .18s;
-      font-family: 'Noto Sans JP', sans-serif;
-    }
-
-    .seg-btn.on {
-      background: #F2EEE8;
-      border-color: transparent;
-      color: #191A1D;
-      box-shadow: var(--shadow1);
-    }
-
-    .nbadge {
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Oswald', sans-serif;
-      font-weight: 700;
-      border: 2px solid;
-      flex-shrink: 0;
-    }
-
-    .nbadge.lg { width: 62px; height: 62px; font-size: 24px; }
-    .nbadge.md { width: 44px; height: 44px; font-size: 16px; }
-    .nbadge.sm { width: 34px; height: 34px; font-size: 12px; }
-
-    .inp-field {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--ln);
-      color: var(--t1);
-      font-family: 'Noto Sans JP', sans-serif;
-      font-size: 15px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      outline: none;
-      width: 100%;
-      -webkit-appearance: none;
-    }
-
-    .inp-field:focus {
-      border-color: rgba(216,184,156,0.45);
-    }
-
-    .inp-field::placeholder {
-      color: var(--t4);
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 800;
-    }
-
-    .tag.wait {
-      background: rgba(216,184,156,0.12);
-      color: var(--accent);
-      border: 1px solid rgba(216,184,156,0.22);
-    }
-
-    .tag.win {
-      background: rgba(151,184,167,0.12);
-      color: #B7D3C6;
-      border: 1px solid rgba(151,184,167,0.22);
-    }
-
-    .tag.lose {
-      background: rgba(201,143,143,0.12);
-      color: #E4B6B6;
-      border: 1px solid rgba(201,143,143,0.22);
-    }
-
-    #toast {
-      position: fixed;
-      left: 50%;
-      bottom: calc(var(--safe-bottom) + var(--footer-h) + 10px);
-      transform: translateX(-50%) translateY(80px);
-      background: rgba(36,38,43,0.92);
-      color: var(--t1);
-      padding: 13px 22px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 800;
-      z-index: 9999;
-      transition: transform .3s, opacity .3s;
-      box-shadow: var(--shadow2);
-      white-space: nowrap;
-      pointer-events: none;
-      border: 1px solid var(--ln);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      opacity: 0;
-      max-width: calc(100vw - 32px);
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-    #toast.ok   { background: rgba(151,184,167,0.94); color: #172019; border-color: transparent; }
-    #toast.err  { background: rgba(201,143,143,0.94); color: #fff; border-color: transparent; }
-    #toast.warn { background: rgba(216,184,156,0.96); color: #1A1B1E; border-color: transparent; }
-
-    /* ── Setup Screen ── */
-    #screen-setup .scrollable {
-      padding: 0 0 28px;
-    }
-
-    .setup-hero {
-      padding: 28px 18px 18px;
-      border-bottom: 1px solid var(--ln2);
-    }
-
-    .setup-hero h1 {
-      font-family: 'Oswald', sans-serif;
-      font-weight: 700;
-      font-size: 34px;
-      color: var(--t1);
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-
-    .setup-hero p {
-      font-size: 15px;
-      color: var(--t2);
-    }
-
-    .setup-area {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .setup-card {
-      background: var(--card);
-      border-radius: 22px;
-      border: 1px solid var(--ln);
-      box-shadow: var(--shadow1);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      overflow: hidden;
-    }
-
-    .setup-card-head {
-      padding: 16px 16px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .setup-card-title {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--t1);
-    }
-
-    .setup-card-summary {
-      font-size: 14px;
-      color: var(--t2);
-      white-space: nowrap;
-    }
-
-    .setup-card-body {
-      padding: 0 16px 16px;
-    }
-
-    .setup-help {
-      font-size: 13px;
-      color: var(--t3);
-      margin-bottom: 14px;
-    }
-
-    .count-row,
-    .timer-setup-row {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-
-    .court-config-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .court-config-row {
-      background: rgba(255,255,255,0.03);
-      border-radius: 18px;
-      border: 1px solid var(--ln);
-      overflow: hidden;
-    }
-
-    .court-config-top {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 14px 10px;
-    }
-
-    .court-config-name-inp {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: var(--t1);
-      font-family: 'Noto Sans JP', sans-serif;
-      font-size: 16px;
-      font-weight: 800;
-      outline: none;
-      min-width: 80px;
-    }
-
-    .court-config-name-inp::placeholder {
-      color: var(--t4);
-    }
-
-    .court-config-seg {
-      padding: 0 14px 14px;
-    }
-
-    .bal-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 15px 16px;
-      background: var(--card);
-      border-radius: 18px;
-      border: 1px solid var(--ln);
-      box-shadow: var(--shadow1);
-    }
-
-    .bal-lbl {
-      flex: 1;
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--t1);
-    }
-
-    .bal-sub {
-      font-size: 13px;
-      color: var(--t2);
-      margin-top: 2px;
-    }
-
-    .sw {
-      position: relative;
-      width: 50px;
-      height: 30px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .sw input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-      position: absolute;
-    }
-
-    .sw-tr {
-      position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid var(--ln);
-      border-radius: 999px;
-      transition: .25s;
-    }
-
-    .sw-tr::after {
-      content: '';
-      position: absolute;
-      left: 4px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      background: #E9E1D7;
-      border-radius: 50%;
-      transition: .25s;
-    }
-
-    .sw input:checked + .sw-tr {
-      background: rgba(216,184,156,0.6);
-      border-color: rgba(216,184,156,0.65);
-    }
-
-    .sw input:checked + .sw-tr::after {
-      transform: translateX(20px) translateY(-50%);
-      background: #fff;
-    }
-
-    .status-chips {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-
-    .status-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--ln);
-      background: rgba(255,255,255,0.04);
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--t2);
-    }
-
-    /* ── Game Screen ── */
-    #screen-game .scrollable {
-      padding: 0 0 24px;
-    }
-
-    .timer-bar-wrap {
-      padding: 16px 16px 12px;
-      background: rgba(17,18,20,0.8);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-bottom: 1px solid var(--ln2);
-      flex-shrink: 0;
-    }
-
-    .timer-top-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 12px;
-      align-items: start;
-      margin-bottom: 12px;
-    }
-
-    .timer-left {
-      min-width: 0;
-    }
-
-    #game-timer-disp {
-      display: block;
-      font-family: 'Oswald', sans-serif;
-      font-weight: 700;
-      font-size: 56px;
-      line-height: 0.95;
-      color: var(--t1);
-      letter-spacing: 2px;
-      font-variant-numeric: tabular-nums;
-      min-width: 4.8ch;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    #game-timer-disp.warn { color: #E4B57A; animation: tblink .5s infinite; }
-    #game-timer-disp.done { color: #E18C8C; animation: tblink .3s infinite; }
-
-    .timer-round-label {
-      margin-top: 10px;
-      font-size: 15px;
-      color: var(--t2);
-      font-weight: 700;
-    }
-
-    .timer-right {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    .btn-start {
-      height: 54px;
-      padding: 0 20px;
-      border-radius: 16px;
-      border: 1px solid var(--ln);
-      background: rgba(255,255,255,0.06);
-      color: var(--t1);
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-      font-family: 'Noto Sans JP', sans-serif;
-    }
-
-    .btn-start.running {
-      background: #F2EEE8;
-      color: #17181B;
-      border-color: transparent;
-    }
-
-    .btn-timer-reset {
-      width: 54px;
-      height: 54px;
-      border-radius: 16px;
-      border: 1px solid var(--ln);
-      background: rgba(255,255,255,0.05);
-      color: var(--t2);
-      font-size: 22px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .progress-track {
-      height: 8px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #D8B89C 0%, #EBD8C7 100%);
-      border-radius: 999px;
-      transition: width .5s linear, background .3s;
-    }
-
-    .progress-fill.warn { background: linear-gradient(90deg, #E6C189 0%, #EFD7B7 100%); }
-    .progress-fill.done { background: linear-gradient(90deg, #D59A9A 0%, #E4B6B6 100%); }
-
-    .game-actions {
-      display: flex;
-      gap: 10px;
-      padding: 14px 16px;
-      flex-shrink: 0;
-    }
-
-    .game-courts {
-      padding: 0 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .court-game-card {
-      background: var(--card);
-      border-radius: 22px;
-      border: 1px solid var(--ln);
-      box-shadow: var(--shadow1);
-      overflow: hidden;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-
-    .court-game-header {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--ln2);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .court-game-name {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--t1);
-      letter-spacing: -0.2px;
-    }
-
-    .court-game-mode {
-      font-size: 12px;
-      font-weight: 800;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: rgba(216,184,156,0.14);
-      color: var(--accent);
-      border: 1px solid rgba(216,184,156,0.18);
-    }
-
-    .match-display {
-      padding: 16px;
-    }
-
-    .match-teams {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 12px;
-      align-items: stretch;
-    }
-
-    .team-col {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--ln);
-      border-radius: 18px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-height: 128px;
-    }
-
-    .team-label {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      color: var(--t3);
-      margin-bottom: 2px;
-    }
-
-    .vs-col {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 4px;
-    }
-
-    .vs-label {
-      font-family: 'Oswald', sans-serif;
-      font-weight: 700;
-      font-size: 28px;
-      color: var(--t1);
-      letter-spacing: 1px;
-      opacity: .92;
-    }
-
-    .player-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 6px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.03);
-    }
-
-    .player-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .player-name {
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--t1);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .player-sub {
-      font-size: 11px;
-      color: var(--t3);
-      margin-top: 2px;
-    }
-
-    .player-empty .player-name {
-      color: var(--t4);
-      font-weight: 500;
-      font-style: italic;
-    }
-
-    .score-section {
-      padding: 14px 16px 16px;
-      border-top: 1px solid var(--ln2);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      background: rgba(255,255,255,0.02);
-    }
-
-    .score-label {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--t3);
-      flex-shrink: 0;
-    }
-
-    .score-inputs {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .score-inp {
-      width: 58px;
-      height: 48px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid var(--ln);
-      color: var(--t1);
-      font-family: 'Oswald', sans-serif;
-      font-size: 24px;
-      font-weight: 500;
-      text-align: center;
-      border-radius: 14px;
-      outline: none;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .score-inp:focus {
-      border-color: rgba(216,184,156,0.42);
-    }
-
-    .score-sep {
-      font-size: 20px;
-      color: var(--t3);
-      font-weight: 700;
-    }
-
-    .score-recorded {
-      font-size: 12px;
-      font-weight: 800;
-      color: #B7D3C6;
-    }
-
-    .btn-score {
-      height: 40px;
-      padding: 0 14px;
-      border-radius: 12px;
-      border: none;
-      font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-      font-family: 'Noto Sans JP', sans-serif;
-    }
-
-    .btn-score.record {
-      background: #F2EEE8;
-      color: #18191C;
-    }
-
-    .btn-score.overwrite {
-      background: rgba(255,255,255,0.06);
-      color: var(--t1);
-      border: 1px solid var(--ln);
-    }
-
-    .rest-section {
-      margin: 0 16px 14px;
-      background: var(--card);
-      border-radius: 22px;
-      border: 1px solid var(--ln);
-      overflow: hidden;
-      box-shadow: var(--shadow1);
-    }
-
-    .rest-header {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--ln2);
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--t1);
-    }
-
-    .rest-players {
-      padding: 12px 14px 14px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .rest-player {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--ln);
-      border-radius: 14px;
-      padding: 8px 10px;
-    }
-
-    .rest-player-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .rest-player-name {
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--t1);
-    }
-
-    .rest-player-sub {
-      font-size: 10px;
-      color: var(--t3);
-    }
-
-    /* ── Players Screen ──
-       FIX: scrollableにflexを当てず、pgridが2カラムで正しく展開できるようにする */
-    #screen-players .scrollable {
-      padding: 16px 16px 24px;
-    }
-
-    .players-top {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
-
-    /* FIX: pgridの親(scrollable)がflexコンテナではないのでwidthが100%になる */
-    .pgrid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .pcard {
-      background: var(--card);
-      border: 1px solid var(--ln);
-      border-radius: 22px;
-      padding: 16px 14px 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      position: relative;
-      text-align: center;
-      transition: border-color .18s, transform .12s ease;
-      box-shadow: var(--shadow1);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-
-    .pcard:active {
-      transform: scale(.985);
-    }
-
-    .pcard.inactive {
-      opacity: .45;
-    }
-
-    .pcard-name {
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--t1);
-    }
-
-    .pcard-nick {
-      font-size: 13px;
-      color: var(--t2);
-      min-height: 20px;
-    }
-
-    .pcard-nick.empty {
-      color: var(--t4);
-      font-style: italic;
-    }
-
-    .pcard-stats {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .pcard-wait {
-      font-size: 14px;
-      color: var(--t2);
-      font-weight: 700;
-    }
-
-    .p-exit-btn {
-      width: 100%;
-      height: 40px;
-      border-radius: 14px;
-      border: none;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-      font-family: 'Noto Sans JP', sans-serif;
-      margin-top: 2px;
-    }
-
-    .p-exit-btn.exit {
-      background: rgba(201,143,143,0.14);
-      color: #E4B6B6;
-      border: 1px solid rgba(201,143,143,0.2);
-    }
-
-    .p-exit-btn.rejoin {
-      background: rgba(151,184,167,0.14);
-      color: #C9E1D4;
-      border: 1px solid rgba(151,184,167,0.2);
-    }
-
-    .nick-popover {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      z-index: 3000;
-      background: rgba(36,38,43,0.98);
-      border: 1px solid rgba(216,184,156,0.25);
-      border-radius: 18px;
-      padding: 14px;
-      box-shadow: var(--shadow2);
-    }
-
-    .np-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .np-save {
-      flex: 1;
-      height: 42px;
-      background: #F2EEE8;
-      border: none;
-      border-radius: 12px;
-      color: #17181B;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .np-cancel {
-      height: 42px;
-      padding: 0 12px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid var(--ln);
-      border-radius: 12px;
-      color: var(--t2);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    /* ── Courts Screen ── */
-    #screen-courts .scrollable {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      padding: 16px 16px 24px;
-    }
-
-    /* ── Schedule & History ──
-       FIX: gap付きflexをscrollableに当てると高さが正しく計算されないため
-            内側のwrapperで管理する */
-    #screen-schedule .scrollable,
-    #screen-history .scrollable {
-      padding: 12px 16px 24px;
-    }
-
-    .sched-inner,
-    .hist-inner {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .timeline-head {
-      background: var(--card);
-      border-radius: 20px;
-      border: 1px solid var(--ln);
-      box-shadow: var(--shadow1);
-      padding: 14px 16px;
-    }
-
-    .timeline-head-title {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--t1);
-      margin-bottom: 4px;
-    }
-
-    .timeline-head-sub {
-      font-size: 13px;
-      color: var(--t2);
-    }
-
-    .sc-card,
-    .hcard {
-      background: var(--card);
-      border-radius: 22px;
-      border: 1px solid var(--ln);
-      overflow: hidden;
-      box-shadow: var(--shadow1);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-
-    .sc-card.cur {
-      border-color: rgba(216,184,156,0.24);
-      box-shadow: 0 0 0 1px rgba(216,184,156,0.18), var(--shadow1);
-    }
-
-    .sc-card.next {
-      border-color: rgba(158,177,199,0.24);
-      box-shadow: 0 0 0 1px rgba(158,177,199,0.16), var(--shadow1);
-    }
-
-    .sc-head,
-    .hhead {
-      padding: 13px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--ln2);
-    }
-
-    .sc-round {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--t1);
-    }
-
-    .hhead {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--t1);
-    }
-
-    .sc-badge {
-      font-size: 11px;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      color: var(--t2);
-    }
-
-    .sc-card.cur .sc-badge {
-      background: rgba(216,184,156,0.16);
-      color: var(--accent);
-    }
-
-    .sc-card.next .sc-badge {
-      background: rgba(158,177,199,0.14);
-      color: #C7D2DE;
-    }
-
-    .sc-body {
-      padding: 12px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .sc-court-block {
-      background: rgba(255,255,255,0.035);
-      border-radius: 16px;
-      overflow: hidden;
-      border: 1px solid var(--ln2);
-    }
-
-    .sc-court-nm {
-      padding: 9px 12px;
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--t3);
-      border-bottom: 1px solid var(--ln2);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .sc-court-mode {
-      font-size: 11px;
-      color: var(--t2);
-    }
-
-    .sc-vs-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      padding: 12px;
-      gap: 10px;
-      align-items: stretch;
-    }
-
-    .sc-team {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .sc-player {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--t1);
-      line-height: 1.5;
-      word-break: break-word;
-    }
-
-    .sc-player.emp {
-      color: var(--t4);
-      font-style: italic;
-    }
-
-    .sc-vs-txt {
-      font-family: 'Oswald', sans-serif;
-      font-weight: 700;
-      font-size: 24px;
-      color: var(--t2);
-      text-align: center;
-      padding: 4px 0;
-    }
-
-    .sc-score-row {
-      padding: 7px 12px;
-      background: rgba(255,255,255,0.03);
-      text-align: center;
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--accent);
-    }
-
-    .sc-rest {
-      background: rgba(255,255,255,0.035);
-      border-radius: 16px;
-      padding: 10px 12px;
-      border: 1px solid var(--ln2);
-    }
-
-    .sc-rest-lbl {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--t3);
-      margin-bottom: 4px;
-    }
-
-    .sc-rest-names {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--t2);
-    }
-
-    .hbody {
-      padding: 12px 16px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .hrow {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 12px;
-      border: 1px solid var(--ln2);
-      border-radius: 14px;
-      background: rgba(255,255,255,0.03);
-      font-size: 13px;
-    }
-
-    .hct {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--t3);
-    }
-
-    .hpl {
-      color: var(--t2);
-      line-height: 1.5;
-    }
-
-    .hsc {
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--accent);
-    }
-
-    @media (max-width: 640px) {
-      .timer-top-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .timer-right {
-        justify-content: flex-start;
-      }
-    }
-
-    @media (max-width: 390px) {
-      .setup-hero h1 { font-size: 30px; }
-      #game-timer-disp { font-size: 48px; }
-      .court-game-name { font-size: 20px; }
-      .match-teams { gap: 8px; }
-      .vs-label { font-size: 24px; }
-      .logo { font-size: 26px; }
-      .hnav-btn { padding: 0 12px; font-size: 14px; }
-    }
+```
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg0: #111214;
+  --card: rgba(255,255,255,0.045);
+  --ln:  rgba(255,255,255,0.08);
+  --ln2: rgba(255,255,255,0.05);
+  --t1: #F7F4EE;
+  --t2: #C9C3B8;
+  --t3: #918A80;
+  --t4: #6C6A66;
+  --accent:  #D8B89C;
+  --accent4: #9EB1C7;
+  --male-bg:   rgba(158,177,199,0.15);
+  --male-bd:   rgba(158,177,199,0.45);
+  --male-tx:   #9EB1C7;
+  --female-bg: rgba(201,143,143,0.15);
+  --female-bd: rgba(201,143,143,0.45);
+  --female-tx: #D4A0A0;
+  --sh1: 0 8px 24px rgba(0,0,0,0.22);
+  --sh2: 0 18px 50px rgba(0,0,0,0.28);
+  --safe-top:    max(env(safe-area-inset-top), 10px);
+  --safe-bottom: max(env(safe-area-inset-bottom), 0px);
+  --header-h: 56px;
+  --footer-h: 64px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  background: #111214;
+}
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: #111214;
+  color: var(--t1);
+  height: 100dvh;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+#app {
+  position: relative;
+  height: 100dvh;
+  background:
+    radial-gradient(circle at top, rgba(216,184,156,0.07), transparent 26%),
+    linear-gradient(180deg, #131417 0%, #101113 100%);
+  overflow: hidden;
+}
+
+/* ============================================================
+   ヘッダー
+============================================================ */
+#header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100; /* ★ フッターより低く、モーダルより低い */
+  padding-top: var(--safe-top);
+  background: rgba(17,18,20,0.90);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--ln2);
+}
+
+.header-inner {
+  height: var(--header-h);
+  display: flex; align-items: center; padding: 0 16px; gap: 8px;
+}
+
+.logo {
+  font-family: 'Oswald', sans-serif; font-weight: 700;
+  font-size: 26px; color: var(--t1); letter-spacing: 1px;
+  flex-shrink: 0; margin-right: 4px;
+}
+
+.header-nav {
+  display: flex; gap: 4px; flex: 1; overflow-x: auto; min-width: 0;
+}
+.header-nav::-webkit-scrollbar { display: none; }
+
+.hnav-btn {
+  height: 34px; padding: 0 12px; border-radius: 999px;
+  border: none; background: transparent; color: var(--accent4);
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  white-space: nowrap; transition: all .18s;
+  font-family: 'Noto Sans JP', sans-serif; flex-shrink: 0;
+}
+.hnav-btn.active { background: rgba(255,255,255,0.07); color: var(--t1); }
+
+.game-badge {
+  font-size: 12px; font-weight: 700; color: var(--t3);
+  flex-shrink: 0; white-space: nowrap;
+}
+
+/* ============================================================
+   メイン
+============================================================ */
+#main {
+  position: fixed;
+  top: calc(var(--safe-top) + var(--header-h));
+  left: 0; right: 0;
+  bottom: calc(var(--safe-bottom) + var(--footer-h));
+  overflow: hidden;
+}
+
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  overflow: hidden; opacity: 0; pointer-events: none;
+  transition: opacity .22s;
+}
+.screen.active { opacity: 1; pointer-events: all; }
+
+.scrollable {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.scrollable::-webkit-scrollbar { width: 3px; }
+.scrollable::-webkit-scrollbar-thumb { background: var(--ln); border-radius: 999px; }
+
+/* ============================================================
+   フッター
+   ★ z-index を 200 に設定。通常時はヘッダーより前面。
+      モーダル表示時は JS で hidden クラスを付与して隠す。
+============================================================ */
+#footer {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 200;
+  padding-bottom: var(--safe-bottom);
+  background: rgba(17,18,20,0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid var(--ln2);
+  transition: opacity .2s, visibility .2s;
+}
+
+/* ★ モーダル表示中にフッターを非表示にするクラス */
+#footer.modal-open {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.footer-inner { height: var(--footer-h); display: flex; align-items: center; }
+
+.foot-btn {
+  flex: 1; height: 100%; border: none; background: transparent;
+  color: var(--t4); font-size: 10px; font-weight: 700; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 3px; transition: color .18s, background .18s;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.foot-btn .icon { font-size: 18px; line-height: 1; }
+.foot-btn.active { color: var(--accent4); background: rgba(255,255,255,0.04); }
+
+/* ============================================================
+   共通コンポーネント
+============================================================ */
+.btn-action {
+  width: 100%; height: 50px; border: none; border-radius: 14px;
+  font-family: 'Noto Sans JP', sans-serif; font-size: 15px; font-weight: 800;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  gap: 8px; transition: transform .1s, opacity .15s;
+}
+.btn-action:active { transform: scale(.985); opacity: .8; }
+.btn-action.primary   { background: #F2EEE8; color: #191A1D; }
+.btn-action.secondary { background: rgba(255,255,255,0.055); color: var(--t1); border: 1px solid var(--ln); }
+.btn-action.green     { background: linear-gradient(180deg,#F3EFE9,#E7DED1); color: #1A1B1E; }
+.btn-action.danger    { background: rgba(201,143,143,0.18); color: #F4CECE; border: 1px solid rgba(201,143,143,0.22); }
+
+.stepper {
+  display: flex; align-items: center; background: rgba(255,255,255,0.04);
+  border-radius: 16px; overflow: hidden; border: 1px solid var(--ln);
+  width: fit-content;
+}
+.step-btn {
+  width: 52px; height: 52px; border: none; background: transparent;
+  color: var(--accent4); font-size: 28px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.step-btn:active { background: rgba(255,255,255,0.05); }
+.step-val {
+  min-width: 72px; height: 52px;
+  border-left: 1px solid var(--ln); border-right: 1px solid var(--ln);
+  font-family: 'Oswald', sans-serif; font-size: 30px; font-weight: 500;
+  color: var(--t1); text-align: center;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.inp-field {
+  background: rgba(255,255,255,0.05); border: 1px solid var(--ln);
+  color: var(--t1); font-family: 'Noto Sans JP', sans-serif;
+  font-size: 15px; padding: 11px 13px; border-radius: 12px;
+  outline: none; width: 100%; -webkit-appearance: none;
+}
+.inp-field:focus { border-color: rgba(216,184,156,0.45); }
+.inp-field::placeholder { color: var(--t4); }
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--safe-bottom) + var(--footer-h) + 8px);
+  transform: translateX(-50%) translateY(70px);
+  background: rgba(36,38,43,0.93); color: var(--t1);
+  padding: 11px 20px; border-radius: 999px; font-size: 13px; font-weight: 700;
+  z-index: 9999; /* ★ 最前面 */
+  transition: transform .28s, opacity .28s;
+  box-shadow: var(--sh2); pointer-events: none;
+  border: 1px solid var(--ln);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  opacity: 0; max-width: calc(100vw - 32px); text-align: center;
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+#toast.ok   { background: rgba(151,184,167,0.94); color: #172019; border-color: transparent; }
+#toast.err  { background: rgba(201,143,143,0.94); color: #fff;    border-color: transparent; }
+#toast.warn { background: rgba(216,184,156,0.96); color: #1A1B1E; border-color: transparent; }
+
+.nbadge {
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: 'Oswald', sans-serif; font-weight: 700; border: 2px solid; flex-shrink: 0;
+}
+.nbadge.lg { width: 58px; height: 58px; font-size: 22px; }
+.nbadge.md { width: 42px; height: 42px; font-size: 15px; }
+.nbadge.sm { width: 32px; height: 32px; font-size: 12px; }
+
+.gender-chip {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 800; border: 1px solid;
+}
+.gender-chip.male   { background: var(--male-bg);   border-color: var(--male-bd);   color: var(--male-tx); }
+.gender-chip.female { background: var(--female-bg); border-color: var(--female-bd); color: var(--female-tx); }
+.gender-chip.none   { background: rgba(255,255,255,0.04); border-color: var(--ln); color: var(--t4); }
+
+.sec-lbl {
+  font-size: 11px; font-weight: 800; color: var(--t3);
+  letter-spacing: .8px; text-transform: uppercase; margin-bottom: 6px;
+}
+
+.status-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.status-chip {
+  display: inline-flex; align-items: center; padding: 5px 10px;
+  border-radius: 999px; border: 1px solid var(--ln);
+  background: rgba(255,255,255,0.04); font-size: 11px; font-weight: 700; color: var(--t2);
+}
+
+/* ============================================================
+   ★ モーダル（ボトムシート）の全面修正
+   
+   【修正の核心】
+   旧: .modal-sheet が単純な overflow-y:auto ボックス
+       → コンテンツが長いとボタンが画面外に押し出される
+       → z-index:800 でフッター(z-index:200)より前面だったが
+         フッターの高さ分だけ実質的に使える画面が狭くなっていた
+   
+   新: .modal-sheet を flex コンテナにして
+       ヘッダー部固定 + 本文スクロール + フッターボタン固定 の3層構造
+       フッターは modal-open クラスで完全非表示にする
+============================================================ */
+
+/* オーバーレイ: 画面全体を覆う。z-index を高く設定 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500; /* ★ ヘッダー(100)・フッター(200)より高い */
+  background: rgba(0,0,0,0.6);
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  /* ★ overflow:hidden でオーバーレイ背後のスクロールを防ぐ */
+  overflow: hidden;
+}
+.modal-overlay.open { display: flex; }
+
+/*
+  ★ モーダルシートの全面見直し
+  
+  構造:
+    .modal-sheet (flex column, 最大高さ制限)
+      .modal-sheet-header (固定: ドラッグハンドル + タイトル + タブ)
+      .modal-sheet-body   (可変: overflow-y:auto でスクロール)
+      .modal-sheet-footer (固定: ボタン行 + safe-area余白)
+  
+  max-height を dvh で制限し、safe-area-inset-bottom を考慮する。
+  フッターは modal-open クラスで非表示にするので、
+  フッター分の余白は不要（safe-area分だけ取る）。
+*/
+.modal-sheet {
+  background: #1A1C1F;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 540px;
+
+  /* ★ 最大高さ: 画面の90%まで。dvh でノッチを考慮 */
+  max-height: 90dvh;
+
+  box-shadow: 0 -4px 32px rgba(0,0,0,0.5);
+  border-top: 1px solid var(--ln);
+
+  /* ★ flex column にして3層構造を実現 */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* シート自体はhidden、スクロールは body層のみ */
+}
+
+/* ── シートヘッダー（固定・スクロールされない） ── */
+.modal-sheet-header {
+  flex-shrink: 0; /* ★ 縮まない */
+  padding: 14px 20px 0;
+}
+
+.modal-drag {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--ln); margin: 0 auto 14px;
+}
+
+.modal-title {
+  font-size: 18px; font-weight: 800; color: var(--t1); margin-bottom: 14px;
+}
+
+/* ── タブ（シートヘッダー内） ── */
+.edit-tabs {
+  display: flex; gap: 6px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ln2);
+}
+.edit-tab {
+  flex: 1; height: 40px; border-radius: 12px;
+  border: 1px solid var(--ln); background: rgba(255,255,255,0.04);
+  color: var(--t3); font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: all .15s;
+}
+.edit-tab.on {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15); color: var(--t1);
+}
+
+/* ── シートボディ（スクロールする中間層） ── */
+.modal-sheet-body {
+  flex: 1;          /* ★ 残りスペースを全部使う */
+  overflow-y: auto; /* ★ ここだけスクロール */
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 20px;
+}
+
+/* タブコンテンツ */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── シートフッター（固定・常に最下部に見える） ── */
+.modal-sheet-footer {
+  flex-shrink: 0; /* ★ 縮まない */
+  padding: 12px 20px;
+  /* ★ safe-area-inset-bottom 分を余白として確保 */
+  padding-bottom: calc(12px + var(--safe-bottom));
+  border-top: 1px solid var(--ln2);
+  background: #1A1C1F; /* シートと同じ背景 */
+}
+
+/* ボタン行 */
+.modal-row {
+  display: flex; gap: 10px;
+}
+
+.modal-cancel {
+  flex: 1; height: 46px; border-radius: 12px;
+  border: 1px solid var(--ln); background: rgba(255,255,255,0.05);
+  color: var(--t2); font-family: 'Noto Sans JP', sans-serif;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+}
+.modal-submit {
+  flex: 2; height: 46px; border-radius: 12px;
+  border: none; background: #F2EEE8; color: #191A1D;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 15px; font-weight: 800; cursor: pointer;
+}
+
+/* 割り当て解除ボタン（ボディ内の末尾に配置） */
+.btn-unassign {
+  width: 100%; height: 40px; border-radius: 12px;
+  border: 1px solid rgba(201,143,143,0.3);
+  background: rgba(201,143,143,0.10); color: #E4B6B6;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  margin-top: 10px;
+}
+
+/* 性別切り替えボタン */
+.gender-toggle { display: flex; gap: 8px; margin-top: 8px; }
+.gend-btn {
+  flex: 1; height: 44px; border-radius: 12px;
+  border: 1px solid var(--ln); background: rgba(255,255,255,0.04);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif; color: var(--t3); transition: all .15s;
+}
+.gend-btn.active-male   { background: var(--male-bg);   border-color: var(--male-bd);   color: var(--male-tx); }
+.gend-btn.active-female { background: var(--female-bg); border-color: var(--female-bd); color: var(--female-tx); }
+
+/* 保存チェック */
+.save-check-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 2px; cursor: pointer; margin-top: 4px;
+}
+.save-check-row input[type="checkbox"] {
+  width: 20px; height: 20px; cursor: pointer; flex-shrink: 0;
+  accent-color: var(--accent);
+}
+.save-check-label { font-size: 13px; font-weight: 600; color: var(--t2); }
+
+/* 保存済みリスト（ボディ内でスクロール） */
+.saved-list {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.saved-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--ln);
+  border-radius: 14px; padding: 12px 14px; cursor: pointer; transition: all .15s;
+}
+.saved-item:active { background: rgba(255,255,255,0.08); }
+.saved-item.selected {
+  border-color: rgba(216,184,156,0.55); background: rgba(216,184,156,0.10);
+}
+.saved-item-name { flex: 1; font-size: 15px; font-weight: 700; color: var(--t1); }
+.saved-item-check {
+  font-size: 18px; color: var(--accent); opacity: 0; transition: opacity .15s;
+}
+.saved-item.selected .saved-item-check { opacity: 1; }
+
+/* ============================================================
+   ホーム画面
+============================================================ */
+#screen-setup .scrollable { padding: 0 0 24px; }
+
+.setup-hero { padding: 20px 18px 16px; border-bottom: 1px solid var(--ln2); }
+.setup-hero h1 {
+  font-family: 'Oswald', sans-serif; font-weight: 700;
+  font-size: 30px; color: var(--t1); letter-spacing: .5px; margin-bottom: 4px;
+}
+.setup-hero p { font-size: 13px; color: var(--t2); }
+
+.setup-area { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.setup-card {
+  background: var(--card); border-radius: 20px;
+  border: 1px solid var(--ln); box-shadow: var(--sh1); overflow: hidden;
+}
+.setup-card-head {
+  padding: 14px 16px 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.setup-card-title { font-size: 18px; font-weight: 800; color: var(--t1); }
+.setup-card-summary { font-size: 13px; color: var(--t2); white-space: nowrap; }
+.setup-card-body { padding: 0 16px 16px; }
+.setup-help { font-size: 12px; color: var(--t3); margin-bottom: 12px; }
+
+.count-row {
+  display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap; margin-bottom: 14px;
+}
+
+.court-config-list { display: flex; flex-direction: column; gap: 10px; }
+.court-config-row {
+  background: rgba(255,255,255,0.03); border-radius: 16px;
+  border: 1px solid var(--ln); overflow: hidden;
+}
+.court-config-top {
+  display: flex; align-items: center; gap: 10px; padding: 12px 12px 8px;
+}
+.court-config-name-inp {
+  flex: 1; background: transparent; border: none;
+  color: var(--t1); font-family: 'Noto Sans JP', sans-serif;
+  font-size: 15px; font-weight: 800; outline: none; min-width: 60px;
+}
+.court-config-name-inp::placeholder { color: var(--t4); }
+.court-config-seg { padding: 0 12px 12px; }
+
+.seg2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.seg-btn {
+  height: 40px; border-radius: 12px;
+  border: 1px solid var(--ln); background: rgba(255,255,255,0.04);
+  color: var(--accent4); font-size: 13px; font-weight: 800;
+  cursor: pointer; transition: all .15s; font-family: 'Noto Sans JP', sans-serif;
+}
+.seg-btn.on { background: #F2EEE8; border-color: transparent; color: #191A1D; box-shadow: var(--sh1); }
+
+.priority-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pri-btn {
+  padding: 10px 8px; border-radius: 14px; border: 1px solid var(--ln);
+  background: rgba(255,255,255,0.04); color: var(--t2);
+  font-size: 12px; font-weight: 700; cursor: pointer; transition: all .15s;
+  font-family: 'Noto Sans JP', sans-serif; line-height: 1.4; text-align: center;
+}
+.pri-btn.on {
+  background: rgba(216,184,156,0.18);
+  border-color: rgba(216,184,156,0.5); color: var(--accent);
+}
+
+/* ============================================================
+   参加者画面
+============================================================ */
+#screen-players .scrollable { padding: 14px 16px 24px; }
+
+.players-header { margin-bottom: 14px; }
+.players-header-title { font-size: 16px; font-weight: 800; color: var(--t1); margin-bottom: 4px; }
+.players-header-sub { font-size: 12px; color: var(--t3); }
+
+.pgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pcard {
+  background: var(--card); border: 1px solid var(--ln);
+  border-radius: 20px; padding: 14px 12px 12px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; position: relative; text-align: center;
+  box-shadow: var(--sh1); cursor: pointer;
+}
+.pcard:active { opacity: .85; }
+.pcard.empty-slot { border-style: dashed; opacity: .8; }
+.pcard.inactive { opacity: .4; }
+
+.pcard-name { font-size: 15px; font-weight: 800; color: var(--t1); word-break: break-all; }
+.pcard-name.unset { color: var(--t4); font-style: italic; }
+.pcard-wait { font-size: 12px; color: var(--t3); font-weight: 600; }
+.pcard-edit-hint { font-size: 10px; color: var(--t4); font-weight: 600; }
+
+.p-exit-btn {
+  width: 100%; height: 36px; border-radius: 12px; border: none;
+  font-size: 13px; font-weight: 800; cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.p-exit-btn.exit   { background: rgba(201,143,143,0.14); color: #E4B6B6; border: 1px solid rgba(201,143,143,0.2); }
+.p-exit-btn.rejoin { background: rgba(151,184,167,0.14); color: #C9E1D4; border: 1px solid rgba(151,184,167,0.2); }
+
+/* ============================================================
+   ゲーム画面
+============================================================ */
+#screen-game .scrollable { padding: 0 0 20px; }
+
+.game-actions {
+  display: flex; gap: 10px; padding: 12px 16px; flex-shrink: 0;
+  background: rgba(17,18,20,0.7); border-bottom: 1px solid var(--ln2);
+}
+
+.court-game-card {
+  background: var(--card); border-radius: 20px;
+  border: 1px solid var(--ln); box-shadow: var(--sh1); overflow: hidden;
+}
+.court-game-header {
+  padding: 12px 14px; border-bottom: 1px solid var(--ln2);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.court-game-name { font-size: 20px; font-weight: 800; color: var(--t1); }
+.court-type-chip {
+  font-size: 11px; font-weight: 800; padding: 4px 10px;
+  border-radius: 999px; background: rgba(216,184,156,0.12);
+  color: var(--accent); border: 1px solid rgba(216,184,156,0.18); white-space: nowrap;
+}
+
+.match-display { padding: 14px; }
+.match-teams {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 10px; align-items: stretch;
+}
+.team-col {
+  background: rgba(255,255,255,0.04); border: 1px solid var(--ln);
+  border-radius: 16px; padding: 10px; display: flex;
+  flex-direction: column; gap: 6px; min-height: 110px;
+}
+.team-label {
+  font-size: 10px; font-weight: 800; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--t3); margin-bottom: 2px;
+}
+.vs-col { display: flex; align-items: center; justify-content: center; }
+.vs-label {
+  font-family: 'Oswald', sans-serif; font-weight: 700;
+  font-size: 24px; color: var(--t1);
+}
+
+.player-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 5px; border-radius: 12px; background: rgba(255,255,255,0.03);
+}
+.player-info { flex: 1; min-width: 0; }
+.player-name {
+  font-size: 14px; font-weight: 800; color: var(--t1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.player-sub { font-size: 10px; color: var(--t3); margin-top: 1px; }
+
+.rest-section {
+  margin: 0 16px 12px; background: var(--card);
+  border-radius: 18px; border: 1px solid var(--ln); overflow: hidden;
+}
+.rest-header {
+  padding: 10px 14px; border-bottom: 1px solid var(--ln2);
+  font-size: 14px; font-weight: 800; color: var(--t1);
+}
+.rest-players { padding: 10px 14px 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.rest-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--ln);
+  border-radius: 12px; padding: 6px 10px;
+}
+.rest-chip-name { font-size: 13px; font-weight: 700; color: var(--t1); }
+.rest-chip-sub  { font-size: 10px; color: var(--t3); }
+
+.game-courts-wrap {
+  padding: 0 16px; display: flex; flex-direction: column; gap: 12px;
+}
+
+/* ============================================================
+   進行 / 履歴
+============================================================ */
+#screen-schedule .scrollable,
+#screen-history .scrollable { padding: 12px 16px 24px; }
+
+.sched-inner, .hist-inner { display: flex; flex-direction: column; gap: 10px; }
+
+.timeline-head {
+  background: var(--card); border-radius: 18px;
+  border: 1px solid var(--ln); box-shadow: var(--sh1); padding: 12px 16px;
+}
+.timeline-head-title { font-size: 17px; font-weight: 800; color: var(--t1); margin-bottom: 3px; }
+.timeline-head-sub   { font-size: 12px; color: var(--t2); }
+
+.sc-card {
+  background: var(--card); border-radius: 20px;
+  border: 1px solid var(--ln); overflow: hidden; box-shadow: var(--sh1);
+}
+.sc-card.cur  { border-color: rgba(216,184,156,0.28); box-shadow: 0 0 0 1px rgba(216,184,156,0.18),var(--sh1); }
+.sc-card.next { border-color: rgba(158,177,199,0.28); box-shadow: 0 0 0 1px rgba(158,177,199,0.16),var(--sh1); }
+
+.sc-head {
+  padding: 11px 14px; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: 1px solid var(--ln2);
+}
+.sc-round { font-size: 16px; font-weight: 800; color: var(--t1); }
+.sc-badge {
+  font-size: 10px; font-weight: 800; padding: 3px 9px;
+  border-radius: 999px; background: rgba(255,255,255,0.06); color: var(--t2);
+}
+.sc-card.cur  .sc-badge { background: rgba(216,184,156,0.16); color: var(--accent); }
+.sc-card.next .sc-badge { background: rgba(158,177,199,0.14); color: #C7D2DE; }
+
+.sc-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+
+.sc-court-block {
+  background: rgba(255,255,255,0.03); border-radius: 14px;
+  overflow: hidden; border: 1px solid var(--ln2);
+}
+.sc-court-nm {
+  padding: 7px 10px; font-size: 11px; font-weight: 800;
+  color: var(--t3); border-bottom: 1px solid var(--ln2);
+}
+.sc-vs-grid { padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.sc-team { display: flex; flex-direction: column; gap: 3px; }
+.sc-player { font-size: 14px; font-weight: 700; color: var(--t1); line-height: 1.5; word-break: break-word; }
+.sc-player.emp { color: var(--t4); font-style: italic; }
+.sc-vs-txt {
+  font-family: 'Oswald', sans-serif; font-weight: 700;
+  font-size: 20px; color: var(--t2); text-align: center; padding: 2px 0;
+}
+.sc-rest {
+  background: rgba(255,255,255,0.03); border-radius: 12px;
+  padding: 8px 10px; border: 1px solid var(--ln2);
+}
+.sc-rest-lbl   { font-size: 10px; font-weight: 800; color: var(--t3); margin-bottom: 3px; }
+.sc-rest-names { font-size: 12px; font-weight: 700; color: var(--t2); }
+
+.hcard {
+  background: var(--card); border-radius: 20px;
+  border: 1px solid var(--ln); overflow: hidden; box-shadow: var(--sh1);
+}
+.hhead {
+  padding: 11px 14px; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: 1px solid var(--ln2);
+  font-size: 15px; font-weight: 800; color: var(--t1);
+}
+.hbody { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+.hrow {
+  padding: 10px; border: 1px solid var(--ln2); border-radius: 12px;
+  background: rgba(255,255,255,0.025); font-size: 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.hct { font-size: 11px; font-weight: 800; color: var(--t3); }
+.hpl { color: var(--t2); line-height: 1.5; font-size: 13px; font-weight: 600; }
+
+@media (max-width: 380px) {
+  .setup-hero h1 { font-size: 26px; }
+  .court-game-name { font-size: 18px; }
+  .logo { font-size: 22px; }
+  .hnav-btn { padding: 0 10px; font-size: 12px; }
+}
+```
+
   </style>
-
 </head>
 <body>
-  <div id="app">
-    <div id="header">
-      <div class="header-inner">
-        <div class="logo">PB</div>
-        <div class="header-nav">
-          <button class="hnav-btn active" onclick="gotoScreen('setup')" id="hnav-setup">ホーム</button>
-          <button class="hnav-btn" onclick="gotoScreen('game')" id="hnav-game">ゲーム</button>
-          <button class="hnav-btn" onclick="gotoScreen('players')" id="hnav-players">参加者</button>
-        </div>
-        <div class="timer-chip">
-          <div id="h-timer">07:00</div>
-        </div>
+<div id="app">
+
+  <!-- ヘッダー -->
+
+  <div id="header">
+    <div class="header-inner">
+      <div class="logo">PB</div>
+      <div class="header-nav">
+        <button class="hnav-btn active" onclick="gotoScreen('setup')"   id="hnav-setup">ホーム</button>
+        <button class="hnav-btn"        onclick="gotoScreen('game')"    id="hnav-game">ゲーム</button>
+        <button class="hnav-btn"        onclick="gotoScreen('players')" id="hnav-players">参加者</button>
       </div>
+      <div class="game-badge" id="game-badge">第1ゲーム</div>
     </div>
+  </div>
+
+  <!-- メイン -->
+
+  <div id="main">
 
 ```
-<div id="main">
-  <!-- ホーム -->
-  <div id="screen-setup" class="screen active">
-    <div class="scrollable">
-      <div class="setup-hero">
-        <h1>Pickleball Manager</h1>
-        <p>参加者・コート・タイマーを設定して、すぐにゲームを回せます</p>
-      </div>
-
-      <div class="setup-area">
-        <div class="setup-card">
-          <div class="setup-card-head">
-            <div class="setup-card-title">参加者</div>
-            <div class="setup-card-summary" id="setup-player-summary">12名</div>
-          </div>
-          <div class="setup-card-body">
-            <div class="setup-help">当日の参加人数を設定します（0〜30名）</div>
-            <div class="count-row">
-              <div class="stepper">
-                <button class="step-btn" onclick="adjPlayers(-1)">−</button>
-                <div class="step-val" id="player-count-disp">12</div>
-                <button class="step-btn" onclick="adjPlayers(1)">＋</button>
-              </div>
-              <span style="font-size:14px;color:var(--t2)">名</span>
-            </div>
-            <button class="btn-action primary" onclick="registerPlayers()">参加者を登録する</button>
-          </div>
-        </div>
-
-        <div class="setup-card">
-          <div class="setup-card-head">
-            <div class="setup-card-title">コート設定</div>
-            <div class="setup-card-summary" id="setup-court-summary">3面</div>
-          </div>
-          <div class="setup-card-body">
-            <div class="setup-help">使用するコート数と、各コートの形式を設定します</div>
-            <div class="count-row">
-              <div class="stepper">
-                <button class="step-btn" onclick="adjCourts(-1)">−</button>
-                <div class="step-val" id="court-count-disp">3</div>
-                <button class="step-btn" onclick="adjCourts(1)">＋</button>
-              </div>
-              <span style="font-size:14px;color:var(--t2)">面（1〜6）</span>
-            </div>
-            <div class="court-config-list" id="court-config-list"></div>
-            <div style="margin-top:14px">
-              <button class="btn-action primary" onclick="saveCourts()">コートを保存する</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="setup-card">
-          <div class="setup-card-head">
-            <div class="setup-card-title">タイマー設定</div>
-            <div class="setup-card-summary" id="setup-timer-summary">7分</div>
-          </div>
-          <div class="setup-card-body">
-            <div class="setup-help">1ゲームあたりの時間を設定します</div>
-            <div class="timer-setup-row">
-              <div class="stepper">
-                <button class="step-btn" onclick="adjTimer(-1)">−</button>
-                <div class="step-val" id="timer-setup-disp">7</div>
-                <button class="step-btn" onclick="adjTimer(1)">＋</button>
-              </div>
-              <span style="font-size:14px;color:var(--t2)">分</span>
-            </div>
-            <button class="btn-action primary" onclick="saveTimer()">タイマーを保存する</button>
-          </div>
-        </div>
-
-        <div class="bal-row">
-          <div>
-            <div class="bal-lbl">実力均衡モード</div>
-            <div class="bal-sub">勝敗記録をもとに近い実力同士でマッチングします</div>
-          </div>
-          <label class="sw">
-            <input type="checkbox" id="bal-tog">
-            <div class="sw-tr"></div>
-          </label>
-        </div>
-
-        <div class="setup-card">
-          <div class="setup-card-head">
-            <div class="setup-card-title">開始準備</div>
-            <div class="setup-card-summary">自動配置</div>
-          </div>
-          <div class="setup-card-body">
-            <div class="setup-help">現在の設定内容でゲームを自動配置します</div>
-            <button class="btn-action green" onclick="doAutoAssign()" id="auto-assign-btn" style="height:58px;font-size:18px;">
-              🔀 自動配置してゲーム開始
-            </button>
-            <div class="status-chips" id="setup-status-chips"></div>
-          </div>
-        </div>
-      </div>
+<!-- ── ホーム ── -->
+<div id="screen-setup" class="screen active">
+  <div class="scrollable">
+    <div class="setup-hero">
+      <h1>Pickleball Manager</h1>
+      <p>まず参加人数を決めて、No.枠を作成してください</p>
     </div>
-  </div>
+    <div class="setup-area">
 
-  <!-- ゲーム -->
-  <div id="screen-game" class="screen">
-    <div class="timer-bar-wrap">
-      <div class="timer-top-grid">
-        <div class="timer-left">
-          <div id="game-timer-disp">07:00</div>
-          <div class="timer-round-label" id="rnd-badge">第1ゲーム</div>
-        </div>
-        <div class="timer-right">
-          <button class="btn-start" id="btn-start" onclick="toggleGameTimer()">▶ ゲーム開始</button>
-          <button class="btn-timer-reset" onclick="resetGameTimer()" title="リセット">↺</button>
-        </div>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progress-fill" style="width:100%"></div>
-      </div>
-    </div>
-
-    <div class="game-actions">
-      <button class="btn-action secondary" style="flex:1" onclick="doAutoAssign()">🔀 再配置</button>
-      <button class="btn-action primary" style="flex:1" onclick="nextRound()">次のゲーム ▶</button>
-    </div>
-
-    <div class="scrollable">
-      <div class="game-courts" id="game-courts"></div>
-    </div>
-  </div>
-
-  <!-- 参加者
-       FIX: HTMLの構造を修正（ネストのズレを解消）。
-            players-topの中に余分なdivが混入していたのを整理。 -->
-  <div id="screen-players" class="screen">
-    <div class="scrollable">
-      <div class="players-top">
-        <div class="stepper" style="transform:scale(.85);transform-origin:left">
-          <button class="step-btn" onclick="adjPlayers(-1)">−</button>
-          <div class="step-val" id="player-count-disp2">12</div>
-          <button class="step-btn" onclick="adjPlayers(1)">＋</button>
-        </div>
-        <button class="btn-action primary" style="flex:1;height:44px" onclick="registerPlayers()">登録を更新</button>
-      </div>
-      <div class="pgrid" id="pgrid"></div>
-    </div>
-  </div>
-
-  <!-- コート -->
-  <div id="screen-courts" class="screen">
-    <div class="scrollable">
       <div class="setup-card">
         <div class="setup-card-head">
-          <div class="setup-card-title">コート数</div>
-          <div class="setup-card-summary" id="court-screen-summary">3面</div>
+          <div class="setup-card-title">参加人数</div>
+          <div class="setup-card-summary" id="setup-player-summary">0名</div>
         </div>
         <div class="setup-card-body">
+          <div class="setup-help">当日の参加人数を決めてNo.枠を作成します（0〜30名）</div>
+          <div class="count-row">
+            <div class="stepper">
+              <button class="step-btn" onclick="adjPlayers(-1)">−</button>
+              <div class="step-val" id="player-count-disp">0</div>
+              <button class="step-btn" onclick="adjPlayers(1)">＋</button>
+            </div>
+            <span style="font-size:13px;color:var(--t2)">名</span>
+          </div>
+          <button class="btn-action primary" onclick="applyPlayerCount()">
+            📋 当日のNo.枠を作成 / 更新する
+          </button>
+          <div class="status-chips" id="setup-player-chips"></div>
+        </div>
+      </div>
+
+      <div class="setup-card">
+        <div class="setup-card-head">
+          <div class="setup-card-title">コート設定</div>
+          <div class="setup-card-summary" id="setup-court-summary">2面</div>
+        </div>
+        <div class="setup-card-body">
+          <div class="setup-help">使用コート数と各コートの形式を設定します</div>
           <div class="count-row">
             <div class="stepper">
               <button class="step-btn" onclick="adjCourts(-1)">−</button>
-              <div class="step-val" id="court-count-disp2">3</div>
+              <div class="step-val" id="court-count-disp">2</div>
               <button class="step-btn" onclick="adjCourts(1)">＋</button>
             </div>
-            <span style="font-size:14px;color:var(--t2)">面（1〜6）</span>
+            <span style="font-size:13px;color:var(--t2)">面（1〜6）</span>
+          </div>
+          <div class="court-config-list" id="court-config-list"></div>
+          <div style="margin-top:12px">
+            <button class="btn-action primary" onclick="saveCourts()">コートを保存する</button>
           </div>
         </div>
       </div>
 
-      <div class="court-config-list" id="court-config-list2"></div>
-
-      <div>
-        <button class="btn-action primary" onclick="saveCourts()">コートを保存する</button>
+      <div class="setup-card">
+        <div class="setup-card-head">
+          <div class="setup-card-title">優先モード</div>
+          <div class="setup-card-summary" id="setup-mode-summary">通常</div>
+        </div>
+        <div class="setup-card-body">
+          <div class="setup-help">最低1面の組み合わせに優先ルールを適用します</div>
+          <div class="priority-grid" id="priority-grid"></div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- 進行
-       FIX: scrollableの直下にsched-innerラッパーを挟む -->
-  <div id="screen-schedule" class="screen">
-    <div class="scrollable">
-      <div class="sched-inner" id="sched-scroll"></div>
-    </div>
-  </div>
+      <div class="setup-card">
+        <div class="setup-card-head">
+          <div class="setup-card-title">開始準備</div>
+          <div class="setup-card-summary">自動配置</div>
+        </div>
+        <div class="setup-card-body">
+          <div class="setup-help">No.枠の設定が完了したら自動配置でゲームを開始します</div>
+          <button class="btn-action green" onclick="doAutoAssign()" style="height:54px;font-size:17px;">
+            🔀 自動配置してゲーム開始
+          </button>
+          <div class="status-chips" id="setup-status-chips"></div>
+        </div>
+      </div>
 
-  <!-- 履歴
-       FIX: scrollableの直下にhist-innerラッパーを挟む -->
-  <div id="screen-history" class="screen">
-    <div class="scrollable">
-      <div class="hist-inner" id="hist-scroll"></div>
     </div>
   </div>
 </div>
 
-<div id="footer">
-  <div class="footer-inner">
-    <button class="foot-btn" onclick="gotoScreen('schedule')" id="fnav-schedule">
-      <span class="icon">📅</span>進行
-    </button>
-    <button class="foot-btn active" onclick="gotoScreen('setup')" id="fnav-setup">
-      <span class="icon">🏠</span>ホーム
-    </button>
-    <button class="foot-btn" onclick="gotoScreen('history')" id="fnav-history">
-      <span class="icon">📋</span>履歴
-    </button>
+<!-- ── ゲーム ── -->
+<div id="screen-game" class="screen">
+  <div class="game-actions">
+    <button class="btn-action secondary" style="flex:1" onclick="doAutoAssign()">🔀 再配置</button>
+    <button class="btn-action primary"   style="flex:1" onclick="nextRound()">次のゲーム ▶</button>
+  </div>
+  <div class="scrollable">
+    <div class="game-courts-wrap" id="game-courts" style="padding-top:14px;"></div>
   </div>
 </div>
 
-<div id="toast"></div>
+<!-- ── 参加者 ── -->
+<div id="screen-players" class="screen">
+  <div class="scrollable">
+    <div class="players-header">
+      <div class="players-header-title">当日参加者 No.枠一覧</div>
+      <div class="players-header-sub">各カードをタップしてニックネーム・性別・保存済み参加者の割り当てを設定できます</div>
+    </div>
+    <div class="pgrid" id="pgrid"></div>
+  </div>
+</div>
+
+<!-- ── 進行 ── -->
+<div id="screen-schedule" class="screen">
+  <div class="scrollable">
+    <div class="sched-inner" id="sched-scroll"></div>
+  </div>
+</div>
+
+<!-- ── 履歴 ── -->
+<div id="screen-history" class="screen">
+  <div class="scrollable">
+    <div class="hist-inner" id="hist-scroll"></div>
+  </div>
+</div>
 ```
 
+  </div><!-- /#main -->
+
+  <!-- フッター -->
+
+  <div id="footer">
+    <div class="footer-inner">
+      <button class="foot-btn"        onclick="gotoScreen('schedule')" id="fnav-schedule"><span class="icon">📅</span>進行</button>
+      <button class="foot-btn active" onclick="gotoScreen('setup')"    id="fnav-setup">   <span class="icon">🏠</span>ホーム</button>
+      <button class="foot-btn"        onclick="gotoScreen('history')"  id="fnav-history"> <span class="icon">📋</span>履歴</button>
+    </div>
   </div>
 
-  <script>
-    var S = {
-      players: [],
-      courts: [
-        {name:'手前コート', mode:'doubles', teams:[[],[]]},
-        {name:'中央コート', mode:'doubles', teams:[[],[]]},
-        {name:'奥コート', mode:'doubles', teams:[[],[]]}
-      ],
-      scores: [],
-      rounds: [],
-      futureRounds: [],
-      currentRound: 0,
-      courtGroupHist: [],
-      pairHist: {},
-      oppHist: {},
-      timerMin: 7,
-      playerCount: 12,
-      courtCount: 3
+  <!-- ============================================================
+       ★ No.枠 編集モーダル（修正済み）
+       
+       構造:
+         .modal-overlay（z-index:500 でフッターより前面）
+           .modal-sheet（flex column）
+             .modal-sheet-header（固定：ドラッグハンドル＋タイトル＋タブ）
+             .modal-sheet-body  （可変：overflow-y:auto でスクロール）
+               タブコンテンツ（フォーム・リスト）
+             .modal-sheet-footer（固定：ボタン行 ← ここが常に見える）
+  ============================================================ -->
+
+  <div class="modal-overlay" id="modal-edit" onclick="handleOverlay(event,'modal-edit')">
+    <div class="modal-sheet">
+
+```
+  <!-- ★ シートヘッダー（固定・スクロールされない） -->
+  <div class="modal-sheet-header">
+    <div class="modal-drag"></div>
+    <div class="modal-title" id="edit-modal-title">No.1 を編集</div>
+    <div class="edit-tabs">
+      <button class="edit-tab on" id="tab-manual-btn" onclick="switchTab('manual')">✏️ 直接入力</button>
+      <button class="edit-tab"    id="tab-saved-btn"  onclick="switchTab('saved')">📂 保存済みから選ぶ</button>
+    </div>
+  </div>
+
+  <!-- ★ シートボディ（ここだけスクロール） -->
+  <div class="modal-sheet-body">
+
+    <!-- 直接入力タブ -->
+    <div class="tab-content active" id="tab-manual">
+      <div style="margin-bottom:14px;">
+        <div class="sec-lbl">ニックネーム</div>
+        <input class="inp-field" id="edit-nick-inp" type="text"
+          placeholder="ニックネームを入力" maxlength="20"
+          onkeydown="if(event.key==='Enter')saveManualEdit()">
+      </div>
+      <div style="margin-bottom:4px;">
+        <div class="sec-lbl">性別</div>
+        <div class="gender-toggle">
+          <button class="gend-btn" id="edit-gender-male"   onclick="setEditGender('male')">♂ 男性</button>
+          <button class="gend-btn" id="edit-gender-female" onclick="setEditGender('female')">♀ 女性</button>
+        </div>
+      </div>
+      <label class="save-check-row">
+        <input type="checkbox" id="edit-save-chk" checked>
+        <span class="save-check-label">保存して次回も使えるようにする</span>
+      </label>
+    </div>
+
+    <!-- 保存済みから選ぶタブ -->
+    <div class="tab-content" id="tab-saved">
+      <div class="saved-list" id="edit-saved-list"></div>
+      <!-- 割り当て解除ボタン（割り当て済みの場合のみ表示） -->
+      <button class="btn-unassign" id="btn-unassign" onclick="unassignSlot()" style="display:none;">
+        🗑 割り当てを解除する
+      </button>
+    </div>
+
+  </div><!-- /.modal-sheet-body -->
+
+  <!-- ★ シートフッター（固定・常に見える ← これが修正の核心） -->
+  <div class="modal-sheet-footer">
+    <div class="modal-row">
+      <button class="modal-cancel" onclick="closeEditModal()">キャンセル</button>
+      <!-- ★ タブに応じてボタンのテキストと動作を切り替える -->
+      <button class="modal-submit" id="modal-submit-btn" onclick="handleModalSubmit()">
+        この内容で設定する
+      </button>
+    </div>
+  </div><!-- /.modal-sheet-footer -->
+
+</div><!-- /.modal-sheet -->
+```
+
+  </div><!-- /.modal-overlay -->
+
+  <div id="toast"></div>
+
+</div><!-- /#app -->
+
+<script>
+// ============================================================
+// ■ データ定義
+// ============================================================
+
+/*
+ * savedParticipants（localStorage永続保存）
+ * { id, nickName, gender }
+ * ★ 氏名は扱わない。ニックネームのみ。
+ */
+var savedParticipants = [];
+
+/*
+ * todayParticipants（当日No.枠の固定長配列）
+ * ★ push() で人数が増える設計ではない。
+ *    人数確定時に生成し、各要素の中身を編集する方式。
+ * {
+ *   no, participantId, nickName, gender, active,
+ *   waitingCount, lastWaited,
+ *   lastPartnerNos, lastOpponentNos,
+ *   recentPartnerNos, recentOpponentNos
+ * }
+ */
+var todayParticipants = [];
+
+var S = {
+  courts: [
+    { name: '手前コート', mode: 'doubles', teams: [[], []] },
+    { name: '中央コート', mode: 'doubles', teams: [[], []] }
+  ],
+  rounds: [], futureRounds: [], currentRound: 0,
+  courtGroupHist: [], pairHist: {}, oppHist: {},
+  courtCount: 2, playerCount: 0, priorityMode: 'normal'
+};
+
+var tmpCourtConfig = [
+  { name: '手前コート', mode: 'doubles' },
+  { name: '中央コート', mode: 'doubles' }
+];
+var _courtCount  = 2;
+var _playerCount = 0;
+var _defaultCourtNames = ['手前コート','中央コート','奥コート','第4コート','第5コート','第6コート'];
+
+// 編集モーダル状態
+var _editTargetNo        = null;
+var _editGender          = 'male';
+var _editTab             = 'manual';
+var _editSelectedSavedId = null;
+
+// ============================================================
+// ■ localStorage
+// ============================================================
+
+function saveSavedParticipants() {
+  try { localStorage.setItem('pb_savedParticipants', JSON.stringify(savedParticipants)); }
+  catch(e) { console.warn(e); }
+}
+
+function loadSavedParticipants() {
+  try {
+    var raw = localStorage.getItem('pb_savedParticipants');
+    if (raw) savedParticipants = JSON.parse(raw);
+  } catch(e) { console.warn(e); }
+}
+
+function saveSession() {
+  try {
+    localStorage.setItem('pb_session', JSON.stringify({
+      S: S, todayParticipants: todayParticipants,
+      tmpCourtConfig: tmpCourtConfig,
+      _courtCount: _courtCount, _playerCount: _playerCount
+    }));
+  } catch(e) { console.warn(e); }
+}
+
+function loadSession() {
+  try {
+    var raw = localStorage.getItem('pb_session');
+    if (!raw) return;
+    var data = JSON.parse(raw);
+    if (data.S)                  S                 = data.S;
+    if (data.todayParticipants)  todayParticipants = data.todayParticipants;
+    if (data.tmpCourtConfig)     tmpCourtConfig    = data.tmpCourtConfig;
+    if (typeof data._courtCount  === 'number') _courtCount  = data._courtCount;
+    if (typeof data._playerCount === 'number') _playerCount = data._playerCount;
+  } catch(e) { console.warn(e); }
+}
+
+// ============================================================
+// ■ 画面遷移
+// ============================================================
+
+var SCREENS     = ['setup','game','players','schedule','history'];
+var HEADER_NAVS = ['setup','game','players'];
+var FOOTER_NAVS = ['schedule','setup','history'];
+
+function gotoScreen(name) {
+  SCREENS.forEach(function(s) {
+    var el = document.getElementById('screen-' + s);
+    if (el) el.classList.toggle('active', s === name);
+  });
+  HEADER_NAVS.forEach(function(n) {
+    var b = document.getElementById('hnav-' + n);
+    if (b) b.classList.toggle('active', n === name);
+  });
+  FOOTER_NAVS.forEach(function(n) {
+    var b = document.getElementById('fnav-' + n);
+    if (b) b.classList.toggle('active', n === name);
+  });
+  if (name === 'setup')    renderSetup();
+  if (name === 'players')  renderPlayers();
+  if (name === 'game')     renderGame();
+  if (name === 'schedule') renderSched();
+  if (name === 'history')  renderHistory();
+}
+
+// ============================================================
+// ■ バッジ・ラベル
+// ============================================================
+
+function pColor(no) {
+  var hs = [355,20,45,80,140,180,210,250,290,320,10,60,160,235,300,35,160,200];
+  var h  = hs[(no - 1) % hs.length];
+  return { bg:'hsla('+h+',55%,65%,0.20)', bd:'hsla('+h+',55%,60%,0.72)', tx:'hsl('+h+',72%,72%)' };
+}
+
+function makeBadge(no, size) {
+  var col = pColor(no);
+  var d = document.createElement('div');
+  d.className = 'nbadge ' + (size || 'md');
+  d.style.background = col.bg; d.style.borderColor = col.bd; d.style.color = col.tx;
+  d.textContent = no;
+  return d;
+}
+
+function displayName(p) {
+  if (!p) return '—';
+  return p.nickName ? p.nickName : ('No.' + p.no);
+}
+
+function pLabel(p) {
+  if (!p) return '—';
+  var tp = (typeof p === 'object' && p.no !== undefined) ? p : findByNo(p);
+  if (!tp) return 'No.' + p;
+  return tp.nickName ? (tp.nickName + '（No.' + tp.no + '）') : ('No.' + tp.no);
+}
+
+function findByNo(no) {
+  return todayParticipants.find(function(x) { return x.no === no; }) || null;
+}
+
+function genderChipHtml(gender) {
+  if (gender === 'male')   return '<span class="gender-chip male">♂ 男</span>';
+  if (gender === 'female') return '<span class="gender-chip female">♀ 女</span>';
+  return '<span class="gender-chip none">未設定</span>';
+}
+
+// ============================================================
+// ■ ホーム画面
+// ============================================================
+
+function renderSetup() {
+  document.getElementById('player-count-disp').textContent = _playerCount;
+  document.getElementById('setup-player-summary').textContent = todayParticipants.length + '名';
+  document.getElementById('court-count-disp').textContent = _courtCount;
+  document.getElementById('setup-court-summary').textContent = _courtCount + '面';
+
+  var chipsEl = document.getElementById('setup-player-chips');
+  if (chipsEl) {
+    var total   = todayParticipants.length;
+    var named   = todayParticipants.filter(function(p) { return !!p.nickName; }).length;
+    var active  = todayParticipants.filter(function(p) { return p.active; }).length;
+    var males   = todayParticipants.filter(function(p) { return p.gender === 'male'; }).length;
+    var females = todayParticipants.filter(function(p) { return p.gender === 'female'; }).length;
+    chipsEl.innerHTML =
+      '<span class="status-chip">枠 ' + total + '個</span>' +
+      '<span class="status-chip">名前設定済み ' + named + '名</span>' +
+      '<span class="status-chip">参加中 ' + active + '名</span>' +
+      '<span class="status-chip" style="color:var(--male-tx)">♂ ' + males + '</span>' +
+      '<span class="status-chip" style="color:var(--female-tx)">♀ ' + females + '</span>';
+  }
+
+  var statusEl = document.getElementById('setup-status-chips');
+  if (statusEl) {
+    var usedCourts = S.courts.filter(function(c) { return c.mode !== 'unused'; }).length;
+    statusEl.innerHTML =
+      '<span class="status-chip">参加中 ' + todayParticipants.filter(function(p){return p.active;}).length + '名</span>' +
+      '<span class="status-chip">使用コート ' + usedCourts + '面</span>' +
+      '<span class="status-chip">モード: ' + getPriorityLabel(S.priorityMode) + '</span>';
+  }
+
+  renderCourtConfig1();
+  renderPriorityGrid();
+  var modeEl = document.getElementById('setup-mode-summary');
+  if (modeEl) modeEl.textContent = getPriorityLabel(S.priorityMode);
+}
+
+function adjPlayers(d) {
+  _playerCount = Math.max(0, Math.min(30, _playerCount + d));
+  document.getElementById('player-count-disp').textContent = _playerCount;
+}
+
+/*
+ * ★ No.枠を作成 / 更新する
+ * todayParticipants は固定長配列として扱う。
+ * 増えた場合 → 末尾に追加
+ * 減った場合 → 末尾を削除
+ * 既存データは保持
+ */
+function applyPlayerCount() {
+  var newCount = _playerCount;
+  var oldCount = todayParticipants.length;
+
+  if (newCount === oldCount) {
+    showToast('No.枠の数は変わりません（' + newCount + '名）', 'warn');
+    return;
+  }
+
+  if (newCount > oldCount) {
+    for (var no = oldCount + 1; no <= newCount; no++) {
+      todayParticipants.push(makeEmptySlot(no));
+    }
+    showToast('No.' + (oldCount + 1) + '〜No.' + newCount + ' の枠を追加しました', 'ok');
+  } else {
+    todayParticipants.splice(newCount);
+    showToast('No.' + (newCount + 1) + '〜No.' + oldCount + ' の枠を削除しました', 'ok');
+  }
+
+  S.playerCount = newCount;
+  saveSession();
+  renderSetup();
+  renderPlayers();
+}
+
+function makeEmptySlot(no) {
+  return {
+    no: no, participantId: null, nickName: '', gender: '',
+    active: true, waitingCount: 0, lastWaited: false,
+    lastPartnerNos: [], lastOpponentNos: [],
+    recentPartnerNos: [], recentOpponentNos: []
+  };
+}
+
+// ============================================================
+// ■ コート設定
+// ============================================================
+
+function adjCourts(d) {
+  _courtCount = Math.max(1, Math.min(6, _courtCount + d));
+  document.getElementById('court-count-disp').textContent = _courtCount;
+  while (tmpCourtConfig.length < _courtCount) {
+    var idx = tmpCourtConfig.length;
+    tmpCourtConfig.push({ name: _defaultCourtNames[idx] || ('第'+(idx+1)+'コート'), mode: 'doubles' });
+  }
+  renderCourtConfig1();
+}
+
+function renderCourtConfig1() {
+  var list = document.getElementById('court-config-list');
+  if (!list) return;
+  list.innerHTML = '';
+  for (var i = 0; i < _courtCount; i++) list.appendChild(buildCourtConfigCard(i));
+}
+
+function buildCourtConfigCard(idx) {
+  var cfg = tmpCourtConfig[idx];
+  var row = document.createElement('div');
+  row.className = 'court-config-row';
+
+  var top = document.createElement('div');
+  top.className = 'court-config-top';
+  var inp = document.createElement('input');
+  inp.className = 'court-config-name-inp';
+  inp.type = 'text'; inp.value = cfg.name; inp.placeholder = 'コート名';
+  inp.oninput = (function(i) { return function() { tmpCourtConfig[i].name = this.value; }; })(idx);
+  top.appendChild(inp);
+  row.appendChild(top);
+
+  var seg = document.createElement('div');
+  seg.className = 'court-config-seg';
+  var segBtns = document.createElement('div');
+  segBtns.className = 'seg2';
+  [{k:'doubles',l:'ダブルス'},{k:'unused',l:'未使用'}].forEach(function(m) {
+    var btn = document.createElement('button');
+    btn.className = 'seg-btn' + (cfg.mode === m.k ? ' on' : '');
+    btn.textContent = m.l;
+    btn.onclick = (function(i, mk) {
+      return function() { tmpCourtConfig[i].mode = mk; renderCourtConfig1(); };
+    })(idx, m.k);
+    segBtns.appendChild(btn);
+  });
+  seg.appendChild(segBtns);
+  row.appendChild(seg);
+  return row;
+}
+
+function saveCourts(silent) {
+  S.courts = tmpCourtConfig.slice(0, _courtCount).map(function(c) {
+    return { name: c.name, mode: c.mode, teams: [[], []] };
+  });
+  S.courtGroupHist = S.courts.map(function() { return {}; });
+  S.courtCount = _courtCount;
+  saveSession();
+  renderSetup();
+  if (!silent) showToast('コート設定を保存しました', 'ok');
+}
+
+// ============================================================
+// ■ 優先モード
+// ============================================================
+
+function getPriorityLabel(mode) {
+  return {normal:'通常',men_doubles_priority:'男子優先',women_doubles_priority:'女子優先',mixed_doubles_priority:'ミックス優先'}[mode] || '通常';
+}
+
+function renderPriorityGrid() {
+  var grid = document.getElementById('priority-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  [
+    {key:'normal',label:'通常',desc:'待機回数順で均等に'},
+    {key:'men_doubles_priority',label:'♂ 男子優先',desc:'最低1面は男4人'},
+    {key:'women_doubles_priority',label:'♀ 女子優先',desc:'最低1面は女4人'},
+    {key:'mixed_doubles_priority',label:'⚥ ミックス',desc:'最低1面は男女ペア'}
+  ].forEach(function(m) {
+    var btn = document.createElement('button');
+    btn.className = 'pri-btn' + (S.priorityMode === m.key ? ' on' : '');
+    btn.innerHTML = '<strong>' + m.label + '</strong><br><small style="font-size:10px;opacity:.7">' + m.desc + '</small>';
+    btn.onclick = (function(k) {
+      return function() {
+        S.priorityMode = k;
+        saveSession();
+        renderPriorityGrid();
+        var el = document.getElementById('setup-mode-summary');
+        if (el) el.textContent = getPriorityLabel(k);
+        showToast(getPriorityLabel(k) + 'モードに設定しました');
+      };
+    })(m.key);
+    grid.appendChild(btn);
+  });
+}
+
+// ============================================================
+// ■ 参加者画面
+// ============================================================
+
+function renderPlayers() {
+  var grid = document.getElementById('pgrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  if (todayParticipants.length === 0) {
+    grid.innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;padding:40px 16px;color:var(--t3);font-size:14px;line-height:2;">' +
+      'No.枠がありません<br>ホーム画面で参加人数を設定して<br>「No.枠を作成」してください</div>';
+    return;
+  }
+
+  todayParticipants.slice().sort(function(a,b){return a.no-b.no;})
+    .forEach(function(p) { grid.appendChild(buildPlayerCard(p)); });
+}
+
+function buildPlayerCard(p) {
+  var card = document.createElement('div');
+  var isEmpty = !p.nickName;
+  card.className = 'pcard' + (isEmpty ? ' empty-slot' : '') + (p.active ? '' : ' inactive');
+
+  card.appendChild(makeBadge(p.no, 'lg'));
+
+  var nm = document.createElement('div');
+  nm.className = 'pcard-name' + (isEmpty ? ' unset' : '');
+  nm.textContent = isEmpty ? '未設定' : p.nickName;
+  card.appendChild(nm);
+
+  var gc = document.createElement('div');
+  gc.innerHTML = genderChipHtml(p.gender);
+  card.appendChild(gc);
+
+  var wt = document.createElement('div');
+  wt.className = 'pcard-wait';
+  wt.textContent = '待機 ' + p.waitingCount + '回';
+  card.appendChild(wt);
+
+  var editHint = document.createElement('div');
+  editHint.className = 'pcard-edit-hint';
+  editHint.textContent = 'タップして編集';
+  card.appendChild(editHint);
+
+  card.onclick = function() { openEditModal(p.no); };
+
+  var btn = document.createElement('button');
+  btn.className = 'p-exit-btn ' + (p.active ? 'exit' : 'rejoin');
+  btn.textContent = p.active ? '退場' : '再参加';
+  btn.onclick = function(e) { e.stopPropagation(); toggleActive(p.no); };
+  card.appendChild(btn);
+
+  return card;
+}
+
+function toggleActive(no) {
+  var p = findByNo(no);
+  if (!p) return;
+  p.active = !p.active;
+  saveSession();
+  renderPlayers();
+  renderGame();
+  renderSched();
+  showToast((p.nickName || 'No.'+no) + ' を' + (p.active ? '参加' : '退場') + 'にしました');
+}
+
+// ============================================================
+// ■ No.枠 編集モーダル
+// ============================================================
+
+/*
+ * ★ openModal / closeModal の修正点
+ *
+ * 開く時: #footer に .modal-open クラスを付けて非表示にする
+ * 閉じる時: .modal-open クラスを外してフッターを再表示する
+ *
+ * これによりモーダル表示中にフッターが干渉しなくなる。
+ */
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  // ★ フッターを非表示にしてモーダルと干渉させない
+  var footer = document.getElementById('footer');
+  if (footer) footer.classList.add('modal-open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  // ★ フッターを再表示する
+  var footer = document.getElementById('footer');
+  if (footer) footer.classList.remove('modal-open');
+}
+
+function closeEditModal() { closeModal('modal-edit'); }
+
+function handleOverlay(e, id) {
+  if (e.target === document.getElementById(id)) closeModal(id);
+}
+
+/*
+ * ★ handleModalSubmit
+ * タブに応じてボタンの動作を切り替える
+ * （保存ボタンを1つに統合して、フッター固定エリアに配置）
+ */
+function handleModalSubmit() {
+  if (_editTab === 'manual') {
+    saveManualEdit();
+  } else {
+    saveFromSaved();
+  }
+}
+
+/** 編集モーダルを開く */
+function openEditModal(no) {
+  _editTargetNo = no;
+  _editSelectedSavedId = null;
+
+  var p = findByNo(no);
+  if (!p) return;
+
+  var titleEl = document.getElementById('edit-modal-title');
+  if (titleEl) titleEl.textContent = 'No.' + no + ' を編集';
+
+  var nickInp = document.getElementById('edit-nick-inp');
+  if (nickInp) nickInp.value = p.nickName || '';
+
+  _editGender = p.gender || 'male';
+  updateGenderBtns();
+
+  var saveChk = document.getElementById('edit-save-chk');
+  if (saveChk) saveChk.checked = !p.participantId || p.participantId.indexOf('tmp_') === 0;
+
+  renderSavedListForEdit(p);
+
+  var unassignBtn = document.getElementById('btn-unassign');
+  if (unassignBtn) unassignBtn.style.display = p.participantId ? 'block' : 'none';
+
+  // 提出ボタンのラベルをタブに合わせて初期化
+  switchTab('manual');
+
+  openModal('modal-edit');
+
+  // フォーカス（キーボード表示後にシートが押し上げられるのを防ぐため少し遅らせる）
+  setTimeout(function() {
+    var el = document.getElementById('edit-nick-inp');
+    if (el) el.focus();
+  }, 200);
+}
+
+function updateGenderBtns() {
+  var mb = document.getElementById('edit-gender-male');
+  var fb = document.getElementById('edit-gender-female');
+  if (!mb || !fb) return;
+  mb.className = 'gend-btn' + (_editGender === 'male'   ? ' active-male'   : '');
+  fb.className = 'gend-btn' + (_editGender === 'female' ? ' active-female' : '');
+}
+
+function setEditGender(g) {
+  _editGender = g;
+  updateGenderBtns();
+}
+
+/*
+ * ★ switchTab の修正
+ * タブ切り替え時に送信ボタンのラベルも切り替える
+ */
+function switchTab(tab) {
+  _editTab = tab;
+  document.getElementById('tab-manual').classList.toggle('active', tab === 'manual');
+  document.getElementById('tab-saved').classList.toggle('active',  tab === 'saved');
+  document.getElementById('tab-manual-btn').classList.toggle('on', tab === 'manual');
+  document.getElementById('tab-saved-btn').classList.toggle('on',  tab === 'saved');
+
+  // ★ 送信ボタンのラベルをタブに応じて変更
+  var submitBtn = document.getElementById('modal-submit-btn');
+  if (submitBtn) {
+    submitBtn.textContent = tab === 'manual' ? 'この内容で設定する' : '選択した人を割り当てる';
+  }
+}
+
+function renderSavedListForEdit(currentSlot) {
+  var listEl = document.getElementById('edit-saved-list');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+
+  var usedIds = {};
+  todayParticipants.forEach(function(p) {
+    if (p.participantId && p.no !== currentSlot.no) usedIds[p.participantId] = true;
+  });
+
+  var available = savedParticipants.filter(function(sp) { return !usedIds[sp.id]; });
+
+  if (available.length === 0) {
+    listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px;line-height:1.8;">' +
+      '保存済み参加者がいません<br>「直接入力」タブで入力し<br>「次回も保存」をONにすると保存されます</div>';
+    return;
+  }
+
+  available.forEach(function(sp) {
+    var item = document.createElement('div');
+    var isCurrentlyAssigned = (currentSlot.participantId === sp.id);
+    item.className = 'saved-item' + (isCurrentlyAssigned ? ' selected' : '');
+    item.dataset.id = sp.id;
+    item.innerHTML =
+      '<div class="saved-item-name">' + escHtml(sp.nickName) + '</div>' +
+      genderChipHtml(sp.gender) +
+      '<span class="saved-item-check">✓</span>';
+    if (isCurrentlyAssigned) _editSelectedSavedId = sp.id;
+    item.onclick = function() {
+      listEl.querySelectorAll('.saved-item').forEach(function(el) { el.classList.remove('selected'); });
+      item.classList.add('selected');
+      _editSelectedSavedId = sp.id;
     };
+    listEl.appendChild(item);
+  });
+}
 
-    var tmpCourtConfig = [
-      {name:'手前コート', mode:'doubles'},
-      {name:'中央コート', mode:'doubles'},
-      {name:'奥コート', mode:'doubles'}
-    ];
+function unassignSlot() {
+  var p = findByNo(_editTargetNo);
+  if (!p) return;
+  p.participantId = null; p.nickName = ''; p.gender = '';
+  saveSession();
+  closeEditModal();
+  renderPlayers();
+  renderSetup();
+  showToast('No.' + _editTargetNo + ' の割り当てを解除しました');
+}
 
-    var _playerCount = 12;
-    var _courtCount = 3;
-    var _timerMin = 7;
-    var _defaultNames = ['手前コート','中央コート','奥コート','第4コート','第5コート','第6コート'];
+function saveManualEdit() {
+  var p = findByNo(_editTargetNo);
+  if (!p) return;
 
-    function initCourtHist() {
-      S.courtGroupHist = S.courts.map(function(){ return {}; });
-      S.scores = S.courts.map(function(){ return {team1:'', team2:''}; });
+  var nickVal = (document.getElementById('edit-nick-inp').value || '').trim();
+  if (!nickVal) { showToast('ニックネームを入力してください', 'err'); return; }
+
+  var dup = todayParticipants.some(function(x) { return x.no !== _editTargetNo && x.nickName === nickVal; });
+  if (dup) showToast('同じニックネームが存在します', 'warn');
+
+  var doSave = document.getElementById('edit-save-chk').checked;
+
+  if (doSave) {
+    if (p.participantId && p.participantId.indexOf('tmp_') === -1) {
+      var sp = savedParticipants.find(function(x) { return x.id === p.participantId; });
+      if (sp) { sp.nickName = nickVal; sp.gender = _editGender; }
+    } else {
+      var newId = 'p_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      savedParticipants.push({ id: newId, nickName: nickVal, gender: _editGender });
+      p.participantId = newId;
     }
-    initCourtHist();
+    saveSavedParticipants();
+  } else {
+    p.participantId = 'tmp_' + _editTargetNo;
+  }
 
-    var SCREENS = ['setup','game','players','courts','schedule','history'];
-    var HEADER_NAVS = ['setup','game','players'];
-    var FOOTER_NAVS = ['schedule','setup','history'];
+  p.nickName = nickVal;
+  p.gender   = _editGender;
 
-    function gotoScreen(name) {
-      SCREENS.forEach(function(s){
-        var el = document.getElementById('screen-' + s);
-        if (el) el.classList.toggle('active', s === name);
-      });
+  saveSession();
+  closeEditModal();
+  renderPlayers();
+  renderSetup();
+  renderGame();
+  renderSched();
+  showToast('No.' + _editTargetNo + ' を設定しました', 'ok');
+}
 
-      HEADER_NAVS.forEach(function(n){
-        var b = document.getElementById('hnav-' + n);
-        if (b) b.classList.toggle('active', n === name);
-      });
+function saveFromSaved() {
+  if (!_editSelectedSavedId) { showToast('保存済み参加者を選択してください', 'warn'); return; }
+  var p = findByNo(_editTargetNo);
+  if (!p) return;
+  var sp = savedParticipants.find(function(x) { return x.id === _editSelectedSavedId; });
+  if (!sp) return;
+  p.participantId = sp.id; p.nickName = sp.nickName; p.gender = sp.gender;
+  saveSession();
+  closeEditModal();
+  renderPlayers();
+  renderSetup();
+  renderGame();
+  renderSched();
+  showToast('No.' + _editTargetNo + ' に ' + sp.nickName + ' を割り当てました', 'ok');
+}
 
-      FOOTER_NAVS.forEach(function(n){
-        var b = document.getElementById('fnav-' + n);
-        if (b) b.classList.toggle('active', n === name);
-      });
+// ============================================================
+// ■ 自動配置ロジック
+// ============================================================
 
-      if (name === 'players') renderPlayers();
-      if (name === 'courts') renderCourtConfig2();
-      if (name === 'schedule') renderSched();
-      if (name === 'history') renderHistory();
-      if (name === 'game') renderGame();
-    }
+function doAutoAssign() {
+  var active = todayParticipants.filter(function(p) { return p.active; });
+  if (active.length < 4) {
+    showToast('参加中の人が4名以上必要です（現在 ' + active.length + '名）', 'err'); return;
+  }
+  var usedCourts = S.courts.filter(function(c) { return c.mode !== 'unused'; });
+  if (usedCourts.length === 0) { showToast('使用コートを設定してください', 'err'); return; }
+  var totalNeeded = usedCourts.length * 4;
+  if (active.length < totalNeeded) {
+    showToast('参加者が不足しています（必要 ' + totalNeeded + '名 / 参加中 ' + active.length + '名）', 'err'); return;
+  }
 
-    function pColor(no) {
-      var hs = [355,20,45,80,140,180,210,250,290,320,10,60,160,235,300,35,160,200];
-      var h = hs[(no - 1) % hs.length];
+  var sorted = sortByPriority(active);
+  var result = assignCourts(sorted, usedCourts);
+
+  var onCourtNos = {};
+  result.forEach(function(ca) {
+    ((ca[0]||[]).concat(ca[1]||[])).filter(Boolean).forEach(function(p) { onCourtNos[p.no] = true; });
+  });
+  todayParticipants.forEach(function(p) {
+    if (!p.active) return;
+    if (onCourtNos[p.no]) { p.lastWaited = false; }
+    else { p.waitingCount++; p.lastWaited = true; }
+  });
+
+  var usedIdx = 0;
+  S.courts.forEach(function(court) {
+    if (court.mode === 'unused') { court.teams = [[], []]; return; }
+    court.teams = result[usedIdx] || [[], []]; usedIdx++;
+  });
+
+  computeFuture();
+  saveSession();
+  renderGame();
+  renderSched();
+  gotoScreen('game');
+  showToast('自動配置が完了しました', 'ok');
+}
+
+function sortByPriority(players) {
+  return players.slice().sort(function(a, b) {
+    if (b.waitingCount !== a.waitingCount) return b.waitingCount - a.waitingCount;
+    if (a.lastWaited !== b.lastWaited) return (a.lastWaited ? 0 : 1) - (b.lastWaited ? 0 : 1);
+    return a.no - b.no;
+  });
+}
+
+function assignCourts(sorted, courts) {
+  var rem = sorted.slice();
+  var assignments = [];
+  courts.forEach(function(court, ci) {
+    if (rem.length < 4) { assignments.push([[], []]); return; }
+    var group = null;
+    if (ci === 0 && S.priorityMode !== 'normal') group = pickByPriorityMode(rem, S.priorityMode);
+    if (!group || group.length < 4) group = rem.slice(0, 4);
+    group.forEach(function(p) { var idx = rem.indexOf(p); if (idx !== -1) rem.splice(idx, 1); });
+    assignments.push(bestPairing(group));
+  });
+  return assignments;
+}
+
+function pickByPriorityMode(pool, mode) {
+  var males   = pool.filter(function(p) { return p.gender === 'male'; });
+  var females = pool.filter(function(p) { return p.gender === 'female'; });
+  if (mode === 'men_doubles_priority'   && males.length   >= 4) return males.slice(0, 4);
+  if (mode === 'women_doubles_priority' && females.length >= 4) return females.slice(0, 4);
+  if (mode === 'mixed_doubles_priority' && males.length   >= 2 && females.length >= 2) {
+    return [males[0], males[1], females[0], females[1]];
+  }
+  return null;
+}
+
+function bestPairing(four) {
+  while (four.length < 4) four.push(null);
+  var a=four[0],b=four[1],c=four[2],d=four[3];
+  var opts=[{teams:[[a,b],[c,d]]},{teams:[[a,c],[b,d]]},{teams:[[a,d],[b,c]]}];
+  var best=opts[0], bestScore=-Infinity;
+  opts.forEach(function(opt) {
+    var s = calcPairingScore(opt.teams[0], opt.teams[1]);
+    if (s > bestScore) { bestScore = s; best = opt; }
+  });
+  return best.teams;
+}
+
+function calcPairingScore(teamA, teamB) {
+  var score = 0;
+  score += evalPair(teamA[0], teamA[1]);
+  score += evalPair(teamB[0], teamB[1]);
+  (teamA||[]).forEach(function(pa) {
+    (teamB||[]).forEach(function(pb) { score += evalOpponent(pa, pb); });
+  });
+  return score;
+}
+
+function evalPair(p1, p2) {
+  if (!p1||!p2) return 0;
+  var s = 0;
+  if ((p1.lastPartnerNos  ||[]).indexOf(p2.no)!==-1) s -= 100;
+  if ((p1.recentPartnerNos||[]).indexOf(p2.no)!==-1) s -= 30;
+  return s;
+}
+
+function evalOpponent(p1, p2) {
+  if (!p1||!p2) return 0;
+  var s = 0;
+  if ((p1.lastOpponentNos  ||[]).indexOf(p2.no)!==-1) s -= 80;
+  if ((p1.recentOpponentNos||[]).indexOf(p2.no)!==-1) s -= 20;
+  return s;
+}
+
+function updateMatchHistory(teamA, teamB) {
+  var aF=(teamA||[]).filter(Boolean), bF=(teamB||[]).filter(Boolean);
+  var update = function(p, partners, opponents) {
+    var sp = findByNo(p.no); if (!sp) return;
+    var pNos=partners.map(function(x){return x.no;});
+    var oNos=opponents.map(function(x){return x.no;});
+    sp.lastPartnerNos    = pNos; sp.lastOpponentNos   = oNos;
+    sp.recentPartnerNos  = (sp.recentPartnerNos ||[]).concat(pNos).slice(-6);
+    sp.recentOpponentNos = (sp.recentOpponentNos||[]).concat(oNos).slice(-6);
+  };
+  aF.forEach(function(p){update(p,aF.filter(function(x){return x.no!==p.no;}),bF);});
+  bF.forEach(function(p){update(p,bF.filter(function(x){return x.no!==p.no;}),aF);});
+}
+
+// ============================================================
+// ■ 将来ラウンド予測
+// ============================================================
+
+function computeFuture() {
+  S.futureRounds = [];
+  var active = todayParticipants.filter(function(p) { return p.active; });
+  var usedCourts = S.courts.filter(function(c) { return c.mode !== 'unused'; });
+  if (active.length < 4 || usedCourts.length === 0) return;
+
+  var sim = active.map(function(p) { return Object.assign({}, p, {
+    recentPartnerNos:  (p.recentPartnerNos ||[]).slice(),
+    recentOpponentNos: (p.recentOpponentNos||[]).slice()
+  }); });
+
+  for (var r = 0; r < 3; r++) {
+    var sorted = sim.slice().sort(function(a,b) {
+      if (b.waitingCount!==a.waitingCount) return b.waitingCount-a.waitingCount;
+      if (a.lastWaited!==b.lastWaited) return (a.lastWaited?0:1)-(b.lastWaited?0:1);
+      return a.no-b.no;
+    });
+    var result = assignCourts(sorted, usedCourts);
+    var onCourtNos = {};
+    result.forEach(function(ca) {
+      ((ca[0]||[]).concat(ca[1]||[])).filter(Boolean).forEach(function(p){onCourtNos[p.no]=true;});
+    });
+    sim.forEach(function(p) {
+      if (onCourtNos[p.no]) p.lastWaited=false;
+      else { p.waitingCount++; p.lastWaited=true; }
+    });
+    var waiters = sim.filter(function(p){return !onCourtNos[p.no];})
+      .map(function(p){var tp=findByNo(p.no);return tp?pLabel(tp):'No.'+p.no;});
+    var usedIdx = 0;
+    var courts = S.courts.map(function(c) {
+      if (c.mode==='unused') return {name:c.name,mode:'unused',teams:[[],[]]};
+      var teams=result[usedIdx]||[[],[]]; usedIdx++;
       return {
-        bg:'hsla(' + h + ',55%,65%,0.20)',
-        bd:'hsla(' + h + ',55%,60%,0.72)',
-        tx:'hsl(' + h + ',72%,72%)'
+        name:c.name, mode:c.mode,
+        teams:[
+          (teams[0]||[]).filter(Boolean).map(function(p){var tp=findByNo(p.no);return tp?pLabel(tp):'No.'+p.no;}),
+          (teams[1]||[]).filter(Boolean).map(function(p){var tp=findByNo(p.no);return tp?pLabel(tp):'No.'+p.no;})
+        ]
       };
+    });
+    S.futureRounds.push({round:S.currentRound+r+2,waiters:waiters,courts:courts});
+  }
+}
+
+// ============================================================
+// ■ 次のゲームへ
+// ============================================================
+
+function nextRound() {
+  var onCourtNos = {};
+  S.courts.forEach(function(c) {
+    ((c.teams[0]||[]).concat(c.teams[1]||[])).filter(Boolean).forEach(function(p){onCourtNos[p.no]=true;});
+  });
+  var waiters = todayParticipants.filter(function(p){return p.active&&!onCourtNos[p.no];}).map(pLabel);
+  S.rounds.push({
+    round: S.currentRound+1, waiters: waiters,
+    courts: S.courts.map(function(c) {
+      return {name:c.name,mode:c.mode,
+        teams:(c.teams||[]).map(function(t){return (t||[]).filter(Boolean).map(pLabel);})};
+    })
+  });
+  S.courts.forEach(function(c) {
+    if (c.mode==='unused') return;
+    updateMatchHistory((c.teams[0]||[]).filter(Boolean),(c.teams[1]||[]).filter(Boolean));
+  });
+  S.currentRound++;
+  document.getElementById('game-badge').textContent = '第'+(S.currentRound+1)+'ゲーム';
+  doAutoAssign();
+  renderPlayers();
+  renderHistory();
+  showToast('第'+S.currentRound+'ゲームを終了しました','ok');
+}
+
+// ============================================================
+// ■ ゲーム画面
+// ============================================================
+
+function renderGame() {
+  var gc = document.getElementById('game-courts');
+  if (!gc) return;
+  gc.innerHTML = '';
+
+  S.courts.forEach(function(court) {
+    var mode=court.mode, t1=court.teams[0]||[], t2=court.teams[1]||[];
+    var card = document.createElement('div');
+    card.className = 'court-game-card';
+
+    var hdr = document.createElement('div');
+    hdr.className = 'court-game-header';
+    var nm = document.createElement('span');
+    nm.className='court-game-name'; nm.textContent=court.name;
+    hdr.appendChild(nm);
+    if (mode!=='unused') {
+      var chip=document.createElement('span');
+      chip.className='court-type-chip';
+      var activeCourts=S.courts.filter(function(c){return c.mode!=='unused';});
+      chip.textContent=(S.priorityMode!=='normal'&&activeCourts[0]===court)?getPriorityLabel(S.priorityMode):'ダブルス';
+      hdr.appendChild(chip);
     }
+    card.appendChild(hdr);
 
-    function pLabel(p) {
-      if (!p) return '—';
-      var sp = S.players.find(function(x){ return x.no === p.no; });
-      if (!sp) return 'No.' + p.no;
-      return sp.nick ? (sp.nick + '（No.' + sp.no + '）') : ('No.' + sp.no);
+    if (mode==='unused') {
+      var ph=document.createElement('div');
+      ph.style.cssText='padding:24px;text-align:center;color:var(--t4);font-size:14px';
+      ph.textContent='このコートは未使用です';
+      card.appendChild(ph);
+    } else {
+      var md=document.createElement('div'); md.className='match-display';
+      var mt=document.createElement('div'); mt.className='match-teams';
+      mt.appendChild(buildTeamCol('TEAM A',t1));
+      var vc=document.createElement('div'); vc.className='vs-col';
+      var vl=document.createElement('div'); vl.className='vs-label'; vl.textContent='VS';
+      vc.appendChild(vl); mt.appendChild(vc);
+      mt.appendChild(buildTeamCol('TEAM B',t2));
+      md.appendChild(mt); card.appendChild(md);
     }
+    gc.appendChild(card);
+  });
 
-    function makeBadge(no, size) {
-      var col = pColor(no);
-      var d = document.createElement('div');
-      d.className = 'nbadge ' + (size || 'md');
-      d.style.background = col.bg;
-      d.style.borderColor = col.bd;
-      d.style.color = col.tx;
-      d.textContent = no;
-      return d;
-    }
+  var onCourtNos={};
+  S.courts.forEach(function(c){
+    ((c.teams[0]||[]).concat(c.teams[1]||[])).filter(Boolean).forEach(function(p){onCourtNos[p.no]=true;});
+  });
+  var waiting=todayParticipants.filter(function(p){return p.active&&!onCourtNos[p.no];});
+  if (waiting.length>0) {
+    var rs=document.createElement('div'); rs.className='rest-section';
+    var rh=document.createElement('div'); rh.className='rest-header';
+    rh.textContent='待機中 '+waiting.length+'人'; rs.appendChild(rh);
+    var rb=document.createElement('div'); rb.className='rest-players';
+    waiting.forEach(function(p) {
+      var chip=document.createElement('div'); chip.className='rest-chip';
+      chip.appendChild(makeBadge(p.no,'sm'));
+      var info=document.createElement('div');
+      var pnm=document.createElement('div'); pnm.className='rest-chip-name'; pnm.textContent=displayName(p);
+      info.appendChild(pnm);
+      var sub=document.createElement('div'); sub.className='rest-chip-sub';
+      sub.textContent='待機 '+p.waitingCount+'回'+(p.waitingCount>0?' / 次回優先':'');
+      info.appendChild(sub); chip.appendChild(info); rb.appendChild(chip);
+    });
+    rs.appendChild(rb); gc.appendChild(rs);
+  }
+}
 
-    function updateSetupSummary() {
-      var ps = document.getElementById('setup-player-summary');
-      var cs = document.getElementById('setup-court-summary');
-      var ts = document.getElementById('setup-timer-summary');
-      var c2 = document.getElementById('court-screen-summary');
+function buildTeamCol(label, players) {
+  var col=document.createElement('div'); col.className='team-col';
+  var lbl=document.createElement('div'); lbl.className='team-label'; lbl.textContent=label;
+  col.appendChild(lbl);
+  var ps=players.filter(Boolean);
+  if (ps.length===0) ps=[null,null];
+  ps.forEach(function(p){col.appendChild(makePlayerRowEl(p));});
+  return col;
+}
 
-      if (ps) ps.textContent = _playerCount + '名';
-      if (cs) cs.textContent = _courtCount + '面';
-      if (ts) ts.textContent = _timerMin + '分';
-      if (c2) c2.textContent = _courtCount + '面';
+function makePlayerRowEl(p) {
+  var row=document.createElement('div'); row.className='player-row';
+  if (!p) {
+    var ph=document.createElement('div');
+    ph.style.cssText='width:32px;height:32px;border-radius:50%;border:1px dashed rgba(255,255,255,0.15);flex-shrink:0;';
+    var pi=document.createElement('div'); pi.className='player-info';
+    var pn=document.createElement('div'); pn.className='player-name'; pn.style.color='var(--t4)'; pn.textContent='未配置';
+    pi.appendChild(pn); row.appendChild(ph); row.appendChild(pi); return row;
+  }
+  var sp=findByNo(p.no); row.appendChild(makeBadge(p.no,'sm'));
+  var pi=document.createElement('div'); pi.className='player-info';
+  var pn=document.createElement('div'); pn.className='player-name';
+  pn.textContent=sp?displayName(sp):('No.'+p.no); pi.appendChild(pn);
+  var sub=document.createElement('div'); sub.className='player-sub';
+  var gLabel=sp&&sp.gender==='female'?'♀':(sp&&sp.gender==='male'?'♂':'');
+  sub.textContent=(gLabel?gLabel+' ':'')+'待機 '+(sp?sp.waitingCount:0)+'回';
+  pi.appendChild(sub); row.appendChild(pi); return row;
+}
 
-      var chipWrap = document.getElementById('setup-status-chips');
-      if (!chipWrap) return;
-      chipWrap.innerHTML = '';
+// ============================================================
+// ■ 進行画面
+// ============================================================
 
-      [
-        '参加者 ' + S.players.length + '名',
-        '使用コート ' + S.courts.filter(function(c){ return c.mode !== 'unused'; }).length + '面',
-        'タイマー ' + S.timerMin + '分'
-      ].forEach(function(txt){
-        var chip = document.createElement('div');
-        chip.className = 'status-chip';
-        chip.textContent = txt;
-        chipWrap.appendChild(chip);
-      });
-    }
+function renderSched() {
+  var el=document.getElementById('sched-scroll');
+  if (!el) return; el.innerHTML='';
+  var head=document.createElement('div'); head.className='timeline-head';
+  head.innerHTML='<div class="timeline-head-title">進行状況</div><div class="timeline-head-sub">現在のゲームと次の予定を確認できます</div>';
+  el.appendChild(head);
 
-    function adjPlayers(d) {
-      _playerCount = Math.max(0, Math.min(30, _playerCount + d));
-      document.getElementById('player-count-disp').textContent = _playerCount;
-      var d2 = document.getElementById('player-count-disp2');
-      if (d2) d2.textContent = _playerCount;
-      updateSetupSummary();
-    }
+  var onCourtNos={};
+  S.courts.forEach(function(c){
+    ((c.teams[0]||[]).concat(c.teams[1]||[])).filter(Boolean).forEach(function(p){onCourtNos[p.no]=true;});
+  });
+  var curWaiters=todayParticipants.filter(function(p){return p.active&&!onCourtNos[p.no];}).map(pLabel);
 
-    function registerPlayers(showMsg) {
-      var count = _playerCount;
-      if (count === 0) {
-        showToast('人数を1名以上にしてください', 'err');
-        return;
-      }
+  el.appendChild(buildScCard({type:'current',data:{
+    round:S.currentRound+1, waiters:curWaiters,
+    courts:S.courts.map(function(c){return{name:c.name,mode:c.mode,
+      teams:(c.teams||[]).map(function(t){return (t||[]).filter(Boolean).map(pLabel);})};})
+  }}));
+  S.futureRounds.slice(0,3).forEach(function(r,idx){
+    el.appendChild(buildScCard({type:idx===0?'next':'future',data:r}));
+  });
+}
 
-      var newP = [];
-      for (var no = 1; no <= count; no++) {
-        var ex = S.players.find(function(p){ return p.no === no; });
-        newP.push(ex || {
-          no:no, nick:'', active:true,
-          waitCount:0, lastWaited:false,
-          wins:0, losses:0
-        });
-      }
-      S.players = newP;
-      S.playerCount = count;
-      updateSetupSummary();
-      renderPlayers();
+function buildScCard(item) {
+  var cur=item.type==='current', next=item.type==='next';
+  var card=document.createElement('div');
+  card.className='sc-card'+(cur?' cur':next?' next':'');
+  var head=document.createElement('div'); head.className='sc-head';
+  var rn=document.createElement('span'); rn.className='sc-round'; rn.textContent='第'+item.data.round+'ゲーム';
+  var badge=document.createElement('span'); badge.className='sc-badge';
+  badge.textContent=cur?'進行中':next?'次':'予定';
+  head.appendChild(rn); head.appendChild(badge); card.appendChild(head);
 
-      if (showMsg !== false) {
-        showToast(count + '名の参加者を登録しました', 'ok');
-      }
-    }
-
-    function adjCourts(d) {
-      _courtCount = Math.max(1, Math.min(6, _courtCount + d));
-      document.getElementById('court-count-disp').textContent = _courtCount;
-      var d2 = document.getElementById('court-count-disp2');
-      if (d2) d2.textContent = _courtCount;
-
-      while (tmpCourtConfig.length < _courtCount) {
-        var idx = tmpCourtConfig.length;
-        tmpCourtConfig.push({name: _defaultNames[idx] || ('第' + (idx + 1) + 'コート'), mode:'doubles'});
-      }
-
-      renderCourtConfig1();
-      renderCourtConfig2();
-      updateSetupSummary();
-    }
-
-    function buildCourtConfigCard(idx) {
-      var cfg = tmpCourtConfig[idx];
-
-      var row = document.createElement('div');
-      row.className = 'court-config-row';
-
-      var top = document.createElement('div');
-      top.className = 'court-config-top';
-
-      var inp = document.createElement('input');
-      inp.className = 'court-config-name-inp';
-      inp.type = 'text';
-      inp.value = cfg.name;
-      inp.placeholder = 'コート名';
-      inp.oninput = (function(i){
-        return function(){ tmpCourtConfig[i].name = this.value; };
-      })(idx);
-
-      top.appendChild(inp);
-      row.appendChild(top);
-
-      var seg = document.createElement('div');
-      seg.className = 'court-config-seg';
-
-      var segBtns = document.createElement('div');
-      segBtns.className = 'seg';
-
-      [
-        {k:'doubles', l:'ダブルス'},
-        {k:'singles', l:'シングル'},
-        {k:'unused',  l:'未使用'}
-      ].forEach(function(m){
-        var btn = document.createElement('button');
-        btn.className = 'seg-btn' + (cfg.mode === m.k ? ' on' : '');
-        btn.textContent = m.l;
-        btn.onclick = (function(i, mk){
-          return function(){
-            tmpCourtConfig[i].mode = mk;
-            renderCourtConfig1();
-            renderCourtConfig2();
-            updateSetupSummary();
-          };
-        })(idx, m.k);
-        segBtns.appendChild(btn);
-      });
-
-      seg.appendChild(segBtns);
-      row.appendChild(seg);
-
-      return row;
-    }
-
-    function renderCourtConfig1() {
-      var list = document.getElementById('court-config-list');
-      if (!list) return;
-      list.innerHTML = '';
-      for (var i = 0; i < _courtCount; i++) {
-        list.appendChild(buildCourtConfigCard(i));
-      }
-    }
-
-    function renderCourtConfig2() {
-      var list = document.getElementById('court-config-list2');
-      if (!list) return;
-      list.innerHTML = '';
-      for (var i = 0; i < _courtCount; i++) {
-        list.appendChild(buildCourtConfigCard(i));
-      }
-      var disp2 = document.getElementById('court-count-disp2');
-      if (disp2) disp2.textContent = _courtCount;
-    }
-
-    function saveCourts(showMsg) {
-      S.courts = tmpCourtConfig.slice(0, _courtCount).map(function(c){
-        return {name:c.name, mode:c.mode, teams:[[],[]]};
-      });
-      initCourtHist();
-      S.courtCount = _courtCount;
-      updateSetupSummary();
-      if (showMsg !== false) showToast('コート設定を保存しました', 'ok');
-    }
-
-    function adjTimer(d) {
-      _timerMin = Math.max(1, Math.min(60, _timerMin + d));
-      document.getElementById('timer-setup-disp').textContent = _timerMin;
-      updateSetupSummary();
-    }
-
-    function applyTimerSetting(min, silent) {
-      S.timerMin = min;
-      _timerMin = min;
-      tTotal = S.timerMin * 60;
-      tSec = tTotal;
-
-      var disp = document.getElementById('timer-setup-disp');
-      if (disp) disp.textContent = min;
-
-      renderTimerDisplays();
-      updateSetupSummary();
-
-      if (!silent) showToast('タイマーを' + min + '分に設定しました', 'ok');
-    }
-
-    function saveTimer() {
-      applyTimerSetting(_timerMin, false);
-    }
-
-    var tSec = 420, tTotal = 420, tRun = false, tIv = null;
-
-    function toggleGameTimer() {
-      var btn = document.getElementById('btn-start');
-      if (tRun) {
-        clearInterval(tIv);
-        tRun = false;
-        btn.textContent = '▶ ゲーム開始';
-        btn.classList.remove('running');
+  var body=document.createElement('div'); body.className='sc-body';
+  (item.data.courts||[]).filter(function(c){return c.mode!=='unused';}).forEach(function(c){
+    var blk=document.createElement('div'); blk.className='sc-court-block';
+    var cnm=document.createElement('div'); cnm.className='sc-court-nm'; cnm.textContent=c.name;
+    blk.appendChild(cnm);
+    var vsg=document.createElement('div'); vsg.className='sc-vs-grid';
+    var mkTeam=function(names){
+      var t=document.createElement('div'); t.className='sc-team';
+      if (names&&names.length) {
+        names.forEach(function(n){var p=document.createElement('div');p.className='sc-player';p.textContent=n;t.appendChild(p);});
       } else {
-        tRun = true;
-        tIv = setInterval(tickTimer, 1000);
-        btn.textContent = '⏸ 一時停止';
-        btn.classList.add('running');
+        var ep=document.createElement('div');ep.className='sc-player emp';ep.textContent='—';t.appendChild(ep);
       }
+      return t;
+    };
+    var vs=document.createElement('div'); vs.className='sc-vs-txt'; vs.textContent='VS';
+    vsg.appendChild(mkTeam(c.teams[0])); vsg.appendChild(vs); vsg.appendChild(mkTeam(c.teams[1]));
+    blk.appendChild(vsg); body.appendChild(blk);
+  });
+  if (item.data.waiters&&item.data.waiters.length>0) {
+    var rb=document.createElement('div'); rb.className='sc-rest';
+    var rl=document.createElement('div'); rl.className='sc-rest-lbl'; rl.textContent='待機'; rb.appendChild(rl);
+    var rn2=document.createElement('div'); rn2.className='sc-rest-names'; rn2.textContent=item.data.waiters.join(' / ');
+    rb.appendChild(rn2); body.appendChild(rb);
+  }
+  card.appendChild(body); return card;
+}
+
+// ============================================================
+// ■ 履歴画面
+// ============================================================
+
+function renderHistory() {
+  var el=document.getElementById('hist-scroll');
+  if (!el) return; el.innerHTML='';
+  var intro=document.createElement('div'); intro.className='timeline-head';
+  intro.innerHTML='<div class="timeline-head-title">履歴</div><div class="timeline-head-sub">終了したゲームの対戦記録です（スコアなし）</div>';
+  el.appendChild(intro);
+  if (!S.rounds.length) {
+    var empty=document.createElement('div'); empty.className='timeline-head';
+    empty.innerHTML='<div class="timeline-head-title">履歴はまだありません</div><div class="timeline-head-sub">ゲームが終了するとここに記録されます</div>';
+    el.appendChild(empty); return;
+  }
+  S.rounds.slice().reverse().forEach(function(r) {
+    var card=document.createElement('div'); card.className='hcard';
+    var head=document.createElement('div'); head.className='hhead'; head.textContent='第'+r.round+'ゲーム';
+    card.appendChild(head);
+    var body=document.createElement('div'); body.className='hbody';
+    (r.courts||[]).filter(function(c){return c.mode!=='unused';}).forEach(function(c){
+      var row=document.createElement('div'); row.className='hrow';
+      var ct=document.createElement('div'); ct.className='hct'; ct.textContent=c.name;
+      var pl=document.createElement('div'); pl.className='hpl';
+      pl.textContent=(c.teams[0]||[]).join(' / ')+' vs '+(c.teams[1]||[]).join(' / ');
+      row.appendChild(ct); row.appendChild(pl); body.appendChild(row);
+    });
+    if (r.waiters&&r.waiters.length) {
+      var wRow=document.createElement('div'); wRow.className='hrow';
+      var wCt=document.createElement('div'); wCt.className='hct'; wCt.textContent='待機';
+      var wPl=document.createElement('div'); wPl.className='hpl'; wPl.textContent=r.waiters.join(' / ');
+      wRow.appendChild(wCt); wRow.appendChild(wPl); body.appendChild(wRow);
     }
-
-    function resetGameTimer() {
-      clearInterval(tIv);
-      tRun = false;
-      tSec = tTotal;
-      var btn = document.getElementById('btn-start');
-      btn.textContent = '▶ ゲーム開始';
-      btn.classList.remove('running');
-      renderTimerDisplays();
-    }
-
-    function tickTimer() {
-      if (tSec <= 0) {
-        clearInterval(tIv);
-        tRun = false;
-        var btn = document.getElementById('btn-start');
-        btn.textContent = '▶ ゲーム開始';
-        btn.classList.remove('running');
-        playBeep();
-        showToast('⏰ タイムです', 'ok');
-        return;
-      }
-      tSec--;
-      renderTimerDisplays();
-    }
-
-    function renderTimerDisplays() {
-      var m = Math.floor(tSec / 60), s = tSec % 60;
-      var txt = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-      var cls = tSec === 0 ? 'done' : tSec <= 30 ? 'warn' : '';
-      var el1 = document.getElementById('game-timer-disp');
-      var el2 = document.getElementById('h-timer');
-      if (el1) { el1.textContent = txt; el1.className = cls; }
-      if (el2) { el2.textContent = txt; el2.className = cls; }
-
-      var pct = tTotal > 0 ? (tSec / tTotal) * 100 : 0;
-      var pf = document.getElementById('progress-fill');
-      if (pf) {
-        pf.style.width = pct + '%';
-        pf.className = 'progress-fill' + (tSec <= 0 ? ' done' : tSec <= tTotal * 0.25 ? ' warn' : '');
-      }
-    }
-
-    function playBeep() {
-      try {
-        var ctx = new (window.AudioContext || window.webkitAudioContext)();
-        [660,880,1100,880,660,880].forEach(function(f, i){
-          var o = ctx.createOscillator(), g = ctx.createGain();
-          o.connect(g); g.connect(ctx.destination);
-          o.frequency.value = f; o.type = 'sine';
-          var t = ctx.currentTime + i * .18;
-          g.gain.setValueAtTime(.4, t);
-          g.gain.exponentialRampToValueAtTime(.001, t + .15);
-          o.start(t); o.stop(t + .15);
-        });
-      } catch(e){}
-    }
-
-    function toggleActive(no) {
-      var p = S.players.find(function(x){ return x.no === no; });
-      if (!p) return;
-      p.active = !p.active;
-      renderPlayers();
-      renderGame();
-      renderSched();
-      showToast((p.nick ? p.nick + '（No.' + p.no + '）' : 'No.' + p.no) + ' を' + (p.active ? '参加' : '退場') + 'にしました');
-    }
-
-    /* ── FIX: renderPlayers ──
-       pgridの親(scrollable)にflex指定がなくなったので、
-       グリッドが全幅でレンダリングされ全員分のカードが表示される */
-    function renderPlayers() {
-      var grid = document.getElementById('pgrid');
-      if (!grid) return;
-      grid.innerHTML = '';
-
-      var disp2 = document.getElementById('player-count-disp2');
-      if (disp2) disp2.textContent = _playerCount;
-
-      S.players
-        .slice()
-        .sort(function(a, b){ return a.no - b.no; })
-        .forEach(function(p){
-          var card = document.createElement('div');
-          card.className = 'pcard' + (p.active ? '' : ' inactive');
-          card.onclick = function(e){ openNickEdit(p.no, e); };
-
-          card.appendChild(makeBadge(p.no, 'lg'));
-
-          var nm = document.createElement('div');
-          nm.className = 'pcard-name';
-          nm.textContent = 'No.' + p.no;
-          card.appendChild(nm);
-
-          var nk = document.createElement('div');
-          if (p.nick) {
-            nk.className = 'pcard-nick';
-            nk.textContent = p.nick;
-          } else {
-            nk.className = 'pcard-nick empty';
-            nk.textContent = 'ニックネームなし';
-          }
-          card.appendChild(nk);
-
-          var wait = document.createElement('div');
-          wait.className = 'pcard-wait';
-          wait.textContent = '待機 ' + p.waitCount + '回';
-          card.appendChild(wait);
-
-          var wl = document.createElement('div');
-          wl.className = 'pcard-stats';
-          var ws = document.createElement('span');
-          ws.className = 'tag win';
-          ws.textContent = 'W ' + p.wins;
-          var ls = document.createElement('span');
-          ls.className = 'tag lose';
-          ls.textContent = 'L ' + p.losses;
-          wl.appendChild(ws);
-          wl.appendChild(ls);
-          card.appendChild(wl);
-
-          var btn = document.createElement('button');
-          btn.className = 'p-exit-btn ' + (p.active ? 'exit' : 'rejoin');
-          btn.textContent = p.active ? '退場' : '再参加';
-          btn.onclick = function(e){
-            e.stopPropagation();
-            toggleActive(p.no);
-          };
-          card.appendChild(btn);
-
-          grid.appendChild(card);
-        });
-    }
-
-    function openNickEdit(no, evt) {
-      evt.stopPropagation();
-      document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); });
-
-      var p = S.players.find(function(x){ return x.no === no; });
-      if (!p) return;
-
-      var card = evt.currentTarget;
-      card.style.position = 'relative';
-      card.style.zIndex = '50';
-
-      var pop = document.createElement('div');
-      pop.className = 'nick-popover';
-
-      var lbl = document.createElement('div');
-      lbl.style.cssText = 'font-size:12px;font-weight:800;color:var(--t2);margin-bottom:8px';
-      lbl.textContent = 'No.' + no + ' のニックネーム';
-      pop.appendChild(lbl);
-
-      var inp = document.createElement('input');
-      inp.className = 'inp-field';
-      inp.type = 'text';
-      inp.value = p.nick || '';
-      inp.placeholder = 'ニックネームを入力';
-      inp.maxLength = 20;
-      inp.onkeydown = function(e){
-        if (e.key === 'Enter') { e.preventDefault(); saveNick(no, inp.value); }
-        if (e.key === 'Escape') closeNickEdit();
-      };
-      pop.appendChild(inp);
-
-      var row = document.createElement('div');
-      row.className = 'np-row';
-
-      var sb = document.createElement('button');
-      sb.className = 'np-save';
-      sb.textContent = '保存';
-      sb.onclick = function(e){ e.stopPropagation(); saveNick(no, inp.value); };
-      row.appendChild(sb);
-
-      var cb = document.createElement('button');
-      cb.className = 'np-cancel';
-      cb.textContent = 'キャンセル';
-      cb.onclick = function(e){ e.stopPropagation(); closeNickEdit(); };
-      row.appendChild(cb);
-
-      pop.appendChild(row);
-      card.appendChild(pop);
-
-      setTimeout(function(){ inp.focus(); inp.select(); }, 30);
-      setTimeout(function(){
-        document.addEventListener('click', outsideClose, {once:true});
-      }, 50);
-    }
-
-    function outsideClose() {
-      document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); });
-    }
-
-    function closeNickEdit() {
-      document.querySelectorAll('.nick-popover').forEach(function(e){ e.remove(); });
-    }
-
-    function saveNick(no, v) {
-      var p = S.players.find(function(x){ return x.no === no; });
-      if (!p) return;
-      p.nick = (v || '').trim();
-      closeNickEdit();
-      renderPlayers();
-      renderGame();
-      renderSched();
-      showToast(p.nick ? ('No.' + no + ' を ' + p.nick + ' に設定しました') : ('No.' + no + ' のニックネームを削除しました'), 'ok');
-    }
-
-    function getSlots() {
-      return S.courts.map(function(c){
-        return c.mode === 'doubles' ? 4 : c.mode === 'singles' ? 2 : 0;
-      });
-    }
-
-    function waitPri(p) {
-      return -(p.waitCount * 10 + (p.lastWaited ? 8 : 0));
-    }
-
-    function groupKey(arr) {
-      return arr.filter(Boolean).map(function(p){ return p.no; }).sort(function(a,b){ return a - b; }).join('-');
-    }
-
-    function groupAvoid(arr, ci, pH, oH, cgH) {
-      var active = arr.filter(Boolean);
-      if (active.length < 2) return 0;
-      var score = (cgH[ci] ? (cgH[ci][groupKey(active)] || 0) : 0) * 100;
-      for (var i = 0; i < active.length; i++) {
-        for (var j = i + 1; j < active.length; j++) {
-          var k = [active[i].no, active[j].no].sort().join('-');
-          score += (pH[k] || 0) * 3 + (oH[k] || 0);
-        }
-      }
-      return score;
-    }
-
-    function bestPairing(four, pH) {
-      while (four.length < 4) four.push(null);
-      var a = four[0], b = four[1], c = four[2], d = four[3];
-      var opts = [[[a,b],[c,d]], [[a,c],[b,d]], [[a,d],[b,c]]];
-      var best = opts[0], bs = Infinity;
-      opts.forEach(function(opt){
-        var pc = function(x, y){
-          if (!x || !y) return 0;
-          return pH[[x.no, y.no].sort().join('-')] || 0;
-        };
-        var s = pc(opt[0][0], opt[0][1]) + pc(opt[1][0], opt[1][1]);
-        if (s < bs) { bs = s; best = opt; }
-      });
-      return best;
-    }
-
-    function getCombos(arr, k) {
-      if (k === 0) return [[]];
-      if (!arr.length) return [];
-      if (arr.length > 12) arr = arr.slice(0, 12);
-      var f = arr[0], r = arr.slice(1);
-      return getCombos(r, k - 1).map(function(c){ return [f].concat(c); }).concat(getCombos(r, k));
-    }
-
-    function shuffleArr(arr) {
-      for (var i = arr.length - 1; i > 0; i--) {
-        var r = Math.floor(Math.random() * (i + 1));
-        var t = arr[i]; arr[i] = arr[r]; arr[r] = t;
-      }
-    }
-
-    function doAssignCalc(pool, bal, pH, oH, cgH) {
-      var slots = getSlots();
-      var total = slots.reduce(function(a, b){ return a + b; }, 0);
-
-      var sorted = pool.slice().sort(function(a, b){ return waitPri(a) - waitPri(b); });
-
-      if (bal) {
-        sorted.sort(function(a, b){
-          var wd = waitPri(a) - waitPri(b);
-          if (Math.abs(wd) > 5) return wd;
-          var ra = (a.wins + a.losses) ? a.wins / (a.wins + a.losses) : .5;
-          var rb = (b.wins + b.losses) ? b.wins / (b.wins + b.losses) : .5;
-          return rb - ra;
-        });
-      }
-
-      var i = 0;
-      while (i < sorted.length) {
-        var pri = waitPri(sorted[i]), j = i;
-        while (j < sorted.length && waitPri(sorted[j]) === pri) j++;
-        var grp = sorted.slice(i, j);
-        shuffleArr(grp);
-        for (var k = i; k < j; k++) sorted[k] = grp[k - i];
-        i = j;
-      }
-
-      var toPlay = sorted.slice(0, Math.min(total, sorted.length));
-      var waiters = sorted.slice(toPlay.length);
-      var rem = toPlay.slice();
-      var courtAssignments = [];
-
-      S.courts.forEach(function(court, ci){
-        var s = slots[ci];
-        if (s === 0) { courtAssignments.push([[],[]]); return; }
-
-        if (rem.length <= s) {
-          var g = rem.splice(0, s);
-          courtAssignments.push(court.mode === 'doubles' ? bestPairing(g, pH) : [[g[0] || null],[g[1] || null]]);
-          return;
-        }
-
-        var mustN = Math.max(1, Math.floor(s / 2));
-        var must = rem.slice(0, mustN), cands = rem.slice(mustN), need = s - mustN, chosen;
-
-        if (cands.length <= need) {
-          chosen = must.concat(cands);
-        } else {
-          var combos = getCombos(cands, need), bst = combos[0], bss = Infinity;
-          combos.forEach(function(combo){
-            var g2 = must.concat(combo), sc = groupAvoid(g2, ci, pH, oH, cgH);
-            if (sc < bss) { bss = sc; bst = combo; }
-          });
-          chosen = must.concat(bst);
-        }
-
-        chosen.forEach(function(p){
-          var idx = rem.indexOf(p);
-          if (idx !== -1) rem.splice(idx, 1);
-        });
-
-        courtAssignments.push(court.mode === 'doubles' ? bestPairing(chosen, pH) : [[chosen[0] || null],[chosen[1] || null]]);
-      });
-
-      return {courtAssignments:courtAssignments, waiters:waiters};
-    }
-
-    function doAutoAssign() {
-      var active = S.players.filter(function(p){ return p.active; });
-      if (active.length < 2) { showToast('参加者が足りません（最低2名）', 'err'); return; }
-
-      var slots = getSlots();
-      var total = slots.reduce(function(a, b){ return a + b; }, 0);
-      if (total === 0) { showToast('使用コートを設定してください', 'err'); return; }
-
-      if (active.length < total) {
-        showToast('参加者が不足しています（必要 ' + total + '名 / 現在 ' + active.length + '名）', 'err');
-        return;
-      }
-
-      var bal = document.getElementById('bal-tog').checked;
-      var res = doAssignCalc(active, bal, S.pairHist, S.oppHist, S.courtGroupHist);
-
-      S.players.forEach(function(p){ if (p.active) p.lastWaited = false; });
-
-      res.waiters.forEach(function(w){
-        var sp = S.players.find(function(x){ return x.no === w.no; });
-        if (sp) { sp.waitCount++; sp.lastWaited = true; }
-      });
-
-      S.courts.forEach(function(c, ci){ c.teams = res.courtAssignments[ci]; });
-      S.scores = S.courts.map(function(){ return {team1:'', team2:''}; });
-
-      computeFuture();
-      renderGame();
-      renderSched();
-      gotoScreen('game');
-      showToast('自動配置が完了しました', 'ok');
-    }
-
-    function computeFuture() {
-      S.futureRounds = [];
-      var active = S.players.filter(function(p){ return p.active; });
-      var total = getSlots().reduce(function(a, b){ return a + b; }, 0);
-      if (total === 0 || active.length < 2) return;
-
-      var bal = document.getElementById('bal-tog').checked;
-      var sp = active.map(function(p){ return Object.assign({}, p); });
-      var sPH = Object.assign({}, S.pairHist), sOH = Object.assign({}, S.oppHist);
-      var sCGH = S.courtGroupHist.map(function(h){ return Object.assign({}, h); });
-
-      for (var r = 0; r < 3; r++) {
-        var res = doAssignCalc(sp, bal, sPH, sOH, sCGH);
-
-        sp.forEach(function(p){ p.lastWaited = false; });
-        res.waiters.forEach(function(w){
-          var x = sp.find(function(p){ return p.no === w.no; });
-          if (x) { x.waitCount++; x.lastWaited = true; }
-        });
-
-        S.courts.forEach(function(court, ci){
-          if (court.mode === 'unused') return;
-          var t1 = (res.courtAssignments[ci][0] || []).filter(Boolean);
-          var t2 = (res.courtAssignments[ci][1] || []).filter(Boolean);
-          var gk = groupKey(t1.concat(t2));
-          sCGH[ci][gk] = (sCGH[ci][gk] || 0) + 1;
-
-          [t1, t2].forEach(function(team){
-            for (var i = 0; i < team.length; i++) {
-              for (var j = i + 1; j < team.length; j++) {
-                var k = [team[i].no, team[j].no].sort().join('-');
-                sPH[k] = (sPH[k] || 0) + 1;
-              }
-            }
-          });
-
-          t1.forEach(function(a){
-            t2.forEach(function(b){
-              var k2 = [a.no, b.no].sort().join('-');
-              sOH[k2] = (sOH[k2] || 0) + 1;
-            });
-          });
-        });
-
-        var futOnCourt = {};
-        S.courts.forEach(function(court, ci){
-          (res.courtAssignments[ci] || [[],[]]).forEach(function(team){
-            (team || []).filter(Boolean).forEach(function(p){ futOnCourt[p.no] = true; });
-          });
-        });
-
-        var futW = sp
-          .filter(function(p){ return !futOnCourt[p.no]; })
-          .map(function(p){
-            var o = S.players.find(function(x){ return x.no === p.no; });
-            return o ? pLabel(o) : ('No.' + p.no);
-          });
-
-        S.futureRounds.push({
-          round: S.currentRound + 1 + r + 1,
-          waiters: futW,
-          courts: S.courts.map(function(court, ci){
-            return {
-              name: court.name, mode: court.mode,
-              teams: [
-                (res.courtAssignments[ci][0] || []).filter(Boolean).map(pLabel),
-                (res.courtAssignments[ci][1] || []).filter(Boolean).map(pLabel)
-              ]
-            };
-          })
-        });
-      }
-    }
-
-    function nextRound() {
-      var onCourt = {};
-      S.courts.forEach(function(c){
-        c.teams.forEach(function(t){
-          (t || []).filter(Boolean).forEach(function(p){ onCourt[p.no] = true; });
-        });
-      });
-
-      var waiters = S.players.filter(function(p){
-        return p.active && !onCourt[p.no];
-      }).map(pLabel);
-
-      S.rounds.push({
-        round: S.currentRound + 1,
-        waiters: waiters,
-        courts: S.courts.map(function(c, ci){
-          return {
-            name: c.name, mode: c.mode,
-            teams: c.teams.map(function(t){ return (t || []).filter(Boolean).map(pLabel); }),
-            score: Object.assign({}, S.scores[ci])
-          };
-        })
-      });
-
-      S.courts.forEach(function(court, ci){
-        if (court.mode === 'unused') return;
-        var t1 = (court.teams[0] || []).filter(Boolean);
-        var t2 = (court.teams[1] || []).filter(Boolean);
-        var gk = groupKey(t1.concat(t2));
-        S.courtGroupHist[ci][gk] = (S.courtGroupHist[ci][gk] || 0) + 1;
-
-        [t1, t2].forEach(function(team){
-          for (var i = 0; i < team.length; i++) {
-            for (var j = i + 1; j < team.length; j++) {
-              var k = [team[i].no, team[j].no].sort().join('-');
-              S.pairHist[k] = (S.pairHist[k] || 0) + 1;
-            }
-          }
-        });
-
-        t1.forEach(function(a){
-          t2.forEach(function(b){
-            var k2 = [a.no, b.no].sort().join('-');
-            S.oppHist[k2] = (S.oppHist[k2] || 0) + 1;
-          });
-        });
-      });
-
-      S.courts.forEach(function(court, ci){
-        if (court.mode === 'unused') return;
-        var s1 = parseInt(S.scores[ci].team1, 10);
-        var s2 = parseInt(S.scores[ci].team2, 10);
-        if (isNaN(s1) || isNaN(s2)) return;
-        var t1 = (court.teams[0] || []).filter(Boolean);
-        var t2 = (court.teams[1] || []).filter(Boolean);
-        var w1 = s1 > s2, w2 = s2 > s1;
-
-        t1.forEach(function(p){
-          var sp = S.players.find(function(x){ return x.no === p.no; });
-          if (sp) { if (w1) sp.wins++; else if (w2) sp.losses++; }
-        });
-        t2.forEach(function(p){
-          var sp = S.players.find(function(x){ return x.no === p.no; });
-          if (sp) { if (w2) sp.wins++; else if (w1) sp.losses++; }
-        });
-      });
-
-      S.currentRound++;
-      document.getElementById('rnd-badge').textContent = '第' + (S.currentRound + 1) + 'ゲーム';
-
-      resetGameTimer();
-      doAutoAssign();
-      renderPlayers();
-      renderHistory();
-      showToast('第' + S.currentRound + 'ゲームを終了しました', 'ok');
-    }
-
-    function recordScore(ci) {
-      var v1 = document.getElementById('sa-' + ci).value;
-      var v2 = document.getElementById('sb-' + ci).value;
-      if (v1 === '' || v2 === '') { showToast('両チームのスコアを入力してください', 'err'); return; }
-      var already = S.scores[ci].team1 !== '' && S.scores[ci].team2 !== '';
-      S.scores[ci] = {team1:v1, team2:v2};
-      var sa = document.getElementById('score-section-' + ci);
-      if (sa) sa.innerHTML = buildScoreHTML(ci);
-      showToast(already ? 'スコアを上書きしました' : 'スコアを記録しました', 'ok');
-    }
-
-    function buildScoreHTML(ci) {
-      var sc = S.scores[ci] || {};
-      var v1 = sc.team1 || '', v2 = sc.team2 || '';
-      var recorded = v1 !== '' && v2 !== '';
-      var h = '<span class="score-label">スコア</span>'
-        + '<div class="score-inputs">'
-        + '<input class="score-inp" type="number" min="0" max="99" id="sa-' + ci + '" value="' + v1 + '" placeholder="A">'
-        + '<span class="score-sep">-</span>'
-        + '<input class="score-inp" type="number" min="0" max="99" id="sb-' + ci + '" value="' + v2 + '" placeholder="B">'
-        + '</div>';
-      if (recorded) {
-        h += '<span class="score-recorded">記録済み</span>';
-        h += '<button class="btn-score overwrite" onclick="recordScore(' + ci + ')">上書き</button>';
-      } else {
-        h += '<button class="btn-score record" onclick="recordScore(' + ci + ')">記録</button>';
-      }
-      return h;
-    }
-
-    function makePlayerRowEl(p) {
-      var row = document.createElement('div');
-      if (!p) {
-        row.className = 'player-row player-empty';
-        var ph = document.createElement('div');
-        ph.style.cssText = 'width:36px;height:36px;border-radius:50%;border:1px dashed rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:var(--t4);font-size:16px;flex-shrink:0';
-        ph.textContent = '–';
-        var pinfo = document.createElement('div');
-        pinfo.className = 'player-info';
-        var pnm = document.createElement('div');
-        pnm.className = 'player-name';
-        pnm.textContent = '未配置';
-        pinfo.appendChild(pnm);
-        row.appendChild(ph);
-        row.appendChild(pinfo);
-        return row;
-      }
-
-      row.className = 'player-row';
-      var sp = S.players.find(function(x){ return x.no === p.no; });
-      row.appendChild(makeBadge(p.no, 'sm'));
-
-      var pinfo = document.createElement('div');
-      pinfo.className = 'player-info';
-      var pnm = document.createElement('div');
-      pnm.className = 'player-name';
-      pnm.textContent = sp && sp.nick ? (sp.nick + '（No.' + p.no + '）') : ('No.' + p.no);
-      pinfo.appendChild(pnm);
-      var sub = document.createElement('div');
-      sub.className = 'player-sub';
-      sub.textContent = '待機 ' + (sp ? sp.waitCount : 0) + '回';
-      pinfo.appendChild(sub);
-      row.appendChild(pinfo);
-      return row;
-    }
-
-    function renderGame() {
-      var gc = document.getElementById('game-courts');
-      if (!gc) return;
-      gc.innerHTML = '';
-
-      S.courts.forEach(function(court, ci){
-        var mode = court.mode;
-        var t1 = court.teams[0] || [];
-        var t2 = court.teams[1] || [];
-
-        var card = document.createElement('div');
-        card.className = 'court-game-card';
-
-        var hdr = document.createElement('div');
-        hdr.className = 'court-game-header';
-        var nm = document.createElement('span');
-        nm.className = 'court-game-name';
-        nm.textContent = court.name;
-        hdr.appendChild(nm);
-        var modeChip = document.createElement('span');
-        modeChip.className = 'court-game-mode';
-        modeChip.textContent = mode === 'doubles' ? 'ダブルス' : mode === 'singles' ? 'シングル' : '未使用';
-        hdr.appendChild(modeChip);
-        card.appendChild(hdr);
-
-        if (mode === 'unused') {
-          var ph = document.createElement('div');
-          ph.style.cssText = 'padding:28px;text-align:center;color:var(--t4);font-size:15px';
-          ph.textContent = 'このコートは未使用です';
-          card.appendChild(ph);
-        } else {
-          var isD = mode === 'doubles';
-          var md = document.createElement('div');
-          md.className = 'match-display';
-          var mt = document.createElement('div');
-          mt.className = 'match-teams';
-
-          var colA = document.createElement('div');
-          colA.className = 'team-col';
-          var lblA = document.createElement('div');
-          lblA.className = 'team-label';
-          lblA.textContent = isD ? 'TEAM A' : 'PLAYER 1';
-          colA.appendChild(lblA);
-          var psA = isD ? t1 : [t1[0] || null];
-          if (psA.length === 0) psA = isD ? [null, null] : [null];
-          psA.forEach(function(p){ colA.appendChild(makePlayerRowEl(p)); });
-
-          var vsCol = document.createElement('div');
-          vsCol.className = 'vs-col';
-          var vsLbl = document.createElement('div');
-          vsLbl.className = 'vs-label';
-          vsLbl.textContent = 'VS';
-          vsCol.appendChild(vsLbl);
-
-          var colB = document.createElement('div');
-          colB.className = 'team-col';
-          var lblB = document.createElement('div');
-          lblB.className = 'team-label';
-          lblB.textContent = isD ? 'TEAM B' : 'PLAYER 2';
-          colB.appendChild(lblB);
-          var psB = isD ? t2 : [t2[0] || null];
-          if (psB.length === 0) psB = isD ? [null, null] : [null];
-          psB.forEach(function(p){ colB.appendChild(makePlayerRowEl(p)); });
-
-          mt.appendChild(colA);
-          mt.appendChild(vsCol);
-          mt.appendChild(colB);
-          md.appendChild(mt);
-          card.appendChild(md);
-
-          var ss = document.createElement('div');
-          ss.className = 'score-section';
-          ss.id = 'score-section-' + ci;
-          ss.innerHTML = buildScoreHTML(ci);
-          card.appendChild(ss);
-        }
-
-        gc.appendChild(card);
-      });
-
-      var onCourt = {};
-      S.courts.forEach(function(c){
-        c.teams.forEach(function(t){
-          (t || []).filter(Boolean).forEach(function(p){ onCourt[p.no] = true; });
-        });
-      });
-
-      var waiting = S.players.filter(function(p){ return p.active && !onCourt[p.no]; });
-
-      if (waiting.length > 0) {
-        var rs = document.createElement('div');
-        rs.className = 'rest-section';
-        var rh = document.createElement('div');
-        rh.className = 'rest-header';
-        rh.textContent = '待機中 ' + waiting.length + '人';
-        rs.appendChild(rh);
-
-        var rb = document.createElement('div');
-        rb.className = 'rest-players';
-        waiting.forEach(function(p){
-          var chip = document.createElement('div');
-          chip.className = 'rest-player';
-          chip.appendChild(makeBadge(p.no, 'sm'));
-          var info = document.createElement('div');
-          info.className = 'rest-player-info';
-          var pnm = document.createElement('div');
-          pnm.className = 'rest-player-name';
-          pnm.textContent = p.nick ? (p.nick + '（No.' + p.no + '）') : ('No.' + p.no);
-          info.appendChild(pnm);
-          var wt = document.createElement('div');
-          wt.className = 'rest-player-sub';
-          wt.textContent = p.waitCount > 0 ? ('待機 ' + p.waitCount + '回 / 次回優先') : '今回休憩';
-          info.appendChild(wt);
-          chip.appendChild(info);
-          rb.appendChild(chip);
-        });
-
-        rs.appendChild(rb);
-        gc.appendChild(rs);
-      }
-    }
-
-    /* ── FIX: renderSched ──
-       sched-scrollはscrollableの内側のwrapperになったので
-       innerHTML = ''でwrapperをクリアしてappendChildする */
-    function renderSched() {
-      var el = document.getElementById('sched-scroll');
-      if (!el) return;
-      el.innerHTML = '';
-
-      var head = document.createElement('div');
-      head.className = 'timeline-head';
-      head.innerHTML = '<div class="timeline-head-title">進行状況</div><div class="timeline-head-sub">現在のゲームと、次に入る組み合わせを確認できます</div>';
-      el.appendChild(head);
-
-      var curOnCourt = {};
-      S.courts.forEach(function(c){
-        c.teams.forEach(function(t){
-          (t || []).filter(Boolean).forEach(function(p){ curOnCourt[p.no] = true; });
-        });
-      });
-
-      var curW = S.players.filter(function(p){ return p.active && !curOnCourt[p.no]; }).map(pLabel);
-
-      var currentItem = {
-        type:'current',
-        data:{
-          round: S.currentRound + 1,
-          waiters: curW,
-          courts: S.courts.map(function(c, ci){
-            return {
-              name:c.name, mode:c.mode,
-              teams:c.teams.map(function(t){ return (t || []).filter(Boolean).map(pLabel); }),
-              score:S.scores[ci] || {}
-            };
-          })
-        }
-      };
-
-      el.appendChild(buildScCard(currentItem));
-
-      S.futureRounds.slice(0, 3).forEach(function(r, idx){
-        el.appendChild(buildScCard({ type: idx === 0 ? 'next' : 'future', data: r }));
-      });
-    }
-
-    function buildScCard(item) {
-      var cur = item.type === 'current';
-      var next = item.type === 'next';
-
-      var card = document.createElement('div');
-      card.className = 'sc-card' + (cur ? ' cur' : next ? ' next' : '');
-
-      var head = document.createElement('div');
-      head.className = 'sc-head';
-      var rn = document.createElement('span');
-      rn.className = 'sc-round';
-      rn.textContent = '第' + item.data.round + 'ゲーム';
-      var badge = document.createElement('span');
-      badge.className = 'sc-badge';
-      badge.textContent = cur ? '進行中' : next ? '次' : '予定';
-      head.appendChild(rn);
-      head.appendChild(badge);
-      card.appendChild(head);
-
-      var body = document.createElement('div');
-      body.className = 'sc-body';
-
-      (item.data.courts || []).filter(function(c){ return c.mode !== 'unused'; }).forEach(function(c){
-        var blk = document.createElement('div');
-        blk.className = 'sc-court-block';
-
-        var cnm = document.createElement('div');
-        cnm.className = 'sc-court-nm';
-        cnm.innerHTML = '<span>' + c.name + '</span><span class="sc-court-mode">' + (c.mode === 'doubles' ? 'ダブルス' : 'シングル') + '</span>';
-        blk.appendChild(cnm);
-
-        var vsg = document.createElement('div');
-        vsg.className = 'sc-vs-grid';
-
-        var ta = document.createElement('div');
-        ta.className = 'sc-team';
-        (c.teams[0] || []).forEach(function(n){
-          var p = document.createElement('div');
-          p.className = 'sc-player';
-          p.textContent = n;
-          ta.appendChild(p);
-        });
-        if (!(c.teams[0] || []).length) {
-          var ep = document.createElement('div');
-          ep.className = 'sc-player emp';
-          ep.textContent = '—';
-          ta.appendChild(ep);
-        }
-
-        var vs = document.createElement('div');
-        vs.className = 'sc-vs-txt';
-        vs.textContent = 'VS';
-
-        var tb = document.createElement('div');
-        tb.className = 'sc-team';
-        (c.teams[1] || []).forEach(function(n){
-          var p2 = document.createElement('div');
-          p2.className = 'sc-player';
-          p2.textContent = n;
-          tb.appendChild(p2);
-        });
-        if (!(c.teams[1] || []).length) {
-          var ep2 = document.createElement('div');
-          ep2.className = 'sc-player emp';
-          ep2.textContent = '—';
-          tb.appendChild(ep2);
-        }
-
-        vsg.appendChild(ta);
-        vsg.appendChild(vs);
-        vsg.appendChild(tb);
-        blk.appendChild(vsg);
-
-        if (c.score && c.score.team1 !== '' && c.score.team2 !== '') {
-          var sc = document.createElement('div');
-          sc.className = 'sc-score-row';
-          sc.textContent = c.score.team1 + ' - ' + c.score.team2;
-          blk.appendChild(sc);
-        }
-
-        body.appendChild(blk);
-      });
-
-      if (item.data.waiters && item.data.waiters.length > 0) {
-        var rb = document.createElement('div');
-        rb.className = 'sc-rest';
-        var rl = document.createElement('div');
-        rl.className = 'sc-rest-lbl';
-        rl.textContent = '待機';
-        rb.appendChild(rl);
-        var rn2 = document.createElement('div');
-        rn2.className = 'sc-rest-names';
-        rn2.textContent = item.data.waiters.join(' / ');
-        rb.appendChild(rn2);
-        body.appendChild(rb);
-      }
-
-      card.appendChild(body);
-      return card;
-    }
-
-    /* ── FIX: renderHistory ──
-       hist-scrollはscrollableの内側のwrapperになったので同様に修正 */
-    function renderHistory() {
-      var el = document.getElementById('hist-scroll');
-      if (!el) return;
-      el.innerHTML = '';
-
-      var intro = document.createElement('div');
-      intro.className = 'timeline-head';
-      intro.innerHTML = '<div class="timeline-head-title">履歴</div><div class="timeline-head-sub">終了したゲーム結果を確認できます</div>';
-      el.appendChild(intro);
-
-      if (!S.rounds.length) {
-        var empty = document.createElement('div');
-        empty.className = 'timeline-head';
-        empty.innerHTML = '<div class="timeline-head-title">履歴はまだありません</div><div class="timeline-head-sub">ゲームが終了すると、ここに対戦結果が保存されます</div>';
-        el.appendChild(empty);
-        return;
-      }
-
-      S.rounds.slice().reverse().forEach(function(r){
-        var card = document.createElement('div');
-        card.className = 'hcard';
-
-        var head = document.createElement('div');
-        head.className = 'hhead';
-        head.textContent = '第' + r.round + 'ゲーム';
-        card.appendChild(head);
-
-        var body = document.createElement('div');
-        body.className = 'hbody';
-
-        r.courts.filter(function(c){ return c.mode !== 'unused'; }).forEach(function(c){
-          var row = document.createElement('div');
-          row.className = 'hrow';
-
-          var ct = document.createElement('div');
-          ct.className = 'hct';
-          ct.textContent = c.name + ' / ' + (c.mode === 'doubles' ? 'ダブルス' : 'シングル');
-
-          var pl = document.createElement('div');
-          pl.className = 'hpl';
-          pl.textContent = (c.teams[0] || []).join(' / ') + ' vs ' + (c.teams[1] || []).join(' / ');
-
-          var sc = document.createElement('div');
-          sc.className = 'hsc';
-          sc.textContent = (c.score && c.score.team1 !== '' && c.score.team2 !== '')
-            ? ('スコア ' + c.score.team1 + ' - ' + c.score.team2)
-            : 'スコア未記録';
-
-          row.appendChild(ct);
-          row.appendChild(pl);
-          row.appendChild(sc);
-          body.appendChild(row);
-        });
-
-        if (r.waiters && r.waiters.length) {
-          var waitRow = document.createElement('div');
-          waitRow.className = 'hrow';
-          var waitCt = document.createElement('div');
-          waitCt.className = 'hct';
-          waitCt.textContent = '待機';
-          var waitPl = document.createElement('div');
-          waitPl.className = 'hpl';
-          waitPl.textContent = r.waiters.join(' / ');
-          waitRow.appendChild(waitCt);
-          waitRow.appendChild(waitPl);
-          body.appendChild(waitRow);
-        }
-
-        card.appendChild(body);
-        el.appendChild(card);
-      });
-    }
-
-    var toastT;
-    function showToast(msg, type) {
-      var t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = 'show' + (type ? ' ' + type : '');
-      clearTimeout(toastT);
-      toastT = setTimeout(function(){ t.className = ''; }, 2200);
-    }
-
-    function initialSetup() {
-      renderCourtConfig1();
-      renderCourtConfig2();
-      registerPlayers(false);
-      saveCourts(false);
-      applyTimerSetting(_timerMin, true);
-      updateSetupSummary();
-      renderPlayers();
-      renderGame();
-      renderSched();
-      renderHistory();
-      gotoScreen('setup');
-    }
-
-    initialSetup();
-  </script>
+    card.appendChild(body); el.appendChild(card);
+  });
+}
+
+// ============================================================
+// ■ トースト・ユーティリティ
+// ============================================================
+
+var _toastTimer;
+function showToast(msg, type) {
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='show'+(type?' '+type:'');
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(function(){t.className='';},2400);
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================================
+// ■ 初期化
+// ============================================================
+
+function init() {
+  loadSavedParticipants();
+  loadSession();
+  _playerCount = S.playerCount || todayParticipants.length || 0;
+  _courtCount  = S.courtCount  || 2;
+  document.getElementById('player-count-disp').textContent = _playerCount;
+  document.getElementById('court-count-disp').textContent  = _courtCount;
+  document.getElementById('game-badge').textContent = '第'+(S.currentRound+1)+'ゲーム';
+  renderSetup();
+  renderPlayers();
+  renderGame();
+  renderSched();
+  renderHistory();
+  gotoScreen('setup');
+}
+
+init();
+</script>
 
 </body>
 </html>
