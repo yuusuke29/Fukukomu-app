@@ -596,12 +596,14 @@ function resetMatchHistory() {
   S.courtGroupHist = S.courts.map(function(){ return {}; });
   S.courts.forEach(function(c){ c.teams = [[], []]; });
   todayParticipants.forEach(function(p) {
-    p.waitingCount     = 0;
-    p.lastWaited       = false;
-    p.lastPartnerNos   = [];
-    p.lastOpponentNos  = [];
-    p.recentPartnerNos = [];
-    p.recentOpponentNos= [];
+    p.waitingCount        = 0;
+    p.lastWaited          = false;
+    // 【追加】連続休みカウントもリセット
+    p.consecutiveWaitCount = 0;
+    p.lastPartnerNos      = [];
+    p.lastOpponentNos     = [];
+    p.recentPartnerNos    = [];
+    p.recentOpponentNos   = [];
   });
   saveSession();
   renderAll();
@@ -746,8 +748,9 @@ function applyPlayerCount(){
 }
 
 function makeEmptySlot(no){
+  // 【追加】consecutiveWaitCount: 連続休み回数（出場したら0にリセット）
   return{no:no,participantId:null,nickName:'',gender:'',active:true,
-    waitingCount:0,lastWaited:false,
+    waitingCount:0,lastWaited:false,consecutiveWaitCount:0,
     lastPartnerNos:[],lastOpponentNos:[],recentPartnerNos:[],recentOpponentNos:[]};
 }
 
@@ -867,7 +870,11 @@ function buildPlayerCard(p){
   nm.textContent=isEmpty?'未設定':p.nickName; card.appendChild(nm);
   var gc=document.createElement('div'); gc.innerHTML=genderChipHtml(p.gender); card.appendChild(gc);
   var wt=document.createElement('div'); wt.className='pcard-wait';
-  wt.textContent='待機 '+p.waitingCount+'回'; card.appendChild(wt);
+  // 【追加】連続休み回数が2以上の場合は警告表示
+  var cwc=p.consecutiveWaitCount||0;
+  var waitText='待機 '+p.waitingCount+'回';
+  if(cwc>=2) waitText+=' ⚠️'+cwc+'連続';
+  wt.textContent=waitText; card.appendChild(wt);
   var eh=document.createElement('div'); eh.className='pcard-edit-hint'; eh.textContent='タップして編集';
   card.appendChild(eh);
   card.onclick=function(){openEditModal(p.no);};
@@ -998,42 +1005,45 @@ function saveFromSaved(){
 }
 
 // ============================================================
-// ■ 自動配置ロジック（大幅改善）
+// ■ 自動配置ロジック
 // ============================================================
 
-/**
- * pairHistのキーを生成する（no1 < no2 で統一）
- */
+/** pairHistのキーを生成（no小-no大で統一） */
 function pairKey(a, b) { return Math.min(a,b)+'-'+Math.max(a,b); }
 
-/**
- * 4人グループのキーを生成する
- */
+/** 4人グループのキーを生成 */
 function groupKey(players) {
   return players.filter(Boolean).map(function(p){return p.no;}).sort(function(a,b){return a-b;}).join('-');
 }
 
 /**
  * sortByPriority: 出場優先順でソート
- * 1. waitingCount 降順（待機が多い人を優先）
- * 2. lastWaited 優先（前回待機）
- * 3. no 昇順（タイブレーク）
+ *
+ * 【追加】優先順位:
+ *   1. consecutiveWaitCount 降順（連続休み中の人を最優先）
+ *   2. waitingCount 降順（累計待機回数）
+ *   3. lastWaited 優先（前回待機）
+ *   4. no 昇順（タイブレーク）
  */
 function sortByPriority(players) {
   return players.slice().sort(function(a,b){
+    // 1. 連続休み回数の多い人を最優先
+    var ca=a.consecutiveWaitCount||0, cb=b.consecutiveWaitCount||0;
+    if(cb!==ca) return cb-ca;
+    // 2. 累計待機回数
     if(b.waitingCount!==a.waitingCount) return b.waitingCount-a.waitingCount;
+    // 3. 前回待機フラグ
     if(a.lastWaited!==b.lastWaited) return (a.lastWaited?0:1)-(b.lastWaited?0:1);
+    // 4. No.順
     return a.no-b.no;
   });
 }
 
 /**
  * doAutoAssign: 自動配置メインエントリ
- * 
- * 改善点:
- * 1. コートをpolicyの難易度順（mixed→men/women→normal）で処理
- * 2. 各コートの4人選出を「スコア評価」で行う
- * 3. pairHist/oppHist/courtGroupHistを直接参照してスコアを計算
+ *
+ * 【追加】consecutiveWaitCount を更新する
+ * 【追加】consecutiveWaitCount>=2 の人を安全装置で優先出場させる
  */
 function doAutoAssign() {
   var active=todayParticipants.filter(function(p){return p.active;});
@@ -1043,24 +1053,28 @@ function doAutoAssign() {
   var totalNeeded=usedCourts.length*4;
   if(active.length<totalNeeded){showToast('参加者が不足しています（必要 '+totalNeeded+'名 / 参加中 '+active.length+'名）','err');return;}
 
-  // 優先順ソート済みのプール
   var sorted=sortByPriority(active);
-
-  // コートごとに4人選出・ペア分けを実行
   var result=assignCourts(sorted, usedCourts, S.pairHist, S.oppHist, S.courtGroupHist);
 
-  // 待機カウント更新
+  // 出場者NoのMap
   var onCourtNos={};
   result.forEach(function(ca){
     ((ca[0]||[]).concat(ca[1]||[])).filter(Boolean).forEach(function(p){onCourtNos[p.no]=true;});
   });
+
+  // 【追加】consecutiveWaitCount の更新（出場→0 / 休み→+1）
   todayParticipants.forEach(function(p){
     if(!p.active) return;
-    if(onCourtNos[p.no]) p.lastWaited=false;
-    else { p.waitingCount++; p.lastWaited=true; }
+    if(onCourtNos[p.no]){
+      p.lastWaited=false;
+      p.consecutiveWaitCount=0; // 出場したらリセット
+    } else {
+      p.waitingCount++;
+      p.lastWaited=true;
+      p.consecutiveWaitCount=(p.consecutiveWaitCount||0)+1; // 連続休みカウントUP
+    }
   });
 
-  // コートにチームを反映
   var usedIdx=0;
   S.courts.forEach(function(court){
     if(court.mode==='unused'){court.teams=[[],[]];return;}
@@ -1076,18 +1090,18 @@ function doAutoAssign() {
 
 /**
  * assignCourts: コートごとに4人を割り当てる
- * 
- * 【改善】
- * - コートをpolicyの難易度順（mixed→men/women→normal）で内部処理
- * - 各コートで候補スコアを評価して最良の4人を選出
+ *
+ * 処理順: mixed_priority → men/women_priority → normal
+ * （制約が厳しいコートを先に処理して満たしやすくする）
  */
 function assignCourts(sorted, courts, pH, oH, cgH) {
-  // コートを処理順でソート（表示順は変えない）
+  // 【バグ修正】mixed_priority の値が 0 (falsy) のため、|| 2 で誤って 2 に置き換わっていた。
+  // undefined チェックに変更し、0 が正しく 0 として扱われるようにする。
   var policyOrder={mixed_priority:0,men_priority:1,women_priority:1,normal:2};
   var courtOrder=courts.map(function(c,i){return{court:c,origIdx:i};})
     .sort(function(a,b){
-      var pa=policyOrder[a.court.policy||'normal']||2;
-      var pb=policyOrder[b.court.policy||'normal']||2;
+      var pa=policyOrder[a.court.policy||'normal']; if(pa===undefined) pa=2;
+      var pb=policyOrder[b.court.policy||'normal']; if(pb===undefined) pb=2;
       return pa-pb;
     });
 
@@ -1096,19 +1110,11 @@ function assignCourts(sorted, courts, pH, oH, cgH) {
 
   courtOrder.forEach(function(item){
     if(rem.length<4){assignments[item.origIdx]=[[],[]];return;}
-
     var court=item.court;
-    var courtIdx=S.courts.indexOf(court); // cgH のインデックス用
-
-    // 4人選出（policyに基づく）
+    var courtIdx=S.courts.indexOf(court);
     var group=selectBestGroup(rem, court, courtIdx, pH, oH, cgH);
-
-    // remから除外
     group.forEach(function(p){var idx=rem.indexOf(p);if(idx!==-1)rem.splice(idx,1);});
-
-    // ペア分け
-    var teams=bestPairing(group, court.policy, pH, oH);
-    assignments[item.origIdx]=teams;
+    assignments[item.origIdx]=bestPairing(group, court.policy, pH, oH);
   });
 
   return assignments;
@@ -1116,122 +1122,151 @@ function assignCourts(sorted, courts, pH, oH, cgH) {
 
 /**
  * selectBestGroup: コートに入れる最良の4人を選ぶ
- * 
- * 【改善の核心】
- * - remから候補を生成してスコアで評価
- * - policyに応じて男女フィルタを適用
- * - pairHist/oppHist/courtGroupHistを参照
- * 
- * アルゴリズム:
- * 1. rem内でwaitingCountが最も高いグループから優先選出
- * 2. 上位候補の中でグループスコアを評価
- * 3. スコア最高のグループを採用
+ *
+ * 【mixed_priority 厳密化】
+ *   - 男2女2の全組み合わせを生成して評価（男女比を保証）
+ *   - 成立しない場合のみ通常フォールバック
+ *
+ * 【連続休み安全装置】
+ *   - consecutiveWaitCount>=2 の人が候補プールに入るよう優先確保
  */
 function selectBestGroup(rem, court, courtIdx, pH, oH, cgH) {
   var policy=court.policy||'normal';
 
-  // policy対応: 性別制約を満たす候補を絞る
-  var filtered=applyPolicyFilter(rem, policy);
+  // ── mixed_priority: 必ず男2女2の組み合わせで評価 ──
+  if(policy==='mixed_priority'){
+    var males  =rem.filter(function(p){return p.gender==='male';});
+    var females=rem.filter(function(p){return p.gender==='female';});
 
-  // フィルタ後の候補が4人未満の場合はfallback（全remから選ぶ）
-  if(filtered.length<4) filtered=rem;
+    if(males.length>=2&&females.length>=2){
+      // 男2+女2 の全組み合わせを生成してスコア評価
+      var mCombos=getCombinations(males.slice(0,6),2);   // 男6人上位まで
+      var fCombos=getCombinations(females.slice(0,6),2); // 女6人上位まで
 
-  // waitingCountが高い上位から多めに候補を取る（最大8人、最低4人）
-  var poolSize=Math.min(Math.max(8, Math.ceil(filtered.length*0.6)), filtered.length);
-  var pool=filtered.slice(0,poolSize);
+      var bestGroup=null, bestScore=-Infinity;
+      mCombos.forEach(function(mc){
+        fCombos.forEach(function(fc){
+          var group=mc.concat(fc);
+          var score=calcGroupScore(group, courtIdx, pH, oH, cgH);
+          // 【加点】連続休みの人が含まれるほど加点
+          group.forEach(function(p){
+            score+=(p.consecutiveWaitCount||0)*150;
+          });
+          if(score>bestScore){bestScore=score;bestGroup=group;}
+        });
+      });
+      if(bestGroup) return bestGroup;
+      // フォールバック: 男2+女2の先頭をそのまま使う
+      return [males[0],males[1],females[0],females[1]];
+    }
+    // 男女が足りなければ通常ロジックへフォールバック
+  }
 
-  // 4人の候補組み合わせを生成してスコア評価
-  // 組み合わせが多すぎる場合は制限（pool > 7 なら少し限定）
-  var combos=getCombinations(pool, 4);
+  // ── men_priority / women_priority ──
+  if(policy==='men_priority'){
+    var males2=rem.filter(function(p){return p.gender==='male';});
+    if(males2.length>=4) return selectFromPool(males2, courtIdx, pH, oH, cgH);
+    // 足りなければ通常へフォールバック
+  }
+  if(policy==='women_priority'){
+    var females2=rem.filter(function(p){return p.gender==='female';});
+    if(females2.length>=4) return selectFromPool(females2, courtIdx, pH, oH, cgH);
+    // 足りなければ通常へフォールバック
+  }
 
-  var bestGroup=combos[0]||rem.slice(0,4);
-  var bestScore=-Infinity;
-
-  combos.forEach(function(group){
-    var score=calcGroupScore(group, courtIdx, pH, oH, cgH);
-    if(score>bestScore){bestScore=score;bestGroup=group;}
-  });
-
-  return bestGroup;
+  // ── 通常（normal + フォールバック共通処理） ──
+  return selectFromPool(rem, courtIdx, pH, oH, cgH);
 }
 
 /**
- * applyPolicyFilter: policyに応じて優先候補を絞る
- * 条件を満たさない場合は全員を返す（フォールバック）
+ * selectFromPool: プールから最良の4人を選ぶ共通関数
+ *
+ * 【連続休み安全装置】
+ *   consecutiveWaitCount>=2 の人を必ずプールの先頭に置き、
+ *   組み合わせ評価でもスコア加点する
  */
-function applyPolicyFilter(rem, policy) {
-  var males  =rem.filter(function(p){return p.gender==='male';});
-  var females=rem.filter(function(p){return p.gender==='female';});
+function selectFromPool(pool, courtIdx, pH, oH, cgH) {
+  if(pool.length<=4) return pool.slice(0,4);
 
-  if(policy==='men_priority'&&males.length>=4){
-    // 男4人: waitingCount上位から優先
-    return males;
+  // consecutiveWaitCount>=2 の人を「必須候補」として先頭に確保
+  var must=pool.filter(function(p){return (p.consecutiveWaitCount||0)>=2;});
+  var rest=pool.filter(function(p){return (p.consecutiveWaitCount||0)<2;});
+
+  var evalPool;
+  if(must.length>=4){
+    // 必須候補が4人以上いる場合: 必須候補の中で評価
+    evalPool=must.slice(0,8);
+  } else if(must.length>0){
+    // 必須候補が1〜3人: 必須候補は固定して残りから補完
+    var need=4-must.length;
+    var poolSize=Math.min(Math.max(6,rest.length), rest.length);
+    var restPool=rest.slice(0,poolSize);
+    var restCombos=getCombinations(restPool, need);
+
+    var bestGroup=null, bestScore=-Infinity;
+    restCombos.forEach(function(rc){
+      var group=must.concat(rc);
+      var score=calcGroupScore(group, courtIdx, pH, oH, cgH);
+      group.forEach(function(p){ score+=(p.consecutiveWaitCount||0)*150; });
+      if(score>bestScore){bestScore=score;bestGroup=group;}
+    });
+    return bestGroup||must.concat(rest.slice(0,need));
+  } else {
+    // 通常: 上位8人の中から組み合わせ評価
+    evalPool=pool.slice(0,8);
   }
-  if(policy==='women_priority'&&females.length>=4){
-    return females;
-  }
-  if(policy==='mixed_priority'&&males.length>=2&&females.length>=2){
-    // 男女2人ずつを確保。残りのスロットは全体から補完
-    var mTop=males.slice(0,Math.max(2,Math.floor(males.length/2)));
-    var fTop=females.slice(0,Math.max(2,Math.floor(females.length/2)));
-    // 組み合わせのため男女を混ぜた上で返す
-    return mTop.concat(fTop);
-  }
-  return rem; // フォールバック
+
+  var combos=getCombinations(evalPool,4);
+  var bestG=combos[0]||pool.slice(0,4), bestS=-Infinity;
+  combos.forEach(function(group){
+    var score=calcGroupScore(group, courtIdx, pH, oH, cgH);
+    group.forEach(function(p){ score+=(p.consecutiveWaitCount||0)*150; });
+    if(score>bestS){bestS=score;bestG=group;}
+  });
+  return bestG;
 }
 
 /**
  * calcGroupScore: 4人グループの総合スコアを計算する
- * 
- * 【改善】pairHist/oppHist/courtGroupHistを直接参照
- * 
+ *
  * 加点:
- *   + 未対戦ペアが多い        → 強い加点
- *   + 未ペア相手が多い        → 強い加点
- *   + waitingCount合計        → 待機者が入るほど加点
- * 
+ *   未ペア相手との組み合わせ     → +80
+ *   未対戦相手との組み合わせ     → +60
+ *   waitingCount 合計            → ×20
+ *   consecutiveWaitCount 合計    → ×150（連続休み者を強く優遇）
  * 減点:
- *   - 同グループ再出現        → 強い減点
- *   - 同じペア繰り返し        → 減点
- *   - 同じ対戦相手繰り返し    → 減点
+ *   同グループ再出現             → ×300
+ *   同じペア繰り返し             → ×100/回
+ *   同じ対戦相手繰り返し         → ×80/回
  */
 function calcGroupScore(group, courtIdx, pH, oH, cgH) {
   var score=0;
   var valid=group.filter(Boolean);
   if(valid.length<4) return -9999;
 
-  // 待機カウント加点（待機回数の合計が多いほど良い）
-  valid.forEach(function(p){ score += p.waitingCount * 20; });
+  valid.forEach(function(p){
+    score+=p.waitingCount*20;
+    // consecutiveWaitCount は calcGroupScore 外（selectFromPool/selectBestGroup）で加点するため
+    // ここでは基本waitingCountのみ
+  });
 
   // 同グループ再出現ペナルティ
   var cgHist=cgH[courtIdx]||{};
-  var gk=groupKey(valid);
-  score -= (cgHist[gk]||0) * 300;
+  score-=(cgHist[groupKey(valid)]||0)*300;
 
-  // ペアと対戦の評価（全組み合わせを評価）
+  // ペア・対戦の評価（6組み合わせ）
   for(var i=0;i<valid.length;i++){
     for(var j=i+1;j<valid.length;j++){
       var pk=pairKey(valid[i].no,valid[j].no);
-      var pCount=pH[pk]||0;
-      var oCount=oH[pk]||0;
-
-      // 未対戦ならボーナス
-      if(pCount===0) score+=60;
-      if(oCount===0) score+=50;
-
-      // 繰り返しはペナルティ
-      score -= pCount*80;
-      score -= oCount*60;
+      var pCnt=pH[pk]||0, oCnt=oH[pk]||0;
+      if(pCnt===0) score+=80; else score-=pCnt*100;
+      if(oCnt===0) score+=60; else score-=oCnt*80;
     }
   }
-
   return score;
 }
 
-/**
- * getCombinations: 配列から k個の組み合わせをすべて生成する
- * pool が大きすぎると計算量が増えるため pool は最大8人に制限して呼ぶ
- */
+/** getCombinations: arr から k個の全組み合わせ（pool は最大8人に制限推奨） */
 function getCombinations(arr, k) {
   if(k===0) return [[]];
   if(!arr.length) return [];
@@ -1241,53 +1276,47 @@ function getCombinations(arr, k) {
 }
 
 /**
- * bestPairing: 4人を2チームに分ける最良の組み合わせを選ぶ
- * 
- * 【改善】
- * - pairHist/oppHistを直接参照
- * - mixed_priority では男女ペアを優先
+ * bestPairing: 4人を2チームに分ける最良の組み合わせ
+ *
+ * 【mixed_priority 厳密化】
+ *   4人が男2女2なら「必ず」男女ペアを組む（男男/女女ペアを禁止）
+ *   評価は2通り（男A+女A vs 男B+女B）か（男A+女B vs 男B+女A）
  */
 function bestPairing(four, policy, pH, oH) {
   while(four.length<4) four.push(null);
-  var a=four[0],b=four[1],c=four[2],d=four[3];
 
-  // mixed_priority: 男女ペアを先に試みる
   if(policy==='mixed_priority'){
-    var mPlayers=four.filter(function(p){return p&&p.gender==='male';});
-    var fPlayers=four.filter(function(p){return p&&p.gender==='female';});
-    if(mPlayers.length>=2&&fPlayers.length>=2){
-      // 男1+女1 vs 男1+女1 の形を3パターン評価
-      var mixedOpts=[
-        {teams:[[mPlayers[0],fPlayers[0]],[mPlayers[1],fPlayers[1]]]},
-        {teams:[[mPlayers[0],fPlayers[1]],[mPlayers[1],fPlayers[0]]]}
+    var mP=four.filter(function(p){return p&&p.gender==='male';});
+    var fP=four.filter(function(p){return p&&p.gender==='female';});
+
+    if(mP.length>=2&&fP.length>=2){
+      // 【厳密化】男女ペアの2パターンのみ評価（男男/女女ペアは作らない）
+      var mixOpts=[
+        {teams:[[mP[0],fP[0]],[mP[1],fP[1]]]},
+        {teams:[[mP[0],fP[1]],[mP[1],fP[0]]]}
       ];
-      var bestMixed=mixedOpts[0],bestMixedScore=-Infinity;
-      mixedOpts.forEach(function(opt){
+      var bestM=mixOpts[0], bestMS=-Infinity;
+      mixOpts.forEach(function(opt){
         var s=calcPairingScore(opt.teams[0],opt.teams[1],pH,oH);
-        if(s>bestMixedScore){bestMixedScore=s;bestMixed=opt;}
+        if(s>bestMS){bestMS=s;bestM=opt;}
       });
-      return bestMixed.teams;
+      return bestM.teams;
     }
+    // 男女比が崩れた場合（フォールバック: 通常3パターン評価）
   }
 
   // 通常: 3パターン評価
-  var opts=[
-    {teams:[[a,b],[c,d]]},
-    {teams:[[a,c],[b,d]]},
-    {teams:[[a,d],[b,c]]}
-  ];
-  var best=opts[0],bestScore=-Infinity;
+  var a=four[0],b=four[1],c=four[2],d=four[3];
+  var opts=[{teams:[[a,b],[c,d]]},{teams:[[a,c],[b,d]]},{teams:[[a,d],[b,c]]}];
+  var best=opts[0], bestS=-Infinity;
   opts.forEach(function(opt){
     var s=calcPairingScore(opt.teams[0],opt.teams[1],pH,oH);
-    if(s>bestScore){bestScore=s;best=opt;}
+    if(s>bestS){bestS=s;best=opt;}
   });
   return best.teams;
 }
 
-/**
- * calcPairingScore: チーム分けのスコア計算
- * 【改善】 pairHist/oppHistを直接参照して評価
- */
+/** calcPairingScore: チーム分けスコア計算 */
 function calcPairingScore(teamA, teamB, pH, oH) {
   var score=0;
   score+=evalPair(teamA[0],teamA[1],pH);
@@ -1298,28 +1327,18 @@ function calcPairingScore(teamA, teamB, pH, oH) {
   return score;
 }
 
-/**
- * evalPair: ペアの評価
- * 未ペアなら加点、繰り返しなら減点
- */
+/** evalPair: 未ペア→+80加点 / 繰り返し→強く減点 */
 function evalPair(p1, p2, pH) {
   if(!p1||!p2) return 0;
-  var pk=pairKey(p1.no,p2.no);
-  var cnt=pH[pk]||0;
-  if(cnt===0) return 80;          // 未ペア → 大きく加点
-  return -(cnt*100);              // 繰り返し → 強く減点
+  var cnt=pH[pairKey(p1.no,p2.no)]||0;
+  return cnt===0 ? 80 : -(cnt*100);
 }
 
-/**
- * evalOpponent: 対戦の評価
- * 未対戦なら加点、繰り返しなら減点
- */
+/** evalOpponent: 未対戦→+60加点 / 繰り返し→強く減点 */
 function evalOpponent(p1, p2, oH) {
   if(!p1||!p2) return 0;
-  var pk=pairKey(p1.no,p2.no);
-  var cnt=oH[pk]||0;
-  if(cnt===0) return 60;          // 未対戦 → 加点
-  return -(cnt*80);               // 繰り返し → 減点
+  var cnt=oH[pairKey(p1.no,p2.no)]||0;
+  return cnt===0 ? 60 : -(cnt*80);
 }
 
 // ============================================================
@@ -1401,9 +1420,10 @@ function updateIndividualHistory(t1, t2) {
 // ============================================================
 
 /**
- * 【改善】 仮履歴を更新しながら将来を予測する
- * pairHist/oppHist/courtGroupHistのコピーを使い、
- * 各仮ラウンドで更新して次ラウンドの計算に反映する
+ * computeFuture: 将来ラウンド予測
+ *
+ * 【追加】仮シミュレーションで consecutiveWaitCount も更新し、
+ *         連続休み防止ロジックを将来予測にも反映する
  */
 function computeFuture() {
   S.futureRounds=[];
@@ -1411,19 +1431,22 @@ function computeFuture() {
   var usedCourts=S.courts.filter(function(c){return c.mode!=='unused';});
   if(active.length<4||!usedCourts.length) return;
 
-  // シミュレーション用コピー
+  // シミュレーション用コピー（consecutiveWaitCount も含む）
   var sim=active.map(function(p){return Object.assign({},p,{
     recentPartnerNos:(p.recentPartnerNos||[]).slice(),
-    recentOpponentNos:(p.recentOpponentNos||[]).slice()
+    recentOpponentNos:(p.recentOpponentNos||[]).slice(),
+    consecutiveWaitCount:p.consecutiveWaitCount||0  // 【追加】
   });});
 
-  // 仮履歴コピー（ラウンドごとに更新）
   var simPH=Object.assign({},S.pairHist);
   var simOH=Object.assign({},S.oppHist);
   var simCGH=S.courtGroupHist.map(function(h){return Object.assign({},h);});
 
   for(var r=0;r<3;r++){
     var sorted=sim.slice().sort(function(a,b){
+      // 【追加】consecutiveWaitCount を先に比較
+      var ca=a.consecutiveWaitCount||0, cb=b.consecutiveWaitCount||0;
+      if(cb!==ca) return cb-ca;
       if(b.waitingCount!==a.waitingCount) return b.waitingCount-a.waitingCount;
       if(a.lastWaited!==b.lastWaited) return (a.lastWaited?0:1)-(b.lastWaited?0:1);
       return a.no-b.no;
@@ -1435,22 +1458,28 @@ function computeFuture() {
     result.forEach(function(ca){
       ((ca[0]||[]).concat(ca[1]||[])).filter(Boolean).forEach(function(p){onCourtNos[p.no]=true;});
     });
+
+    // 【追加】仮 consecutiveWaitCount を更新
     sim.forEach(function(p){
-      if(onCourtNos[p.no]) p.lastWaited=false;
-      else{p.waitingCount++;p.lastWaited=true;}
+      if(onCourtNos[p.no]){
+        p.lastWaited=false;
+        p.consecutiveWaitCount=0; // 出場でリセット
+      } else {
+        p.waitingCount++;
+        p.lastWaited=true;
+        p.consecutiveWaitCount=(p.consecutiveWaitCount||0)+1;
+      }
     });
 
-    // 仮履歴を更新（次の仮ラウンドに反映）
+    // 仮履歴更新
     usedCourts.forEach(function(court,ci){
       var actualCi=S.courts.indexOf(court);
       var teams=result[ci]||[[],[]];
       var t1=(teams[0]||[]).filter(Boolean);
       var t2=(teams[1]||[]).filter(Boolean);
-
       var gk=groupKey(t1.concat(t2));
       if(!simCGH[actualCi]) simCGH[actualCi]={};
       simCGH[actualCi][gk]=(simCGH[actualCi][gk]||0)+1;
-
       [t1,t2].forEach(function(team){
         for(var i=0;i<team.length;i++){
           for(var j=i+1;j<team.length;j++){
@@ -1540,7 +1569,11 @@ function renderGame() {
       var pnm=document.createElement('div'); pnm.className='rest-chip-name'; pnm.textContent=displayName(p);
       info.appendChild(pnm);
       var sub=document.createElement('div'); sub.className='rest-chip-sub';
-      sub.textContent='待機 '+p.waitingCount+'回'+(p.waitingCount>0?' / 次回優先':'');
+      // 【追加】連続休み中は強調表示
+      var cwc2=p.consecutiveWaitCount||0;
+      var subTxt='待機 '+p.waitingCount+'回'+(p.waitingCount>0?' / 次回優先':'');
+      if(cwc2>=2) subTxt+=' ⚠️'+cwc2+'連続';
+      sub.textContent=subTxt;
       info.appendChild(sub); chip.appendChild(info); rb.appendChild(chip);
     });
     rs.appendChild(rb); gc.appendChild(rs);
