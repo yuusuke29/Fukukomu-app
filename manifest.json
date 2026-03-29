@@ -1,17 +1,20 @@
 {
-  "name": "福コム ピックルボール",
-  "short_name": "福コムPB",
-  "description": "福コム サークル向け、待機者優先の自動コート割り当て＆タイマーアプリ",
-  "start_url": "./index.html",
+  "name": "PB Manager",
+  "short_name": "PB Manager",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#FDF9E1",
-  "theme_color": "#FDF9E1",
+  "background_color": "#111214",
+  "theme_color": "#111214",
   "icons": [
     {
       "src": "icon-fukukomu-pb.png",
-      "sizes": "1024x1024",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-fukukomu-pb.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
