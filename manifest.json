@@ -1,7 +1,6 @@
 {
   "name": "PB Manager",
   "short_name": "PB Manager",
-  "start_url": "./",
   "display": "standalone",
   "background_color": "#111214",
   "theme_color": "#111214",
